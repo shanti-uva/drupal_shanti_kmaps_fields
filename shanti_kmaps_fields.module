@@ -1,0 +1,197 @@
+<?php
+
+////////// FIELD //////////
+
+function shanti_kmaps_fields_field_info() {
+  $info = array();
+  $info['shanti_kmaps_fields_simple'] = array(
+    'label'             => t('KMaps Test Field'),
+    'description'       => t('A simple KMaps Field for testing.'),
+    'default_widget'    => 'kmap_textfield',
+    'default_formatter' => 'kmap_default',
+  );
+  $info['shanti_kmaps_fields_default'] = array(
+    'label'             => t('KMap Term'),
+    'description'       => t('A KMap Term for integrating content into the Mandala ecology.'),
+    'settings'          => array('kmap_server' => 'production',),  // THESE VALUES SHOULD COME FROM KMAP UTILS
+    'instance_settings' => array('kmap_domain' => 'subjects'), // These are part of the Instance object
+    'default_widget'    => 'kmap_default_widget',
+    'default_formatter' => 'kmap_default_formatter',  
+  );
+  return $info;
+}
+
+function shanti_kmaps_fields_field_is_empty($item, $field) {
+  if ($field['type'] == 'shanti_kmaps_fields_simple') {
+    if (!empty($item['kmap_simple'])) {
+      return FALSE;
+    }
+  }
+  elseif ($field['type'] == 'shanti_kmaps_fields_default') {
+    //if (!empty($item['kmap_id']) && !empty($item['kmap_header']) && !empty($item['kmap_path'])) {
+    if (!empty($item['kmap_raw'])) {
+      return FALSE;
+    }    
+  }
+  return TRUE;
+}
+
+function shanti_kmaps_fields_field_settings_form($field, $instance, $has_data) {
+  $form = array();
+  $settings = $field['settings'];
+  if ($field['type'] == 'shanti_kmaps_fields_default') {
+    $form['kmap_server'] = array(
+    '#type' => 'select',
+    '#title' => t('KMap Server'),
+    '#description' => t('The server to use for KMaps access on this site.'),
+    '#required' => TRUE,
+    '#options' => array('development' => 'development', 'production' => 'production'), // THESE VALUES SHOULD COME FROM KMAP UTILS
+    '#default_value' => $settings['kmap_server'],
+   );
+  }
+  return $form;
+}
+
+function shanti_kmaps_fields_field_instance_settings_form($field, $instance) {
+  $form = array();
+  $settings = $instance['settings'];
+  if ($field['type'] == 'shanti_kmaps_fields_default') {
+    $form['kmap_domain'] = array(
+    '#type' => 'select',
+    '#title' => t('KMap Domain'),
+    '#description' => t('The domain (subjects or places) to use for KMaps access on this entity type.'),
+    '#required' => TRUE,
+    '#options' => array('subjects' => 'subjects', 'places' => 'places'),  // THESE VALUES SHOULD COME FROM KMAP UTILS
+    '#default_value' => $settings['kmap_domain'],
+   );
+  }
+  return $form;
+}
+
+function shanti_kmaps_fields_field_validate($obj_type, $object, $field, $instance, $langcode, &$items, &$errors) {
+   if ($field['type'] == 'shanti_kmaps_fields_simple') {
+     // Parse the field and just check if the data types are correct
+   } 
+   elseif ($field['type'] == 'shanti_kmaps_fields_default') {
+    foreach($items as $delta => $item) {
+      if(!empty($item['kmap_id'])) {
+        if(!is_int($item['kmap_id']+0)) {
+          $errors[$field['field_name']][$langcode][$delta][] = array(
+            'error' => 'kmap_id_invalid',
+            'message' => t('KMap ID must be a number. ' . $item['kmap_id']),
+          );
+        }
+      }
+    }   
+  } 
+}
+
+////////// WIDGETS //////////
+
+function shanti_kmaps_fields_field_widget_info() {
+  $info = array();
+  $info['kmap_textfield'] = array(
+    'label' => t('Simple KMap Field'),
+    'field types' => array('shanti_kmaps_fields_simple')
+  );
+  $info['kmap_default_widget'] = array(
+    'label' => t('KMap Term Autocomplete'),
+    'field types' => array('shanti_kmaps_fields_default')
+  );
+  return $info;
+}
+
+function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $element += array('#delta' => $delta);
+  
+  if ($instance['widget']['type'] == 'kmap_textfield') {
+    $element['kmap_simple'] = array(); // Note use of SCHEMA column here, not field info key
+    $element['kmap_simple'] += array(
+      '#type' => 'textfield',
+      '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+      '#autocomplete_path' => 'shanti_kmaps_utils/autocomplete-func', 
+    );    
+  }
+  
+  elseif ($instance['widget']['type'] == 'kmap_default_widget') {
+      
+    $server = $field['settings']['kmap_server'];
+    $domain = $instance['settings']['kmap_domain'];
+          
+    $element['kmap_raw'] = array(
+      '#type' => 'textfield',
+      '#size' => 120,
+      '#maxlength' => 255,
+      '#default_value' => isset($items[$delta]) ? $items[$delta] : '', // Grab existing content from three field
+      '#autocomplete_path' => "shanti_kmaps_utils/autocomplete/$server/$domain",
+      '#element_validate' => array('_shanti_kmaps_fields_split_kmap_raw'),
+    ) + $element;
+    $element['kmap_id'] = array(
+      '#type' => 'value',
+      '#default_value' => 0   
+    );    
+    $element['kmap_header'] = array(
+      '#type' => 'value',    
+      '#default_value' => 'None entered'
+    );
+    $element['kmap_path'] = array(
+      '#type' => 'value',    
+      '#default_value' => 'None entered'
+    );    
+    
+  }
+  return $element;
+}
+
+function _shanti_kmaps_fields_split_kmap_raw($element, &$form_state) {
+  $delta = $element['#delta'];
+  $values = array_map('trim', explode('|', $element['#value']));
+  $form_state['values']['field_kmap_term']['und'][$delta]['kmap_id']      = $values[0];
+  $form_state['values']['field_kmap_term']['und'][$delta]['kmap_header']  = $values[1];
+  $form_state['values']['field_kmap_term']['und'][$delta]['kmap_path']    = $values[2];  
+}
+
+////////// FORMATTERS //////////
+
+function shanti_kmaps_fields_field_formatter_info() {
+  $info = array();
+  $info['kmap_default'] = array(
+    'label' => t('KMap ID as plain text'),
+    'field types' => array('shanti_kmaps_fields_simple'),
+  );
+  $info['kmap_link'] = array(
+    'label' => t('KMap ID as link'),
+    'field types' => array('shanti_kmaps_fields_simple'),
+  );
+  $info['kmap_default_formatter'] = array(
+    'label' => t('Default KMap Term formatter'),
+    'field types' => array('shanti_kmaps_fields_default'),
+  );
+  return $info;
+}
+
+function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  if ($display['type'] == 'kmap_default') {
+    foreach ($items as $delta => $item) {
+      $element[$delta]['#markup'] = '<p>' . t($item['kmap_simple']) . '</p>';
+    }
+  } 
+  elseif ($display['type'] == 'kmap_link') {
+    foreach ($items as $delta => $item) {
+      $k = explode('|',$item['kmap_simple']);
+      $kmap_id    = $k[0];
+      $kmap_label = $k[1];
+      $kmap_path  = $k[2];
+      $element[$delta]['#markup'] = "<p><a href=\"http://subjects.kmaps.virginia.edu/features/$kmap_id\" title=\"in $kmap_path\" target=\"_blank\">$kmap_label</a></p>";
+    }
+  } 
+  elseif ($display['type'] == 'kmap_default_formatter') {
+    foreach ($items as $delta => $item) {
+      // Get dev or prod URL in a systematic way
+      $domain = 'subjects';
+      $element[$delta]['#markup'] = "<div class='shanti-kmap-term'><a href=\"http://{$domain}.kmaps.virginia.edu/features/{$item['kmap_id']}\" title=\"{$item['kmap_path']}\" target=\"_blank\">{$item['kmap_header']}</div>";
+    }
+  }
+  return $element;
+}

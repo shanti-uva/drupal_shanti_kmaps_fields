@@ -1,0 +1,9 @@
+name = SHANTI KMaps Fields
+description = Defines fields, widgets, and formatters for adding KMap items to entities.
+core = 7.x
+package = SHANTI
+
+dependencies[] = shanti_kmaps_utils
+
+files[] = shanti_kmaps_fields.module
+files[] = shanti_kmaps_fields.install

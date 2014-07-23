@@ -1,0 +1,43 @@
+<?php
+
+function shanti_kmaps_fields_field_schema($field) {
+  $schema = array();
+  if ($field['type'] == 'shanti_kmaps_fields_simple') {
+    $schema['columns']['kmap_simple'] = array(
+      'description' => t('A simple KMaps field for testing.'),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+    );    
+  }
+  elseif ($field['type'] == 'shanti_kmaps_fields_default') {
+    $schema['columns']['kmap_raw'] = array(
+      'description' => t('The raw content of the KMap term.'),
+      'type' => 'text',
+      'not null' => TRUE,   
+    ); 
+    $schema['columns']['kmap_id'] = array(
+      'description' => t('The external ID of the KMap term.'),
+      'type' => 'int',
+      'length' => 4,
+      'not null' => TRUE,   
+    ); 
+    $schema['columns']['kmap_header'] = array(
+      'description' => t('The default title of the KMap term.'),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,   
+    ); 
+    $schema['columns']['kmap_path'] = array(
+      'description' => t('The ancestral path of the KMap term.'),
+      'type' => 'text',
+      'not null' => TRUE,   
+    ); 
+    $schema['indexes']['kmap_id'] = array('kmap_id');
+  } 
+  return $schema;
+}
+
+function shanti_kmaps_fields_install() {
+  drupal_set_message(st('SHANTI KMaps Fields module installed successfully. I think.'));
+}
