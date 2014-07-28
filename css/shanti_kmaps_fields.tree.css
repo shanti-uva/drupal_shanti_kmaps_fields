@@ -1,0 +1,19 @@
+/* SHANTI KMaps Fields Tree CSS */
+
+.delete-me, .kmap-item {
+	cursor:pointer;
+}
+
+.delete-me {
+	padding: 0 5px;
+}
+
+.selected-kmap {
+	float:left;
+	color:green;
+	border-radius:3px;
+	border:1px solid gray;
+	width:auto;
+	padding:.25em .5em;
+	margin:0 .25em .25em 0;
+}

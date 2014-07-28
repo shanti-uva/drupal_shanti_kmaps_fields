@@ -1,0 +1,11 @@
+.x-tree-node a span, .x-dd-drag-ghost a span {
+    color: #000000
+}
+
+.x-nomatch a span {
+    color: #000000;
+}
+
+.x-match a span {
+    color: #000000;
+}

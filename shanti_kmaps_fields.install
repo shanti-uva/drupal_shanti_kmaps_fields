@@ -14,6 +14,7 @@ function shanti_kmaps_fields_field_schema($field) {
     $schema['columns']['kmap_raw'] = array(
       'description' => t('The raw content of the KMap term.'),
       'type' => 'text',
+      'size' => 'normal',
       'not null' => TRUE,   
     ); 
     $schema['columns']['kmap_id'] = array(
@@ -31,6 +32,7 @@ function shanti_kmaps_fields_field_schema($field) {
     $schema['columns']['kmap_path'] = array(
       'description' => t('The ancestral path of the KMap term.'),
       'type' => 'text',
+      'size' => 'normal',
       'not null' => TRUE,   
     ); 
     $schema['indexes']['kmap_id'] = array('kmap_id');

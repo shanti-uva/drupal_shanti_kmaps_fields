@@ -1,0 +1,27 @@
+.x-tree-node a span, .x-dd-drag-ghost a span {
+    color: #000000
+}
+
+.x-nomatch a span {
+    color: #AAAAAA;
+}
+
+.x-match a span {
+    color: #000000;
+}
+
+a.x-more-show-hidden {
+    color: #AAAAAA;
+    font-style: italic;
+}
+
+a.x-less-show-hidden {
+    color: #AAAAAA;
+    font-style: italic;
+}
+
+/*
+.x-match {
+    background-color: #c6cec5;
+}
+*/

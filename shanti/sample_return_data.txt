@@ -1,0 +1,57 @@
+Link
+
+{
+	"0":"UVA-KM-S-6440",
+	"1":"6440",
+	"2":"Compressing Audio-Video",
+	"3":"UVA-KM-S",
+	"4":"x-imata-external-kmaps-subject-lookup",
+	"5":["Compressing Audio-Video"],
+	"6":-1,
+	"7":{"preferredTerm":"Compressing Audio-Video"},
+	"8":"link"
+}
+
+----------------
+
+Append
+
+{
+	"0":"UVA-KM-S-6309",
+	"1":"6309",
+	"2":"Amdo Monasteries",
+	"3":"UVA-KM-S",
+	"4":"x-imata-external-kmaps-subject-lookup",
+	"5":["Amdo Monasteries"],
+	"6":-1,
+	"7":{"preferredTerm":"Amdo Monasteries"},
+	"8":"append"
+}
+
+----------------
+
+Overwrite
+
+{
+	"0":"UVA-KM-S-6804",
+	"1":"6804",
+	"2":"Close Reading",
+	"3":"UVA-KM-S",
+	"4":"x-imata-external-kmaps-subject-lookup",
+	"5":["Close Reading"],
+	"6":-1,
+	"7":{"preferredTerm":"Close Reading"},
+	"8":"overwrite"
+}
+
+----------------
+
+hook_field_info
+hook_field_formatter_info
+hook_field_formatter_info_alter
+hook_field_widget_info
+hook_field_widget_info_alter
+hook_field_is_empty
+hook_field_instance_settings_form
+hook_field_formatter_info
+hook_field_formatter_view
