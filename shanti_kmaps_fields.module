@@ -81,32 +81,23 @@ function shanti_kmaps_fields_field_widget_info() {
     'label' => t('Autocomplete'),
     'field types' => array('shanti_kmaps_fields_default')
   );
-  $info['kmap_extjs_picker'] = array(
-    'label' => t('Search Tree'),
-    'field types' => array('shanti_kmaps_fields_default'),
-    'settings' => array('size' => 60),
-    'behaviors' => array(
-      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
-      'default value' => FIELD_BEHAVIOR_DEFAULT,
-    ),
-    $info['kmap_tree_picker '] = array(
-    	'label' => t("Tree"),
-    	'field types' =>  array('shanti_kmaps_fields_default'),
-    	'settings' => array(),
-			'behaviors' => array(
-				'multiple values' => FALSE,
-				'default value' => FIELD_BEHAVIOR_DEFAULT,
-			),    
-    ),
-    $info['kmap_arborgraph'] = array(
-    	'label' => t("Arbor Graph"),
-    	'field types' =>  array('shanti_kmaps_fields_default'),
-    	'settings' => array(),
-			'behaviors' => array(
-				'multiple values' => FALSE,
-				'default value' => FIELD_BEHAVIOR_DEFAULT,
-			),    
-    ),
+	$info['kmap_tree_picker '] = array(
+		'label' => t("Tree"),
+		'field types' =>  array('shanti_kmaps_fields_default'),
+		'settings' => array(),
+		'behaviors' => array(
+			'multiple values' => FALSE,
+			'default value' => FIELD_BEHAVIOR_DEFAULT,
+		),    
+	);
+	$info['kmap_arborgraph'] = array(
+		'label' => t("Arbor Graph"),
+		'field types' =>  array('shanti_kmaps_fields_default'),
+		'settings' => array(),
+		'behaviors' => array(
+			'multiple values' => FALSE,
+			'default value' => FIELD_BEHAVIOR_DEFAULT,
+		),    
   );
   return $info;
 }
@@ -115,7 +106,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
   
   $element += array('#delta' => $delta);
   $base = $element;
-  
+
+	// NEED TO FIX HOW ANCESTOR PATHS ARE HANDLED
   if ($instance['widget']['type'] == 'kmap_default_widget') {
       
     $server = $field['settings']['kmap_server'];
@@ -141,55 +133,6 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
       '#type' => 'value',    
       '#default_value' => 'None entered'
     ) + $base;    
-    
-  }
-
-	// Can't get this to work very well
-  elseif ($instance['widget']['type'] == 'kmap_extjs_picker') {
-    $element['kmap_raw'] = array(
-      '#type' => 'textfield',
-      '#size' => 120,
-      '#maxlength' => 500,
-      '#default_value' => isset($items[$delta]['kmap_raw']) ? $items[$delta]['kmap_raw'] : '', // Grab existing content from three field
-      '#prefix' => '<div id="shanti_field_id_wrapper">',
-      '#suffix' => '</div>',
-      '#element_validate' => array('_shanti_kmaps_fields_fix_extcrap'),
-    ) + $base;
-    $element['kmap_id'] = array(
-      '#type' => 'value',
-      '#default_value' => 0   
-    ) + $base;    
-    $element['kmap_header'] = array(
-      '#type' => 'value',    
-      '#default_value' => 'None entered'
-    ) + $base;
-    $element['kmap_path'] = array(
-      '#type' => 'value',    
-      '#default_value' => 'None entered'
-    ) + $base;    
-    
-    $shanti_path = drupal_get_path('module', 'shanti_field');
-    
-    $form['#attached']['css'] = array(
-      $shanti_path . '/shanti/resources/css/ext-all-notheme.css',
-      $shanti_path . '/shanti/resources/css/xtheme-artstor.css',
-      $shanti_path . '/shanti/resources/css/ssimata.css',
-      $shanti_path . '/shanti/resources/css/lookup-field/lookup-field.css',
-      $shanti_path . '/shanti/resources/css/xtheme-kmaps.css',
-      $shanti_path . '/shanti/resources/css/xtheme-kmaps-search.css',
-    );
-  
-    $form['#attached']['js'] = array(
-      $shanti_path . '/shanti/ext-base.js',
-      $shanti_path . '/shanti/ext-all-debug.js',
-      $shanti_path . '/shanti/ux-all-debug.js',
-      $shanti_path . '/shanti/sharedshelf/data/abortable-store.js',
-      $shanti_path . '/shanti/sharedshelf/form/progress-showing-text-field.js',
-      $shanti_path . '/shanti/sharedshelf/external-service-search-button.js',
-      $shanti_path . '/shanti/sharedshelf/window/external-service-lookup-window.js',
-      $shanti_path . '/shanti/app/kmaps_lookup.js',
-      $shanti_path . '/shanti/shanti.js',
-    );
     
   }
   
@@ -226,9 +169,11 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
 		$this_path = drupal_get_path('module','shanti_kmaps_fields');
     $form['#attached']['js'] = array(
     	$this_path . "/js/shanti_kmaps_fields.tree.js",
+    	$this_path . "/easytree/jquery.easytree.js",
     );
     $form['#attached']['css'] = array(
     	$this_path . "/css/shanti_kmaps_fields.tree.css",
+    	$this_path . "/easytree/skin-lion/ui.easytree.css",
     );
     
     // SETTINGS 
@@ -326,12 +271,6 @@ function _shanti_kmaps_fields_split_kmap_raw($element, &$form_state) {
   }
 }
 
-function _shanti_kmaps_fields_fix_extcrap($element, &$form_state) {
-  $delta = $element['#delta'];
-  $values = array_map('trim', explode('|', $element['#value']));
-  watchdog_array("shanti_kmaps_fields","fix_extcrap",$values);  
-}
-
 ////////// FORMATTERS //////////
 
 function shanti_kmaps_fields_field_formatter_info() {
@@ -347,7 +286,6 @@ function shanti_kmaps_fields_field_formatter_info() {
   );
   return $info;
 }
-
 
 function shanti_kmaps_fields_field_formatter_settings_summary($field, $instance, $view_mode) {
 	$display = $instance['display'][$view_mode];
