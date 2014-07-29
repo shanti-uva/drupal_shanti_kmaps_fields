@@ -17,3 +17,19 @@
 	padding:.25em .5em;
 	margin:0 .25em .25em 0;
 }
+
+.matching {
+	color:red;
+	font-weight:bold;
+}
+
+.terminal {
+	color:green;
+	font-weight:bold;
+}
+
+.picked {
+	color:gray;
+	text-decoration:line-through;
+}
+
