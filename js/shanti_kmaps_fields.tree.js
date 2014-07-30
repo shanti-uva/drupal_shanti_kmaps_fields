@@ -12,8 +12,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     // Grab settings from server
     var kmap_domain     = settings.shanti_kmaps_fields.domain; // May not need
     var kmap_server     = settings.shanti_kmaps_fields.server; // May not need
-    var kmap_url        = settings.shanti_kmaps_fields.api_url;
-    var test_url        = settings.shanti_kmaps_fields.test_url;
+    var kmap_url        = settings.shanti_kmaps_fields.kmap_url;
     var search_input_id = settings.shanti_kmaps_fields.search_input_id;
     var pick_tree_id    = settings.shanti_kmaps_fields.pick_tree_id;
     var res_box_id    	= settings.shanti_kmaps_fields.res_box_id;
@@ -21,19 +20,16 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     
     // Define widgets
     var thisField     = $('#'+field_id, context);
-    
-    // THESE IDs need to be prefixed ...
+    var searchField		= $('#'+search_input_id, context);
     var searchButton  = $('#'+field_id+' .kmap_search_term_button', context);
     var pickTree      = $('#'+pick_tree_id, context);
     var resultBox     = $('#'+res_box_id, context);
-    
-    //edit-field-kmap-term-2-und-kmap-field-kmap-pick-tree
-    
+        
     searchButton.click(function(e){
       pickTree.html("<p>Searching ...</p>");
-      search_term = $('#' + search_input_id).val();
-      $.getJSON(test_url + search_term,function(results){
-        ancestor_tree = {};
+      search_term = searchField.val();
+      $.getJSON(kmap_url + search_term,function(results){
+        ancestor_tree = {}; // reinitialize
         if (results.length != 0) {
       
           // Announce things
@@ -44,48 +40,53 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
           for (var i in results.data) {
             var kmap_id = 'F' + results.data[i].id;
             dictionary[kmap_id] = dictionary[kmap_id] || {}
-            dictionary[kmap_id]['header'] =  results.data[i].header;
-            dictionary[kmap_id]['path'] =  ancestorsToPath(results.data[i].ancestors);
+            dictionary[kmap_id]['header'] = results.data[i].header;
+            dictionary[kmap_id]['path'] = ancestorsToPath(results.data[i].ancestors);
             addAncestorsToDictionary(results.data[i].ancestors);
-            parsePath(results.data[i].ancestors); // popular ancestor_tree
+            parsePath(results.data[i].ancestors); // populates ancestor_tree
           }
           
           // Convert the just created JSON tree into an HTML list element 
           JSONTreeToHTML(ancestor_tree,pickTree,'kmap-items'); 
-          Drupal.attachBehaviors(context);  
+          Drupal.attachBehaviors();  
         
         } else {
           pickTree.html("No results for the string /" + search_term + "/.");
         }
+
       });
       
     });
-    
-    $('.kmap-item',context).click(function(e){
-      var kmap_id = $(this).attr('data-id');
-      var kmap_header = $(this).html();
-      if ($(this).hasClass('picked')) {
-        alert("This item is already in your pick list.");
+        
+    $('#'+pick_tree_id+' .kmap-item').click(function(e){
+      //var kmap_id = $(this).attr('data-id');
+      var kmap_id = extractKMapID($(this).html());
+      var kmap_header = $(this).html(); // Or get from dictionary
+      if ($(this).hasClass('picked') && $(this).hasClass(kmap_id)) {
+        //alert("This item is already in your pick list. " + kmap_id);
+				console.log("01 " + kmap_id);
       } else {
-        //var pickedElement = $("<div data-id='"+kmap_id+"' class='selected-kmap'><span class='delete-me' id='delete-me-"+kmap_id+"'>X</span><span>"+kmap_header+"</span></div>").appendTo(resultBox); 
+				console.log("02 " + kmap_id);
+				$(this).addClass('picked');
         var pickedElement = $("<div/>").appendTo(resultBox); 
-        pickedElement.attr('data-id',kmap_id).addClass('selected-kmap');
+        //pickedElement.attr('data-id',kmap_id).addClass('selected-kmap');
+        pickedElement.addClass('selected-kmap');
         var deleteButton = $("<span>X</span>");
-        deleteButton.addClass('delete-me').attr('id','delete-me-'+kmap_id);
+        deleteButton.addClass('delete-me').addClass(kmap_id);
         deleteButton.appendTo(pickedElement);
         var elementLabel = $("<span>"+kmap_header+"</span>");
         elementLabel.appendTo(pickedElement);
-        $(this).addClass('picked');
-        Drupal.attachBehaviors(pickedElement);
+        Drupal.attachBehaviors();
       }
-    });
-
-    $('.delete-me',context).click(function(e){
+	  });
+	  
+    $('#'+res_box_id+' .delete-me', context).click(function(e){
       var pickedElement = $(this).parent();
-      var kmap_id = pickedElement.attr('data-id');
-      var pickTreeElement = $('#kmap-item-'+kmap_id, context);
-      pickTreeElement.removeClass('picked'); // <-- NOT WORKING!!!
-      pickedElement.remove();
+      //var kmap_id = pickedElement.attr('data-id');
+      var kmap_id = extractKMapID($(this).next('span').html());
+      var pickTreeElement = $('#'+pick_tree_id+' .kmap-item.'+kmap_id, context);
+			pickedElement.remove();
+      pickTreeElement.removeClass('picked');
     });
         
   }
@@ -102,34 +103,43 @@ function parsePath(ancestors){
   });
 }
 
+var rgx1 = /\s(\w?\d+)$/; // THIS COULD CHANGE
+function extractKMapID(line) {
+	var kmap_id = null;
+	var matches = rgx1.exec(line);
+	if (matches != null) {
+	  var kmap_id = matches[1];
+	} 
+	return kmap_id;
+}
+
 function JSONTreeToHTML(tree,el,ulid) {
 
   var ul = $("<ul/>");
   if (ulid) { ul.attr("id",ulid); }
   el.append(ul);
 
-  var rgx1 = /\s(\w?\d+)$/; // THIS COULD CHANGE
-  var rgx2 = new RegExp(search_term, 'gi');
+	var rgx2 = new RegExp(search_term, 'gi');
 
   for (item in tree) {
     
-    // Grap the kmap_id
-    var matches = rgx1.exec(item);
-    var kmap_id = matches[1];
-
+    // Grab the kmap_id
+    //var matches = rgx1.exec(item);
+    //var kmap_id = matches[1];
+		var kmap_id = extractKMapID(item);
+		
     // Create the LI element
     var li = $("<li>" + item + "</li>");
-    li.attr('data-id',kmap_id).attr('id','kmap-item-'+kmap_id).addClass('kmap-item');
+    //li.attr('data-id',kmap_id).addClass('kmap-item').addClass(kmap_id);
+    li.addClass('kmap-item').addClass(kmap_id);
     if (rgx2.exec(item) != null) li.addClass('matching');
 
     // Add to UL and attache behaviors
     li.appendTo(ul);
-    //Drupal.attachBehaviors(li);
 
     var children = 0; for (k in tree[item]) children++;
     if (children) {
-      li.addClass('folder');
-      JSONTreeToHTML(tree[item],ul); // RECURSE
+      JSONTreeToHTML(tree[item],ul);
     } else {
       li.addClass('terminal');
     } 

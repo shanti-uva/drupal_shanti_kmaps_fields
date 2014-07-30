@@ -16,7 +16,7 @@ function shanti_kmaps_fields_field_info() {
 }
 
 function shanti_kmaps_fields_field_is_empty($item, $field) {
-	if ($field['type'] == 'shanti_kmaps_fields_default') {
+  if ($field['type'] == 'shanti_kmaps_fields_default') {
     $values = array_map('trim',explode('|',$item['kmap_raw']));
     if (isset($values[0],$values[1],$values[2])) {
       return FALSE;
@@ -58,7 +58,7 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance) {
 }
 
 function shanti_kmaps_fields_field_validate($obj_type, $object, $field, $instance, $langcode, &$items, &$errors) {
-	if ($field['type'] == 'shanti_kmaps_fields_default') {
+  if ($field['type'] == 'shanti_kmaps_fields_default') {
     foreach($items as $delta => $item) {
       if(!empty($item['kmap_id'])) {
         if(!is_int($item['kmap_id']+0)) {
@@ -80,23 +80,23 @@ function shanti_kmaps_fields_field_widget_info() {
     'label' => t('Autocomplete'),
     'field types' => array('shanti_kmaps_fields_default')
   );
-	$info['kmap_tree_picker '] = array(
-		'label' => t("Tree"),
-		'field types' =>  array('shanti_kmaps_fields_default'),
-		'settings' => array(),
-		'behaviors' => array(
-			'multiple values' => FALSE,
-			'default value' => FIELD_BEHAVIOR_DEFAULT,
-		),    
-	);
-	$info['kmap_arborgraph'] = array(
-		'label' => t("Arbor Graph"),
-		'field types' =>  array('shanti_kmaps_fields_default'),
-		'settings' => array(),
-		'behaviors' => array(
-			'multiple values' => FALSE,
-			'default value' => FIELD_BEHAVIOR_DEFAULT,
-		),    
+  $info['kmap_tree_picker '] = array(
+    'label' => t("Tree"),
+    'field types' =>  array('shanti_kmaps_fields_default'),
+    'settings' => array(),
+    'behaviors' => array(
+      'multiple values' => FALSE,
+      'default value' => FIELD_BEHAVIOR_DEFAULT,
+    ),    
+  );
+  $info['kmap_arborgraph'] = array(
+    'label' => t("Arbor Graph"),
+    'field types' =>  array('shanti_kmaps_fields_default'),
+    'settings' => array(),
+    'behaviors' => array(
+      'multiple values' => FALSE,
+      'default value' => FIELD_BEHAVIOR_DEFAULT,
+    ),    
   );
   return $info;
 }
@@ -106,13 +106,13 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
   $element += array('#delta' => $delta);
   $base = $element;
 
-	// NEED TO FIX HOW ANCESTOR PATHS ARE HANDLED
+  // NEED TO FIX HOW ANCESTOR PATHS ARE HANDLED
   if ($instance['widget']['type'] == 'kmap_default_widget') {
       
     $server = $field['settings']['kmap_server'];
     $domain = $instance['settings']['kmap_domain'];
 
- 		$element['kmap_raw'] = array(
+    $element['kmap_raw'] = array(
       '#type' => 'textfield',
       '#size' => 200,
       '#maxlength' => 500,
@@ -135,71 +135,71 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     
   }
   
-	elseif ($instance['widget']['type'] == 'kmap_tree_picker ') {
-  	$base = $element;
-  	$domain = $instance['settings']['kmap_domain'];
-  	$server = $field['settings']['kmap_server'];
-  	
-  	$element['kmap_field'] = array(
-  		'#type' => 'fieldset',
-  		'#title' => t('KMap ID Selector'), 
-			'#collapsible' => TRUE, 
-			'#collapsed' => FALSE,
-			'#tree' => TRUE,
-  	) + $base;
+  elseif ($instance['widget']['type'] == 'kmap_tree_picker ') {
+    $base = $element;
+    $domain = $instance['settings']['kmap_domain'];
+    $server = $field['settings']['kmap_server'];
+    
+    $element['kmap_field'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('KMap ID Selector'), 
+      '#collapsible' => TRUE, 
+      '#collapsed' => FALSE,
+      '#tree' => TRUE,
+    ) + $base;
     $element['kmap_field']['kmap_search_term'] = array(
-    	'#title' => '',
-    	'#type' => 'textfield',
-    	'#description' => "<p>Enter a search term for the KMap $domain server</p>",
-    	'#field_suffix' => "<span class='kmap_search_term_button' style='border:1px solid black;padding:2px 5px;'>Search</search>",
+      '#title' => '',
+      '#type' => 'textfield',
+      '#description' => "<p>Enter a search term for the KMap $domain server</p>",
+      '#field_suffix' => "<span class='kmap_search_term_button' style='border:1px solid black;padding:2px 5px;'>Search</search>",
     ) + $base;
     $element['kmap_field']['kmap_pick_tree'] = array(
-    	'#title' => '',
-    	'#type' => 'item',
+      '#title' => '',
+      '#type' => 'item',
     ) + $base;
     $element['kmap_field']['kmap_result_box'] = array(
-    	'#title' => '',
-    	'#type' => 'item',
+      '#title' => '',
+      '#type' => 'item',
     ) + $base;
     
     // Add CSS and JS to the form
-		$this_path = drupal_get_path('module','shanti_kmaps_fields');
+    $this_path = drupal_get_path('module','shanti_kmaps_fields');
     $form['#attached']['js'] = array(
-    	$this_path . "/js/shanti_kmaps_fields.tree.js",
+      $this_path . "/js/shanti_kmaps_fields.tree.js",
     );
     $form['#attached']['css'] = array(
-    	$this_path . "/css/shanti_kmaps_fields.tree.css",
+      $this_path . "/css/shanti_kmaps_fields.tree.css",
     );
     
     // SETTINGS 
     
-		// Construct search field ID -- aren't these somewhere?
-		$field_id = str_replace('_', '-', "edit-{$field['field_name']}");
+    // Construct search field ID -- aren't these somewhere?
+    $field_id = str_replace('_', '-', "edit-{$field['field_name']}");
     $search_input_id = str_replace('_', '-', "edit-{$field['field_name']}-{$langcode}-kmap-field-kmap-search-term");
     $pick_tree_id = str_replace('_', '-', "edit-{$field['field_name']}-{$langcode}-kmap-field-kmap-pick-tree");
     $res_box_id = str_replace('_', '-', "edit-{$field['field_name']}-{$langcode}-kmap-field-kmap-result-box");
     
     // NEED TO CONSTRUCT OTHER ELEMENT IDS! Otherwise, fields will collide
 
-		// To construct URL below; move to top if needed elsewhere
+    // To construct URL below; move to top if needed elsewhere
     global $base_url;
 
     // Pass settings to the JS
     $js_settings = array(
-    	'domain' 					=> $domain, 
-    	'server' 					=> $server,
-    	'api_url' 				=> "$base_url/shanti_kmaps_utils/tree/$domain/$server/", // We call our local interface
-    	'test_url' 				=> "$base_url/shanti_kmaps_utils/list/$domain/$server/", // We call our local interface
-    	'search_input_id' => $search_input_id,
-    	'field_id'				=> $field_id,
-    	'pick_tree_id'		=> $pick_tree_id,
-    	'res_box_id'			=> $res_box_id,
+      'domain'          => $domain, 
+      'server'          => $server,
+      //'api_url'         => "$base_url/shanti_kmaps_utils/tree/$domain/$server/", // We call our local interface
+      'kmap_url'        => "$base_url/shanti_kmaps_utils/list/$domain/$server/", // We call our local interface
+      'search_input_id' => $search_input_id,
+      'field_id'        => $field_id,
+      'pick_tree_id'    => $pick_tree_id,
+      'res_box_id'      => $res_box_id,
     );
   
-		$form['#attached']['js'][] = array(
-			'data' => array('shanti_kmaps_fields' => $js_settings),
-			'type' => 'setting',
-		);
+    $form['#attached']['js'][] = array(
+      'data' => array('shanti_kmaps_fields' => $js_settings),
+      'type' => 'setting',
+    );
 
   }
   
@@ -227,34 +227,34 @@ function shanti_kmaps_fields_field_formatter_info() {
   $info['kmap_default_formatter'] = array(
     'label' => t('Link to entry on KMaps Server'),
     'field types' => array('shanti_kmaps_fields_default'),
-		'settings' => array('target' => '_blank'),
+    'settings' => array('target' => '_blank'),
   );
   return $info;
 }
 
 function shanti_kmaps_fields_field_formatter_settings_summary($field, $instance, $view_mode) {
-	$display = $instance['display'][$view_mode];
+  $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
   $summary = '';
-	if ($instance['display'][$view_mode]['type'] == 'kmap_default_formatter') {
-		$summary = t('@setting', array('@setting' => "KMap Default Formatter"));		
-	}
-	return $summary;
+  if ($instance['display'][$view_mode]['type'] == 'kmap_default_formatter') {
+    $summary = t('@setting', array('@setting' => "KMap Default Formatter"));    
+  }
+  return $summary;
 }
 
 function shanti_kmaps_fields_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
-	$display = $instance['display'][$view_mode];
+  $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $element = array();	
-	if ($display['type'] == 'kmap_default_formatter') {
-		$element['target'] = array(
-			'#type' => 'select',
-			'#title' => t('HREF target'),
-			'#options' => array('_blank' => 'New window', '_self' => 'Same window'),
-			'#default_value' => $settings['target'],
-			'#description' => t('Control where the link opens (i.e. set the TARGET attribute of the A element).'),
-		);
-	}
+  $element = array(); 
+  if ($display['type'] == 'kmap_default_formatter') {
+    $element['target'] = array(
+      '#type' => 'select',
+      '#title' => t('HREF target'),
+      '#options' => array('_blank' => 'New window', '_self' => 'Same window'),
+      '#default_value' => $settings['target'],
+      '#description' => t('Control where the link opens (i.e. set the TARGET attribute of the A element).'),
+    );
+  }
   return $element;
 }
 
@@ -267,7 +267,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
     }
   } 
   elseif ($display['type'] == 'kmap_default_formatter') {
-  	$target = $settings['target'];
+    $target = $settings['target'];
     foreach ($items as $delta => $item) {
       $domain = $instance['settings']['kmap_domain'];
       $element[$delta]['#markup'] = "<div class='shanti-kmap-term'><a href=\"http://{$domain}.kmaps.virginia.edu/features/{$item['kmap_id']}\" title=\"{$item['kmap_path']}\" target=\"{$target}\">{$item['kmap_header']}</div>";
