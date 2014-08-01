@@ -333,9 +333,9 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
 }
 
 function _shanti_kmaps_fields_decode_path($path){
-	$nicepath = str_replace("}}{{","--",$path);
-	$nicepath = str_replace("}}","",$nicepath);
-	$nicepath = str_replace("{{","",$nicepath);
-	return $nicepath;
+  $nicepath = str_replace("}}{{","--",$path);
+  $nicepath = str_replace("}}","",$nicepath);
+  $nicepath = str_replace("{{","",$nicepath);
+  return $nicepath;
 }
 
