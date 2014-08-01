@@ -5,7 +5,6 @@ package = SHANTI
 
 dependencies[] = shanti_kmaps_utils
 dependencies[] = jquery_update
-dependencies[] = computed_field
 
 files[] = shanti_kmaps_fields.module
 files[] = shanti_kmaps_fields.install
