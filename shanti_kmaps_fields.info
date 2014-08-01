@@ -4,7 +4,8 @@ core = 7.x
 package = SHANTI
 
 dependencies[] = shanti_kmaps_utils
-dependencies[] = jquery_update # Required minimum versions are jQuery 1.7+ and jQuery UI 1.8.6+ for Fancytree
+dependencies[] = jquery_update
+dependencies[] = computed_field
 
 files[] = shanti_kmaps_fields.module
 files[] = shanti_kmaps_fields.install
