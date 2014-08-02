@@ -1,0 +1,11 @@
+KMAP API CALL FOR FANCYTREE DATA:
+
+* http://dev-subjects.kmaps.virginia.edu//features/fancy_nested.json?view_code=blahblahblah
+* Not sure what blahblahblah does though
+* Works only on dev
+
+SOLR INDEX INFO
+* Admin page: http://drupal-index.shanti.virginia.edu/solr-test/kmindex/admin/
+* Help doc: https://wiki.apache.org/solr/UpdateJSON
+* Select query: http://drupal-index.shanti.virginia.edu/solr-test/kmindex/select?q=kmapid:2823&fq=&start=0&facets=on&group=true&group.field=bundle&group.facet=true&group.ngroups=true&group.limit=0
+

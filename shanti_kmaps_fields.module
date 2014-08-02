@@ -239,6 +239,7 @@ function _shanti_kmaps_fields_extract_data_from_hidden_box($element, &$form_stat
 }
 
 function shanti_kmaps_fields_node_insert($node) {
+	/*
   $data = $node->kmap_data;
   $lang = $node->language;
   $field = $node->kmap_field_name;
@@ -252,9 +253,12 @@ function shanti_kmaps_fields_node_insert($node) {
     $node->{$field}[$lang][$i]['path']    = $item['path'];
   }
   field_attach_update('node', $node);
+  */
+  $node = _shanti_kmaps_fields_add_kmaps_to_node($node);
 }
 
 function shanti_kmaps_fields_node_update($node) {
+	/*
   $data = $node->kmap_data;
   $lang = $node->language;
   $field = $node->kmap_field_name;
@@ -268,6 +272,25 @@ function shanti_kmaps_fields_node_update($node) {
     $node->{$field}[$lang][$i]['path']    = $item['path'];
   }
   field_attach_update('node', $node);
+  */
+  $node = _shanti_kmaps_fields_add_kmaps_to_node($node);
+}
+
+function _shanti_kmaps_fields_add_kmaps_to_node($node) {
+  $data 	= $node->kmap_data;
+  $lang 	= $node->language;
+  $field 	= $node->kmap_field_name;
+  $i = -1;
+  // NEED TO HANDLE DELETIONS!
+  foreach ($data as $fid => $item) {
+    $i++;
+    $node->{$field}[$lang][$i]['raw']     = "NOT USED"; 
+    $node->{$field}[$lang][$i]['id']      = $item['id'];
+    $node->{$field}[$lang][$i]['header']  = $item['header'];
+    $node->{$field}[$lang][$i]['path']    = $item['path'];
+  }
+  field_attach_update('node', $node);
+	return $node;
 }
 
 
