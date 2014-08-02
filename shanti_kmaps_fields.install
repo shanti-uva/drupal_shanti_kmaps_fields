@@ -2,17 +2,9 @@
 
 function shanti_kmaps_fields_field_schema($field) {
   $schema = array();
-  if ($field['type'] == 'shanti_kmaps_fields_simple') {
-    $schema['columns']['kmap_simple'] = array(
-      'description' => t('A simple KMaps field for testing.'),
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => TRUE,
-    );    
-  }
-  elseif ($field['type'] == 'shanti_kmaps_fields_default') {
+  if ($field['type'] == 'shanti_kmaps_fields_default') {
     $schema['columns']['raw'] = array(
-      'description' => t('The raw content of the KMap term.'),
+      'description' => t('The raw content of the KMap term. Used by some widgets.'),
       'type' => 'text',
       'size' => 'normal',
       'not null' => TRUE,   
@@ -27,6 +19,12 @@ function shanti_kmaps_fields_field_schema($field) {
       'description' => t('The default title of the KMap term.'),
       'type' => 'varchar',
       'length' => 255,
+      'not null' => TRUE,   
+    ); 
+    $schema['columns']['domain'] = array(
+      'description' => t('The domain the KMap term, e.g. subjects or places.'),
+      'type' => 'varchar',
+      'length' => 20,
       'not null' => TRUE,   
     ); 
     $schema['columns']['path'] = array(

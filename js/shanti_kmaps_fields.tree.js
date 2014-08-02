@@ -12,6 +12,7 @@ var dictionary    = {}; // Needs to persist across reattachments ...
 var picked        = {}; // SHOULD BE POPULATED AHEAD OF TIME FROM SERVER
 var ancestor_tree = {};
 var t = 0; // Keeps track of how many times this code is attached; used for poor man's once()
+var S = {}; // Settings
 
 Drupal.behaviors.shantiKmapsFieldsTree = {
 
@@ -20,7 +21,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     t++; // DO NOT REMOVE
 
     // Grab settings from server
-    var S = settings.shanti_kmaps_fields;
+    S = settings.shanti_kmaps_fields;
 		
     // Define widgets 
     var thisField     = $('#'+S.field_id, context);
@@ -204,6 +205,7 @@ function updateDictionary(kmap_id,id,header,path) {
   dictionary[kmap_id]['id'] = dictionary[kmap_id]['id'] || id;
   dictionary[kmap_id]['header'] = dictionary[kmap_id]['header'] || header;
   dictionary[kmap_id]['path'] = dictionary[kmap_id]['path'] || path;   
+  dictionary[kmap_id]['domain'] = dictionary[kmap_id]['domain'] || S.domain;   
 }
 
 function addAncestorsToDictionary(ancestors) {
