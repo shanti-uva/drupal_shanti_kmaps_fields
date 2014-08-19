@@ -33,10 +33,9 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     var resultBoxDel  = $('#'+S.res_box_id+' .delete-me', context);
     var hiddenBox     = $('#'+S.hidden_box_id, context).css('display','none');
     
-    // If it feels like the first time ...
+    // Update the pick list from the server the first time this is attached
 		if(t==1) {    
 			var picked_already = $.parseJSON(S.picked_already);
-			console.log(picked_already);
 			for (kmap_id in picked_already) {
 				var item = picked_already[kmap_id];
 				picked[kmap_id] = item;
@@ -102,6 +101,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     resultBoxDel.unbind('click').click(function(e){
       var pickedElement = $(this).parent();
       var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
+      
       if (dictionary[kmap_id] == null) {
         if (!confirm("This term is not in the currently selected tree; if you delete it, you'll need to search for it again. Are you sure you want to delete it?")) return;
       }

@@ -9,3 +9,23 @@ SOLR INDEX INFO
 * Help doc: https://wiki.apache.org/solr/UpdateJSON
 * Select query: http://drupal-index.shanti.virginia.edu/solr-test/kmindex/select?q=kmapid:2823&fq=&start=0&facets=on&group=true&group.field=bundle&group.facet=true&group.ngroups=true&group.limit=0
 
+JSON FORMAT
+{
+	"kmapid": [
+     "subjects-6213",
+     "subjects-6212",
+     "subjects-5954",
+     "subjects-2823",
+     "places-15401"
+  ],
+  "url": "http://mediabase.drupal-dev.shanti.virginia.edu/audio/tibetan-folk-music-porong-track-03",
+  "bundle": "audio",
+  "summary": " 0 No votes yet Details Collection: Tibetan and Himalayan Library Collections &gt; Tibetan and Himalayan Collections &gt; Porong &gt; Music Earth &gt; Asia &gt; Greater Himalayas &amp; Tibetan Plateau &gt; Tibet &gt; Western Tibet &gt; Porong People Creator:  Tom Hamilton Creator Role:  Producer Technical Metadata Shanti AV Id: 1907 Earth &gt; Asia &gt; Greater Himalayas &amp; Tibetan Plateau &gt; Tibet &gt; Western Tibet &gt; Porong Workflow Media Present:  Yes Video Quality Acceptable:  Not Reviewed Audio Quality Acceptable:  Not Reviewed Media Needs Recompression:  Not Reviewed Media Needs Re-editing:  Not Reviewed Logging files/EDLs archived:  Not Reviewed Masters Archived:  Not Reviewed Media Problem #1:  Not Reviewed Media Problem #2:  Not Reviewed Media Problem #3:  Not Reviewed Media Workflow Note:  Logging files/EDLs:  Not Reviewed Basic Cataloging:  Not Reviewed Place Data Present:  Yes Cataloging Proofed:  Not Reviewed Extended Cataloging:  Not Reviewed Translation Language 1:  Not Reviewed Translation Language 2:  Not Reviewed Transcript Input:  No Transcript Timecoded:  Not Reviewed Timecode too infrequent:  Not Reviewed Timecoding problem 1:  Not Reviewed Timecoding problem 2:  Not Reviewed Transcript Proofed:  Not Reviewed Translation Input Language 1:  Not Reviewed Translation Input Language 2:  Not Reviewed Translation Input Language 3:  Not Reviewed Translation Proofed Language 1:  Not Reviewed Translation Proofed Language 2:  Not Reviewed Translation Proofed Language 3:  Not Reviewed Catalog Workflow Note:  ",
+  "caption": "Tibetan Folk Music in Porong- Track 03",
+  "id": 1907,
+  "service": "mediabase",
+  "uid": "mediabase-1907",
+  "thumbnail_url": "http://www.kaltura.com/p/381832/sp/38183200/thumbnail/entry_id/1_sw0optz7/width/240/height/180/type/2/bgcolor/000000"
+}
+
+
