@@ -68,12 +68,25 @@ function shanti_kmaps_fields_api_node($nid) {
 function _shanti_kmaps_fields_get_solr_doc($nid_list) {
   global $base_url;
   $service = 'essays';
-  $doc = array();
+  $doc = array();  
   foreach ($nid_list as $nid) {
     $node = node_load($nid);
+
+		// We need a better way to grab the fields of the right type for each node
+    $fields = array();
+  	$sql = "select i.field_name from field_config_instance i join field_config c on (i.field_id = c.id) where c.type = 'shanti_kmaps_fields_default' and i.bundle = :bundle";
+		$rs = db_query($sql, array(':bundle' => $node->type)); // BUNDLE?
+		foreach ($rs as $r) {
+			$fields[] = $r->field_name;
+		}
+
+		// Note that we are losing info about the field here, which is essentially
+		// about the relationship between the KMap term and the node
     $kmapids = array();
-    foreach ($node->field_kmap_term[$node->language] as $term) {
-      $kmapids[] = $term['domain'] .'-'. $term['id']; 
+    foreach ($fields as $field) {
+	    foreach ($node->{$field}[$node->language] as $term) {
+  	    $kmapids[] = $term['domain'] .'-'. $term['id']; 
+    	}    
     }
     $doc[] = array(
       'url'     => "$base_url/node/{$node->nid}",
@@ -279,6 +292,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     $js_settings = array(
       'domain'          => $domain, 
       'server'          => $server,
+      //'kmap_url'        => "$base_url/shanti_kmaps_utils/list-uncached/$domain/$server/", // We call our local interface
       'kmap_url'        => "$base_url/shanti_kmaps_utils/list/$domain/$server/", // We call our local interface
       'search_input_id' => $search_input_id,
       'field_id'        => $field_id,
@@ -339,6 +353,11 @@ function shanti_kmaps_fields_node_update($node) {
   _shanti_kmaps_fields_add_kmaps_to_node($node);
 }
 
+function shanti_kmaps_fields_node_delete($node) {
+	_shanti_kmaps_fields_delete_solr_doc($node->nid);
+}
+
+
 // This function assumes that we are the only ones using kmap_data as key attached to node
 function _shanti_kmaps_fields_add_kmaps_to_node($node) {
 	if ($node->kmap_data) {
@@ -354,30 +373,42 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
 				'domain'  => $item['domain'],
 			);
 		}
+		
 		field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise  
-		_shanti_kmaps_fields_push_solar_doc($node->nid);
+		entity_get_controller('node')->resetCache(array($node->nid)); // This is needs to get most recent ids
+		_shanti_kmaps_fields_push_solr_doc($node->nid);
+		
 	}
 	return $node;
 }
 
-function _shanti_kmaps_fields_push_solar_doc($nid) {
-	global $base_url;
+function _shanti_kmaps_fields_push_solr_doc($nid) {
 	$solrdoc = json_encode(_shanti_kmaps_fields_get_solr_doc(array($nid)));
-	$url = "http://kidx.shanti.virginia.edu/solr/kmindex/update/json"; // SHOULD COME FROM SOMEWHERE ELSE
+	_shanti_kmaps_fields_update_solr_index($solrdoc);
+}
+
+function _shanti_kmaps_fields_delete_solr_doc($nid) {
+	$solrdoc = "{ \"delete\": { \"query\":\"uid:essays-{$nid}\" } }";
+	_shanti_kmaps_fields_update_solr_index($solrdoc);
+}
+
+// PUT THIS IS KMAPS_UTILS?
+function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $message = TRUE) {
+	global $base_url;
+	$url = "http://kidx.shanti.virginia.edu/solr/kmindex/update/json?commit=true"; // SHOULD COME FROM SOMEWHERE ELSE
 	$options = array(
 		'method' 	=> 'POST',
 		'data' 		=> $solrdoc,
 		'headers' => array('Content-type' => 'application/json; charset=utf-8', 'Content-Length' => strlen($solrdoc)),
 	);
 	$resp = drupal_http_request($url,$options);
-	drupal_set_message("Index update: " . $resp->status_message);
-}
-
-/**
- * Call this when a kmap field is created or updated
- */
-function _shanti_kmaps_fields_update_kmap_index() {
-
+	if ($debug) {
+		dpm($solrdoc);
+		dpm($resp);
+	}
+	if ($message) {
+		drupal_set_message("Index response: " . $resp->status_message);
+	}
 }
 
 
