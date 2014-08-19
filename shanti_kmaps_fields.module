@@ -45,9 +45,10 @@ function shanti_kmaps_fields_api_all() {
 		foreach ($rs as $r) {
 			$url = "$base_url/{$r->entity_type}/{$r->entity_id}";
 			$data[$r->entity_id]['service'] 	= $service;
+			$data[$r->entity_id]['id'] 				= $r->entity_id;
 			$data[$r->entity_id]['uid'] 			= $service .'-'. $r->entity_id;
 			$data[$r->entity_id]['url'] 			= $url;			
-			$data[$r->entity_id]['summary'] 	= $r->title;			
+			$data[$r->entity_id]['caption'] 	= $r->title;			
 			$data[$r->entity_id]['kmapid'][]	= $r->field_kmap_term_domain . '-' . $r->field_kmap_term_id;
 		}
 	}
@@ -65,24 +66,25 @@ function shanti_kmaps_fields_api_node($nid) {
 }
 
 function _shanti_kmaps_fields_get_solr_doc($nid_list) {
-	global $base_url;
-	$service = 'essays';
-	$doc = array();
-	foreach ($nid_list as $nid) {
-		$node = node_load($nid);
-		$kmapids = array();
-		foreach ($node->field_kmap_term[$node->language] as $term) {
-			$kmapids[] = $term['domain'] .'-'. $term['id'];	
-		}
-		$doc[] = array(
-			'url' 		=> "$base_url/node/{$node->nid}",
-			'summary' => $node->title,
-			'service' => $service,
-			'uid' 		=> $service .'-'. $nid,
-			'kmapid'	=> $kmapids
-		);
-	}
-	return $doc;
+  global $base_url;
+  $service = 'essays';
+  $doc = array();
+  foreach ($nid_list as $nid) {
+    $node = node_load($nid);
+    $kmapids = array();
+    foreach ($node->field_kmap_term[$node->language] as $term) {
+      $kmapids[] = $term['domain'] .'-'. $term['id']; 
+    }
+    $doc[] = array(
+      'url'     => "$base_url/node/{$node->nid}",
+      'caption'	=> $node->title,
+      'service' => $service,
+      'id'      => $nid,
+      'uid'     => $service .'-'. $nid,
+      'kmapid'  => $kmapids
+    );
+  }
+  return $doc;
 }
 
 ////////// FIELD //////////
@@ -228,8 +230,10 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     $element['kmap_search_term'] = array(
       '#title' 						=> '',
       '#type' 						=> 'textfield',
-      '#description' 			=> "<p>Enter a search term for the KMap $domain server</p>",
-      '#field_suffix' 		=> "<span class='kmap_search_term_button' style='border:1px solid black;padding:2px 5px;'>Search</search>",
+      '#description' 			=> "<p>Enter a search term for the KMap $domain server and press tab to see the results.</p>",
+      '#size'							=> 30,
+      '#default_value'		=> '',
+      //'#field_suffix' 		=> "<span class='kmap_search_term_button' style='border:1px solid black;padding:2px 5px;'>Search</search>",
     );
     $element['kmap_pick_tree'] = array(
       '#title' => '',
@@ -357,9 +361,16 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
 }
 
 function _shanti_kmaps_fields_push_solar_doc($nid) {
-	$solrdoc = _shanti_kmaps_fields_get_solr_doc(array($nid));
-	dpm($solrdoc);
-	// Invoke drupal_httpd_request
+	global $base_url;
+	$solrdoc = json_encode(_shanti_kmaps_fields_get_solr_doc(array($nid)));
+	$url = "http://kidx.shanti.virginia.edu/solr/kmindex/update/json"; // SHOULD COME FROM SOMEWHERE ELSE
+	$options = array(
+		'method' 	=> 'POST',
+		'data' 		=> $solrdoc,
+		'headers' => array('Content-type' => 'application/json; charset=utf-8', 'Content-Length' => strlen($solrdoc)),
+	);
+	$resp = drupal_http_request($url,$options);
+	drupal_set_message("Index update: " . $resp->status_message);
 }
 
 /**

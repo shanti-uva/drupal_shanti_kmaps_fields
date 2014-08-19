@@ -18,7 +18,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 
   attach: function (context, settings) {
   
-    t++; // DO NOT REMOVE
+    t++; // DO NOT REMOVE!
 
     // Grab settings from server
     S = settings.shanti_kmaps_fields;
@@ -26,7 +26,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     // Define widgets 
     var thisField     = $('#'+S.field_id, context);
     var searchField   = $('#'+S.search_input_id, context);
-    var searchButton  = $('#'+S.field_id+' .kmap_search_term_button', context);
+    //var searchButton  = $('#'+S.field_id+' .kmap_search_term_button', context);
     var pickTree      = $('#'+S.pick_tree_id, context);
     var pickTreeItem  = $('#'+S.pick_tree_id+ ' li.kmap-item', context);
     var resultBox     = $('#'+S.res_box_id, context);
@@ -51,7 +51,8 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 		}
 		
     // Event handler 1: Fetch search results and build a "pick tree"
-    searchButton.click(function(e){
+    //searchButton.click(function(e){
+    searchField.blur(function(e){
       pickTree.html("<p>Searching ...</p>");
       search_term = searchField.val();
       $.getJSON(S.kmap_url + search_term,function(results){
