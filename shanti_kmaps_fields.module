@@ -119,7 +119,7 @@ function shanti_kmaps_fields_field_info() {
 }
 
 function shanti_kmaps_fields_field_is_empty($item, $field) {
-  if ($field['type'] == 'shanti_kmaps_fields_default') {
+  if ($field['type'] == 'shanti_kmaps_fields_default' && isset($item['kmap_raw'])) {
     $values = array_map('trim',explode('|',$item['kmap_raw']));
     if (isset($values[0],$values[1],$values[2])) {
       return FALSE;
