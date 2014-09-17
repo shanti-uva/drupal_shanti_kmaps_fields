@@ -81,6 +81,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     // and populate the result box
     pickTreeItem.unbind('click').click(function(e){
     //pickTreeItem.click(function(e){ // CAN'T USE THIS BECAUSE attacheBehaviors rebinds below
+      //alert("Picked");
       var kmap_header = $(this).html();
       var kmap_id = extractKMapID(kmap_header);
       if ($(this).hasClass('picked') && $(this).hasClass(kmap_id)) {
