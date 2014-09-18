@@ -3,10 +3,11 @@ description = Defines fields, widgets, and formatters for adding KMap items to e
 core = 7.x
 package = SHANTI
 
+
+configure = admin/config/content/shanti_kmaps_fields
+
 dependencies[] = shanti_kmaps_utils
 dependencies[] = jquery_update
 
 files[] = shanti_kmaps_fields.module
 files[] = shanti_kmaps_fields.install
-
-

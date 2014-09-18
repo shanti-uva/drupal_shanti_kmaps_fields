@@ -1,5 +1,8 @@
 <?php
 
+global $base_url;
+define('SHANTI_KMAPS_FIELDS_SERVICE', preg_replace("/\./",'_',preg_replace("/http:\/\//", '', $base_url)));
+
 ////////// GENERAL //////////
 
 function shanti_kmaps_fields_menu () {
@@ -20,17 +23,64 @@ function shanti_kmaps_fields_menu () {
       'type' => MENU_CALLBACK,
       'access arguments' => array('access content'),
     ),
+    'admin/config/content/shanti_kmaps_fields' => array(
+      'title' => 'SHANTI KMaps',
+      'description' => 'Specify servers for KMaps.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('shanti_kmaps_fields_admin'),
+      'access arguments' => array('administer shanti_kmaps_fields'),
+      'type' => MENU_NORMAL_ITEM,      
+    ),
   );
 }
 
+function shanti_kmaps_fields_permission() {
+ return array(
+    'administer shanti_kmaps_fields' => array(
+      'title' => t('Administer SHANTI KMaps Fields'),
+    ),
+  );
+}
+
+function shanti_kmaps_fields_admin() {
+  $form['shanti_kmaps_fields_subject_server'] = array(
+    '#type' => 'textfield',
+    '#title' => t('KMaps Subjects server'),
+    '#default_value' => variable_get('shanti_kmaps_fields_subject_server', 'http://subjects.kmaps.virginia.edu'),
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#description' => t('The server used to retrieve KMap subject terms.'),
+    '#required' => TRUE,
+  );
+  $form['shanti_kmaps_fields_places_server'] = array(
+    '#type' => 'textfield',
+    '#title' => t('KMaps Subjects server'),
+    '#default_value' => variable_get('shanti_kmaps_fields_places_server', 'http://places.kmaps.virginia.edu'),
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#description' => t('The server used to retrieve KMap place terms.'),
+    '#required' => TRUE,
+  );
+  $form['shanti_kmaps_fields_solr_server'] = array(
+    '#type' => 'textfield',
+    '#title' => t('KMaps Solr server'),
+    '#default_value' => variable_get('shanti_kmaps_fields_solr_server', 'http://kidx.shanti.virginia.edu/solr/kmindex'),
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#description' => t('The server used to store the KMap index. This may include a path to the specific index.'),
+    '#required' => TRUE,
+  );
+  return system_settings_form($form);  
+}
+
 function shanti_kmaps_fields_api_test() {
-  return "Testing.";
+  return SHANTI_KMAPS_FIELDS_SERVICE;
 }
 
 function shanti_kmaps_fields_api_all() {
 
   global $base_url;
-  $service = 'essays'; // CONFIG
+  $service = SHANTI_KMAPS_FIELDS_SERVICE;
   $tables = array();
   $data = array();
 
@@ -51,6 +101,8 @@ function shanti_kmaps_fields_api_all() {
       $data[$r->entity_id]['id']        = $r->entity_id;
       $data[$r->entity_id]['uid']       = $service .'-'. $r->entity_id;
       $data[$r->entity_id]['url']       = $url;     
+      $data[$r->entity_id]['url_frag']  = 'COMING SOON';     
+      $data[$r->entity_id]['url_json']  = 'COMING SOON';     
       $data[$r->entity_id]['caption']   = $r->title;      
       $data[$r->entity_id]['kmapid'][]  = $r->field_kmap_term_domain . '-' . $r->field_kmap_term_id;
     }
@@ -70,7 +122,7 @@ function shanti_kmaps_fields_api_node($nid) {
 
 function _shanti_kmaps_fields_get_solr_doc($nid_list) {
   global $base_url;
-  $service = 'essays';
+  $service = SHANTI_KMAPS_FIELDS_SERVICE;
   $doc = array();  
   foreach ($nid_list as $nid) {
     $node = node_load($nid);
@@ -93,6 +145,8 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     }
     $doc[] = array(
       'url'     => "$base_url/node/{$node->nid}",
+      'url_frag' => 'COMING SOON'; // MUST POINT TO API URL
+      'url_json' => 'COMING SOON'; // MUST POINT TO API URL
       'caption' => $node->title,
       'service' => $service,
       'id'      => $nid,
@@ -294,7 +348,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     // Pass settings to the JS
     $js_settings = array(
       'domain'          => $domain, 
-      'server'          => $server,
+      'server'          => $server, // THIS NEEDS TO BE REDONE AFTER WE USE THE ADMIN VARS
       //'kmap_url'        => "$base_url/shanti_kmaps_utils/list-uncached/$domain/$server/", // We call our local interface
       'kmap_url'        => "$base_url/shanti_kmaps_utils/list/$domain/$server/", // We call our local interface
       'search_input_id' => $search_input_id,
@@ -398,7 +452,8 @@ function _shanti_kmaps_fields_delete_solr_doc($nid) {
 // PUT THIS IS KMAPS_UTILS?
 function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $message = TRUE) {
   global $base_url;
-  $url = "http://kidx.shanti.virginia.edu/solr/kmindex/update/json?commit=true"; // SHOULD COME FROM SOMEWHERE ELSE
+  $solr_url = variable_get('shanti_kmaps_fields_solr_server');
+  $url = "$solr_url/update/json?commit=true";
   $options = array(
     'method'  => 'POST',
     'data'    => $solrdoc,
