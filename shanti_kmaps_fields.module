@@ -145,8 +145,8 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     }
     $doc[] = array(
       'url'     => "$base_url/node/{$node->nid}",
-      'url_frag' => 'COMING SOON'; // MUST POINT TO API URL
-      'url_json' => 'COMING SOON'; // MUST POINT TO API URL
+      'url_frag' => 'COMING SOON', // MUST POINT TO API URL
+      'url_json' => 'COMING SOON', // MUST POINT TO API URL
       'caption' => $node->title,
       'service' => $service,
       'id'      => $nid,
