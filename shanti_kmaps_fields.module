@@ -86,35 +86,21 @@ function shanti_kmaps_fields_form_alter(&$form, &$form_state, $form_id) {
     $form['shanti_kmaps_fields_asset_type'] = array(
       '#type'           => 'select',
       '#title'          => t('SHANTI Asset Type'),
-      '#description'    => t('Set the SHANTI asset type of this entity if it uses a SHANTI KMaps Field.'),
+      '#description'    => t('If this entity uses a SHANTI KMaps Field, set the SHANTI asset type of this entity. If not, just leave as "NA".'),
       '#options'        => array('__NONE__' => t('NA'), 'texts' => t('text'),'photos' => t('photo or image'),'audio-video' => t('audio or video'),'visuals' => t('visualization'),'sources' => t('bibliographic source'),'subjects' => t('subject term'),'places' => t('place term'),'terms' => t('general term'),'maps' => t('map'),'agents' => t('agent (e.g. person)'),'events' => t('event')),
       '#required'       => FALSE,
-      '#default_value'  => variable_get($var),    // MUST SET THOUGH
+      '#default_value'  => variable_get($var),
       '#weight'         => -99,
     );
+    $form['#submit'][] = 'shanti_kmaps_fields_form_alter_submit';
   }
 }
 
-function shanti_kmaps_fields_form_node_type_form_alter($form, &$form_state, $form_id) {
+function shanti_kmaps_fields_form_alter_submit($form, &$form_state) {
   $var = 'shanti_kmaps_fields_asset_type__' . $form['#node_type']->type;
   $val = $form_state['input']['shanti_kmaps_fields_asset_type'];
   variable_set($var,$val,'');
-  drupal_set_message("$var = $val");
 }
-
-/*
-function shanti_kmaps_fields_node_type_insert($info) {
-
-}
-
-function shanti_kmaps_fields_node_type_update($info) {
-  watchdog_array('SHANTI','shanti_kmaps_fields_node_type_update',$info);
-}
-
-function shanti_kmaps_fields_node_type_delete($info) {
-
-}
-*/
 
 function shanti_kmaps_fields_api_test() {
   return SHANTI_KMAPS_FIELDS_SERVICE;
@@ -127,7 +113,7 @@ function shanti_kmaps_fields_api_all() {
   $tables = array();
   $data = array();
 
-	// USE DB API
+  // USE DB API
   $sql = "SELECT field_name FROM {field_config} WHERE type LIKE 'shanti_kmaps_fields_default'";
   $rs = db_query($sql);
   foreach ($rs as $r) {
@@ -135,16 +121,17 @@ function shanti_kmaps_fields_api_all() {
   }
   
   foreach ($tables as $table) {
-  	// USE DB API
+    // USE DB API
     $sql = 'SELECT t.*, n.title FROM {' . $table . '} t JOIN {node} n ON (t.entity_id = n.nid)';
     $rs = db_query($sql);
     foreach ($rs as $r) {
       $url = "$base_url/{$r->entity_type}/{$r->entity_id}";
       $data[$r->entity_id]['service']   = $service;
+      $data[$r->entity_id]['asset_type'] = variable_get(); // VARIABLE A FUNCTION OF CONTENT TYPE
       $data[$r->entity_id]['id']        = $r->entity_id;
       $data[$r->entity_id]['uid']       = $service .'-'. $r->entity_id;
       $data[$r->entity_id]['url']       = $url;     
-      $data[$r->entity_id]['url_frag']  = 'COMING SOON';     
+      $data[$r->entity_id]['url_ajax']  = 'COMING SOON';     
       $data[$r->entity_id]['url_json']  = 'COMING SOON';     
       $data[$r->entity_id]['caption']   = $r->title;      
       $data[$r->entity_id]['kmapid'][]  = $r->field_kmap_term_domain . '-' . $r->field_kmap_term_id;
@@ -190,7 +177,7 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
       'url'      => "$base_url/node/{$node->nid}", // IS THIS UNIVERSAL? NO 
       'url_ajax'    => '', // How to get an instance setting here?
       'url_json'    => '', // ditto
-      'asset_type'  => '', // ditto
+      'asset_type'  => '', // ditto -- A FUNCTION OF CONTENT TYPE
       'caption' => $node->title,
       'service' => $service,
       'id'      => $nid,
@@ -286,16 +273,6 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance) {
       '#required' => FALSE,
       '#default_value' => $settings['url_json'],    
     );
-    /*
-    $form['asset_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Asset Type'),
-      '#description' => t('The media type of the entity associated with this field.'),
-      '#options' => array('texts' => t('text'),'photos' => t('photo or image'),'audio-video' => t('audio or video'),'visuals' => t('visualization'),'sources' => t('bibliographic source'),'subjects' => t('subject term'),'places' => t('place term'),'terms' => t('general term'),'maps' => t('map'),'agents' => t('agent (e.g. person)'),'events' => t('event')),
-      '#required' => TRUE,
-      '#default_value' => $settings['asset_type'],    
-    );
-    */
   }
   return $form;
 }
