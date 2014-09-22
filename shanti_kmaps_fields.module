@@ -1,7 +1,6 @@
 <?php
 
-global $base_url;
-define('SHANTI_KMAPS_FIELDS_SERVICE', preg_replace("/\./",'_',preg_replace("/http:\/\//", '', $base_url)));
+define('SHANTI_KMAPS_FIELDS_SERVICE', preg_replace("/\./",'_',preg_replace("/http:\/\//", '', $GLOBALS['base_url'])));
 
 ////////// GENERAL //////////
 
@@ -22,7 +21,7 @@ function shanti_kmaps_fields_menu () {
       'page arguments' => array(3),
       'type' => MENU_CALLBACK,
       'access arguments' => array('access content'),
-    ),
+    ),    
     'admin/config/content/shanti_kmaps_fields' => array(
       'title' => 'SHANTI KMaps',
       'description' => 'Specify servers for KMaps.',
@@ -43,10 +42,18 @@ function shanti_kmaps_fields_permission() {
 }
 
 function shanti_kmaps_fields_admin() {
-  $form['shanti_kmaps_fields_subject_server'] = array(
+  $form['shanti_kmaps_fields_asset_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Default Asset Type'),
+    '#description' => t('The media type of the entity associated with a SHANTI KMaps field.'),
+    '#options' => array('texts' => t('text'),'photos' => t('photo or image'),'audio-video' => t('audio or video'),'visuals' => t('visualization'),'sources' => t('bibliographic source'),'subjects' => t('subject term'),'places' => t('place term'),'terms' => t('general term'),'maps' => t('map'),'agents' => t('agent (e.g. person)'),'events' => t('event')),
+    '#default_value' => variable_get('shanti_kmaps_fields_asset_type', ''),
+    '#required' => TRUE,
+  );
+  $form['shanti_kmaps_fields_subjects_server'] = array(
     '#type' => 'textfield',
     '#title' => t('KMaps Subjects server'),
-    '#default_value' => variable_get('shanti_kmaps_fields_subject_server', 'http://subjects.kmaps.virginia.edu'),
+    '#default_value' => variable_get('shanti_kmaps_fields_subjects_server', 'http://subjects.kmaps.virginia.edu'),
     '#size' => 60,
     '#maxlength' => 255,
     '#description' => t('The server used to retrieve KMap subject terms.'),
@@ -54,7 +61,7 @@ function shanti_kmaps_fields_admin() {
   );
   $form['shanti_kmaps_fields_places_server'] = array(
     '#type' => 'textfield',
-    '#title' => t('KMaps Subjects server'),
+    '#title' => t('KMaps Places server'),
     '#default_value' => variable_get('shanti_kmaps_fields_places_server', 'http://places.kmaps.virginia.edu'),
     '#size' => 60,
     '#maxlength' => 255,
@@ -72,6 +79,42 @@ function shanti_kmaps_fields_admin() {
   );
   return system_settings_form($form);  
 }
+
+function shanti_kmaps_fields_form_alter(&$form, &$form_state, $form_id) {
+  if (preg_match("/node_type_form/",$form_id)) {
+    $var = 'shanti_kmaps_fields_asset_type__' . $form['#node_type']->type;
+    $form['shanti_kmaps_fields_asset_type'] = array(
+      '#type'           => 'select',
+      '#title'          => t('SHANTI Asset Type'),
+      '#description'    => t('Set the SHANTI asset type of this entity if it uses a SHANTI KMaps Field.'),
+      '#options'        => array('__NONE__' => t('NA'), 'texts' => t('text'),'photos' => t('photo or image'),'audio-video' => t('audio or video'),'visuals' => t('visualization'),'sources' => t('bibliographic source'),'subjects' => t('subject term'),'places' => t('place term'),'terms' => t('general term'),'maps' => t('map'),'agents' => t('agent (e.g. person)'),'events' => t('event')),
+      '#required'       => FALSE,
+      '#default_value'  => variable_get($var),    // MUST SET THOUGH
+      '#weight'         => -99,
+    );
+  }
+}
+
+function shanti_kmaps_fields_form_node_type_form_alter($form, &$form_state, $form_id) {
+  $var = 'shanti_kmaps_fields_asset_type__' . $form['#node_type']->type;
+  $val = $form_state['input']['shanti_kmaps_fields_asset_type'];
+  variable_set($var,$val,'');
+  drupal_set_message("$var = $val");
+}
+
+/*
+function shanti_kmaps_fields_node_type_insert($info) {
+
+}
+
+function shanti_kmaps_fields_node_type_update($info) {
+  watchdog_array('SHANTI','shanti_kmaps_fields_node_type_update',$info);
+}
+
+function shanti_kmaps_fields_node_type_delete($info) {
+
+}
+*/
 
 function shanti_kmaps_fields_api_test() {
   return SHANTI_KMAPS_FIELDS_SERVICE;
@@ -138,15 +181,16 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     // Note that we are losing info about the field here, which is essentially
     // about the relationship between the KMap term and the node
     $kmapids = array();
-    foreach ($fields as $field) {
+    foreach ($fields as $field) { /// NEED TO GET FIELD INSTANCE DATA HERE ....
       foreach ($node->{$field}[$node->language] as $term) {
         $kmapids[] = $term['domain'] .'-'. $term['id']; 
       }    
     }
     $doc[] = array(
-      'url'     => "$base_url/node/{$node->nid}",
-      'url_frag' => 'COMING SOON', // MUST POINT TO API URL
-      'url_json' => 'COMING SOON', // MUST POINT TO API URL
+      'url'      => "$base_url/node/{$node->nid}", // IS THIS UNIVERSAL? NO 
+      'url_ajax'    => '', // How to get an instance setting here?
+      'url_json'    => '', // ditto
+      'asset_type'  => '', // ditto
       'caption' => $node->title,
       'service' => $service,
       'id'      => $nid,
@@ -160,12 +204,13 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
 ////////// FIELD //////////
 
 function shanti_kmaps_fields_field_info() {
+  global $base_url;
   $info = array();
   $info['shanti_kmaps_fields_default'] = array(
     'label'             => t('KMap Term'),
     'description'       => t('A KMap Term for integrating content into the Mandala ecology.'),
     'settings'          => array('kmap_server' => 'production','kmap_domain' => 'subjects'),  
-    'instance_settings' => array(), 
+    'instance_settings' => array('url_html' => "$base_url/node/__NID__", 'url_ajax' => '', 'url_json' => '', 'asset_type' => variable_get('shanti_kmaps_fields_asset_type','')), 
     'default_widget'    => 'kmap_default_widget',
     'default_formatter' => 'kmap_default_formatter',  
   );
@@ -209,7 +254,49 @@ function shanti_kmaps_fields_field_settings_form($field, $instance, $has_data) {
 function shanti_kmaps_fields_field_instance_settings_form($field, $instance) {
   $form = array();
   $settings = $instance['settings'];
-  if ($field['type'] == 'shanti_kmaps_fields_default') {}
+  if ($field['type'] == 'shanti_kmaps_fields_default') {
+    $form['url_group_info'] = array(
+      '#type' => 'markup',
+      '#markup' => t('<p>Use <b>__NID__</b> to specify where the entity ID goes in each URL below. These URLs may not exist, and so may need to be created, for example by using Services, Views, or by creating menu items in a module.</p><p>NB: These values should be the same for every field used by this entity type!'),
+    );
+    $form['url_html'] = array(
+      '#type' => 'textfield',
+      '#title' => t('HTML URL'),
+      '#description' => t('The URL where the entity associated with this field can be viewed, suitable for linking.'),
+      '#size' => 120,
+      '#maxlength' => 255,
+      '#required' => TRUE,
+      '#default_value' => $settings['url_html'],    
+    );
+    $form['url_ajax'] = array(
+      '#type' => 'textfield',
+      '#title' => t('AJAX URL'),
+      '#description' => t('The URL where the entity associated with this field can be viewed as fragment, suitable for embedding.'),
+      '#size' => 120,
+      '#maxlength' => 255,
+      '#required' => FALSE,
+      '#default_value' => $settings['url_ajax'],    
+    );    
+    $form['url_json'] = array(
+      '#type' => 'textfield',
+      '#title' => t('JSON URL'),
+      '#description' => t('The URL where the entity associated with this field can be retrieved as a JSON string, suitable for munging.'),
+      '#size' => 120,
+      '#maxlength' => 255,
+      '#required' => FALSE,
+      '#default_value' => $settings['url_json'],    
+    );
+    /*
+    $form['asset_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Asset Type'),
+      '#description' => t('The media type of the entity associated with this field.'),
+      '#options' => array('texts' => t('text'),'photos' => t('photo or image'),'audio-video' => t('audio or video'),'visuals' => t('visualization'),'sources' => t('bibliographic source'),'subjects' => t('subject term'),'places' => t('place term'),'terms' => t('general term'),'maps' => t('map'),'agents' => t('agent (e.g. person)'),'events' => t('event')),
+      '#required' => TRUE,
+      '#default_value' => $settings['asset_type'],    
+    );
+    */
+  }
   return $form;
 }
 
