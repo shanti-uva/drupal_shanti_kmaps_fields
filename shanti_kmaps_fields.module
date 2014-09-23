@@ -81,7 +81,7 @@ function shanti_kmaps_fields_admin() {
     '#default_value' => variable_get('shanti_kmaps_fields_server_solr', 'http://kidx.shanti.virginia.edu/solr/kmindex'),
     '#size' => 60,
     '#maxlength' => 255,
-    '#description' => t('The server used to store the KMap index. This may include a path to the specific index.'),
+    '#description' => t("The server used to store the KMap index. This may include a path to the specific index. Leave blank if you don't care to register your content with the SHANTI Collections Index"),
     '#required' => TRUE,
   );
   return system_settings_form($form);  
@@ -369,7 +369,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     $base = $element;
     
     $domain = $field['settings']['kmap_domain'];
-    $server = variable_get('shanti_kmaps_fields_server_' . $domain);
+    //$server = variable_get('shanti_kmaps_fields_server_' . $domain);
+    $server = _shanti_kmaps_fields_get_kmaps_server($domain);
     
     $element = array(
       '#type'             => 'fieldset',
@@ -425,7 +426,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
 
     // Pass settings to the JS
     $js_settings = array(
-      'kmap_server'     => $servers,
+      //'kmap_server'     => $server, // Is this needed?
       'domain'          => $domain,
       'kmap_url'        => "$base_url/shanti_kmaps_fields/kmaps_list/$domain/",
       'search_input_id' => $search_input_id,
@@ -618,17 +619,25 @@ function _shanti_kmaps_fields_decode_path($path){
 /// KMAP Server Interaction
 
 function shanti_kmaps_fields_kmaps_list_func($domain = 'subjects', $string) {
-  $result = array();
-	$server = variable_get('shanti_kmaps_fields_server_' . $domain);
+	//$server = variable_get('shanti_kmaps_fields_server_' . $domain);
+  $server = _shanti_kmaps_fields_get_kmaps_server($domain);
   $request = new KMapsAPI($domain, $server);
   $result = $request->searchByNameGetList($string);
 	drupal_json_output($result);    
 }
 
 function shanti_kmaps_fields_kmaps_autocomplete_func($domain = 'subjects', $string) {
-  $matches = array();
-  $server = variable_get('shanti_kmaps_fields_server_' . $domain);
+  //$server = variable_get('shanti_kmaps_fields_server_' . $domain);
+  $server = _shanti_kmaps_fields_get_kmaps_server($domain);
   $request = new KMapsAPI($domain, $server);
   $matches = $request->searchByName($string); 
   drupal_json_output($matches);    
+}
+
+function _shanti_kmaps_fields_get_kmaps_server($domain = 'subjects') {
+  if (in_array($domain,array('subjects','places'))) {
+    return variable_get('shanti_kmaps_fields_server_' . $domain);
+  } else {
+    return FALSE;
+  }
 }
