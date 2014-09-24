@@ -20,13 +20,14 @@
  * NEEDED FROM ANDRES:
  * -- A flat result list with parent identified (i.e. add element to list results)
  * -- A more complete item for name searches; i.e. with ancestors
- * -- A csv API
+ * -- A CSV API
  */
  
 
 class KMapsAPI {
     
   private $server             = ''; // set in constructor; the base URL to the server
+  private $server_stem        = ''; // set in constructor; the stem path of the URL to the server
   private $domain             = ''; // set in constructor; 'subjects' or 'places'
   private $api_url            = ''; // set in constructor; the appended URL to the server
   private $debug_mode         = 0; // or 1
@@ -42,11 +43,12 @@ class KMapsAPI {
   private $results_scope      = 'names';  // Also 'full_text' 
   private $results_view_code  = 'roman.popular'; // the view code that the features' information should be returned in (e.g. "roman.popular")
 
-  public function __construct($domain = 'subjects', $server = 'http://subjects.kmaps.virginia.edu') {
-    $this->domain     = $domain;
-    $this->server     = $server;
-    $this->api_url    = $this->server . '/features';
-    $this->debug_mode = variable_get('shanti_kmaps_fields_debug_mode',0);
+  public function __construct($domain = 'subjects', $server = 'http://subjects.kmaps.virginia.edu', $server_stem = '/features') {
+    $this->domain       = $domain;
+    $this->server       = $server;
+    $this->server_stem  = $server_stem;
+    $this->api_url      = $this->server . $this->server_stem;
+    $this->debug_mode   = variable_get('shanti_kmaps_fields_debug_mode',0);
     return $this;
   }
   

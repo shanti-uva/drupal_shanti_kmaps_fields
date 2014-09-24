@@ -1,7 +1,6 @@
 <?php
 
-define('SHANTI_KMAPS_FIELDS_SERVICE', preg_replace("/\./",'_',preg_replace("/http:\/\//", '', $GLOBALS['base_url'])));
-define('SHANTI_KMAPS_FIELDS_ASSET_TYPE_VAR_PREFIX', 'shanti_kmaps_fields_asset_type__');
+define('SHANTI_KMAPS_FIELDS_SERVICE', preg_replace("/[\.\/]/", '_', str_replace('http://', '', $GLOBALS['base_url'])));
 
 ////////// GENERAL //////////
 
@@ -24,7 +23,7 @@ function shanti_kmaps_fields_menu() {
       'access arguments' => array('access content'),
     ),    
     'admin/config/content/shanti_kmaps_fields' => array(
-      'title' => 'SHANTI KMaps',
+      'title' => 'SHANTI KMaps Fields',
       'description' => 'Specify servers for pulling and pushing KMaps information.',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('shanti_kmaps_fields_admin'),
@@ -104,11 +103,11 @@ function shanti_kmaps_fields_form_alter(&$form, &$form_state, $form_id) {
       '#description'    => t('If this entity uses a SHANTI KMaps Field, set the SHANTI asset type of this entity. If not, just leave as "NA".'),
       '#options'        => array('__NONE__' => t('NA'), 'texts' => t('text'),'photos' => t('photo or image'),'audio-video' => t('audio or video'),'visuals' => t('visualization'),'sources' => t('bibliographic source'),'subjects' => t('subject term'),'places' => t('place term'),'terms' => t('general term'),'maps' => t('map'),'agents' => t('agent (e.g. person)'),'events' => t('event')),
       '#required'       => FALSE,
-      '#default_value'  => variable_get(SHANTI_KMAPS_FIELDS_ASSET_TYPE_VAR_PREFIX . $node_type),
+      '#default_value'  => variable_get('shanti_kmaps_fields_asset_type__' . $node_type),
     );
     $form['shanti_kmaps_fields']['shanti_kmaps_fields_url_info'] = array(
       '#type' => 'markup',
-      '#markup' => t('<p>Specify the Drupal menu paths for the functions below. Use <b>__NID__</b> to specify where the entity ID goes in each URL below. These URLs may not exist, and so may need to be created, for example by using Services, Views, or by creating menu items in a module.</p>'),
+      '#markup' => t('<p>Specify the Drupal menu paths for the functions below. Use <b>__NID__</b> to specify where the entity ID goes in each path below. These paths may not exist, so they may need to be created, for example by using Services, Views, or by creating menu items in a module.</p>'),
     );
     $form['shanti_kmaps_fields']['shanti_kmaps_fields_url_html'] = array(
       '#type' => 'textfield',
@@ -143,7 +142,7 @@ function shanti_kmaps_fields_form_alter(&$form, &$form_state, $form_id) {
 
 function shanti_kmaps_fields_form_alter_submit($form, &$form_state) {
   $node_type = $form['#node_type']->type;
-  $var1 = SHANTI_KMAPS_FIELDS_ASSET_TYPE_VAR_PREFIX . $node_type;
+  $var1 = 'shanti_kmaps_fields_asset_type__' . $node_type;
   $val1 = $form_state['input']['shanti_kmaps_fields_asset_type'];
   variable_set($var1,$val1);
   $url_types = array('html','ajax','json');
@@ -177,12 +176,12 @@ function shanti_kmaps_fields_api_all() {
     foreach ($rs as $r) {
       $node_type = $r->bundle;
       $data[$r->entity_id]['service']     = SHANTI_KMAPS_FIELDS_SERVICE;
-      $data[$r->entity_id]['asset_type']  = variable_get(SHANTI_KMAPS_FIELDS_ASSET_TYPE_VAR_PREFIX . $node_type);
+      $data[$r->entity_id]['asset_type']  = variable_get('shanti_kmaps_fields_asset_type__' . $node_type);
       $data[$r->entity_id]['id']          = $r->entity_id;
       $data[$r->entity_id]['uid']         = SHANTI_KMAPS_FIELDS_SERVICE .'-'. $r->entity_id;
-      $data[$r->entity_id]['url_html']    = "$base_url/" . preg_replace('/__NID__/', $r->entity_id, variable_get('shanti_kmaps_fields_url_html__'.$node_type));     
-      $data[$r->entity_id]['url_ajax']    = "$base_url/" . preg_replace('/__NID__/', $r->entity_id, variable_get('shanti_kmaps_fields_url_ajax__'.$node_type));     
-      $data[$r->entity_id]['url_json']    = "$base_url/" . preg_replace('/__NID__/', $r->entity_id, variable_get('shanti_kmaps_fields_url_json__'.$node_type));     
+      $data[$r->entity_id]['url_html']    = "$base_url/" . str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_html__'.$node_type));     
+      $data[$r->entity_id]['url_ajax']    = "$base_url/" . str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_ajax__'.$node_type));     
+      $data[$r->entity_id]['url_json']    = "$base_url/" . str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_json__'.$node_type));     
       $data[$r->entity_id]['caption']     = $r->title;      
       $data[$r->entity_id]['kmapid'][]    = $r->field_kmap_term_domain . '-' . $r->field_kmap_term_id;
     }
@@ -225,12 +224,12 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     }
     $doc[] = array(
       'service'     => SHANTI_KMAPS_FIELDS_SERVICE,
-      'asset_type'  => variable_get(SHANTI_KMAPS_FIELDS_ASSET_TYPE_VAR_PREFIX . $node->type), 
+      'asset_type'  => variable_get('shanti_kmaps_fields_asset_type__' . $node->type), 
       'id'          => $node->nid,
       'uid'         => SHANTI_KMAPS_FIELDS_SERVICE .'-'. $node->nid,
-      'url_html'    => "$base_url/" . preg_replace('/__NID__/', $node->nid, variable_get('shanti_kmaps_fields_url_html__'.$node->type)),
-      'url_ajax'    => "$base_url/" . preg_replace('/__NID__/', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)),
-      'url_json'    => "$base_url/" . preg_replace('/__NID__/', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)),
+      'url_html'    => "$base_url/" . str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_html__'.$node->type)),
+      'url_ajax'    => "$base_url/" . str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)),
+      'url_json'    => "$base_url/" . str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)),
       'caption'     => $node->title,
       'kmapid'      => $kmapids
     );
@@ -369,7 +368,6 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     $base = $element;
     
     $domain = $field['settings']['kmap_domain'];
-    //$server = variable_get('shanti_kmaps_fields_server_' . $domain);
     $server = _shanti_kmaps_fields_get_kmaps_server($domain);
     
     $element = array(
@@ -405,7 +403,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     
     // Add CSS and JS to the form
     $this_path = drupal_get_path('module','shanti_kmaps_fields');
-    $form['#attached']['js'] = array($this_path . "/js/shanti_kmaps_fields.tree.js");
+    $form['#attached']['js']  = array($this_path . "/js/shanti_kmaps_fields.tree.js");
     $form['#attached']['css'] = array($this_path . "/css/shanti_kmaps_fields.tree.css");
     
     // SETTINGS 
@@ -459,20 +457,6 @@ function _shanti_kmaps_fields_get_json($items, $domain) {
   $json = drupal_json_encode($data);
   return $json;
 }
-
-/* THIS NEEDS TO GO
-function _shanti_kmaps_fields_split_kmap_raw($element, &$form_state) {
-  $field_name = $element['#field_name'];
-  $language = $element['#language'];
-  $delta = $element['#delta'];
-  $values = array_map('trim', explode('|', $element['#value']));
-  if (isset($values[0], $values[1], $values[2])) {
-    $form_state['values'][$field_name][$language][$delta]['id']      = $values[0];
-    $form_state['values'][$field_name][$language][$delta]['header']  = $values[1];
-    $form_state['values'][$field_name][$language][$delta]['path']    = $values[2];      
-  }
-}
-*/
 
 function _shanti_kmaps_fields_extract_data_from_hidden_box($element, &$form_state) {
   $json = $element['kmap_hidden_box']['#value'];
@@ -616,10 +600,9 @@ function _shanti_kmaps_fields_decode_path($path){
   return $nicepath;
 }
 
-/// KMAP Server Interaction
+////////// KMAP Server Interaction //////////
 
 function shanti_kmaps_fields_kmaps_list_func($domain = 'subjects', $string) {
-	//$server = variable_get('shanti_kmaps_fields_server_' . $domain);
   $server = _shanti_kmaps_fields_get_kmaps_server($domain);
   $request = new KMapsAPI($domain, $server);
   $result = $request->searchByNameGetList($string);
@@ -627,7 +610,6 @@ function shanti_kmaps_fields_kmaps_list_func($domain = 'subjects', $string) {
 }
 
 function shanti_kmaps_fields_kmaps_autocomplete_func($domain = 'subjects', $string) {
-  //$server = variable_get('shanti_kmaps_fields_server_' . $domain);
   $server = _shanti_kmaps_fields_get_kmaps_server($domain);
   $request = new KMapsAPI($domain, $server);
   $matches = $request->searchByName($string); 
