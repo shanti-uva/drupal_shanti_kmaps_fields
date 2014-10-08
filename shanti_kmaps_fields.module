@@ -520,7 +520,7 @@ function _shanti_kmaps_fields_delete_solr_doc($nid) {
   _shanti_kmaps_fields_update_solr_index($solrdoc);
 }
 
-function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = TRUE, $message = TRUE) {
+function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $message = TRUE) {
   $opt_in = variable_get('shanti_kmaps_fields_server_solr_opt_in');
   if ($opt_in) {
     global $base_url;
