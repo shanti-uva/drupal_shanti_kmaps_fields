@@ -162,6 +162,15 @@ function shanti_kmaps_fields_form_alter(&$form, &$form_state, $form_id) {
       '#required' => FALSE,
       '#default_value' => variable_get('shanti_kmaps_fields_url_json__'.$node_type, ''),        
     );
+    $form['shanti_kmaps_fields']['shanti_kmaps_fields_search_view'] = array(
+      '#type' => 'textfield',
+      '#title' => t('KMap ID View'),
+      '#description' => t('The local Drupal path for the view with which to search for nodes of this content type by KMap ID. Used by the popover field formatter. Use <b>__KMAPID__</b> to signify the KMap ID value in the path.'),
+      '#size' => 120,
+      '#maxlength' => 255,
+      '#required' => FALSE,
+      '#default_value' => variable_get('shanti_kmaps_fields_search_view__'.$node_type, ''),        
+    );
     $form['#submit'][] = 'shanti_kmaps_fields_form_alter_submit';
   }
 }
@@ -171,6 +180,9 @@ function shanti_kmaps_fields_form_alter_submit($form, &$form_state) {
   $var1 = 'shanti_kmaps_fields_asset_type__' . $node_type;
   $val1 = $form_state['input']['shanti_kmaps_fields_asset_type'];
   variable_set($var1,$val1);
+  $var2 = 'shanti_kmaps_fields_search_view__' . $node_type;
+  $val2 = $form_state['input']['shanti_kmaps_fields_search_view'];
+  variable_set($var2,$val2);
   $url_types = array('html','ajax','json');
   foreach ($url_types as $url_type) {
     $input_var = 'shanti_kmaps_fields_url_'.$url_type;
@@ -645,25 +657,29 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
         $ancestors[] = "<a target='_blank' href='$url'>$title</a>";
       }
       array_pop($ancestors); // Because the last is the same is the current
-      $external_url = str_replace('__KMAPID__',$item['id'],variable_get('shanti_kmaps_fields_server_'.$domain.'_explorer'));
-      $internal_url = 'alltexts/'.$item['id']; // DEPENDENCY ON VIEW
       
+      // Should probably trap these
+      $external_url = str_replace('__KMAPID__',$item['id'],variable_get('shanti_kmaps_fields_server_'.$domain.'_explorer'));
+      $internal_url = str_replace('__KMAPID__',$item['id'],variable_get('shanti_kmaps_fields_search_view__'.$entity->type));
+      
+      $asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type); 
+
       $element[$delta] = array(
         '#type' => 'container',
         '#attributes' => array('class' => 'shanti-kmaps-fields-term-popover'),
       );
       $element[$delta]['label'] = array(
-        '#markup' => "<span>{$item['header']}</span>",
+        '#markup' => '<span>'.$item['header'].'</span>',
       );
       $element[$delta]['popover_link'] = array(
         '#type' => 'html_tag',
         '#tag' => 'span',
-        '#value' => '<span><i class="icon shanticon-menu3"></i></span>', // DEPENDENCY ON THEME
-        '#attributes' => array('class' => 'popover-link'),
+        '#value' => '<span><i class="icon shanticon-menu3"></i></span>',
+        '#attributes' => array('class' => 'popover-link', 'data-placement' => 'bottom'),
       );
       $element[$delta]['popover'] = array(
         '#type' => 'container',
-        '#attributes' => array('class' => 'popover'),      
+        '#attributes' => array('class' => array('popover')),
       );
       $element[$delta]['popover']['title'] = array(
         '#type' => 'html_tag',
@@ -687,25 +703,17 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
         '#type' => 'container',
         '#attributes' => array('class' => 'popover-footer'),
       );
-      // More dependencies here ...
       $element[$delta]['popover']['popover_footer']['links'] = array(
-        '#theme' => 'item_list',
-        '#type' => 'ul',
-        '#items' => array(
+        '#theme'  => 'item_list',
+        '#type'   => 'ul',
+        '#items'  => array(
           '<i class="icon shanticon-link-external"></i>' . l('Full Entry', $external_url,array('attributes' => array('target' => '_blank'))),
-          '<i class="icon shanticon-texts"></i>' . l('Related Texts', $internal_url),
+          '<i class="icon shanticon-'.$asset_type.'"></i>' . l('Related '. $asset_type, $internal_url),
         ),
       );
     }
   }
   return $element;
-}
-// Override this in Sarvaka
-function theme_shanti_kmaps_fields_kmap_term_popover($vars) {
-  kpr($vars);
-  $output = 'BOO';
-  // use drupal_render ...
-  return $output; 
 }
 
 function _shanti_kmaps_fields_decode_path($path, $delim = '--'){
