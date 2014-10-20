@@ -239,6 +239,14 @@ class KMapsAPI {
   
   // SPECIFIC REQUESTS -- Not sure if these should be written here or in code that uses this Class
   
+  public function searchByID($kmap_id) {
+    $this->setKMapID($kmap_id);  
+    $this->setFormatToJSON();
+    $this->setParseModeToRaw();
+    $rs = $this->execute();
+    return $rs;
+  }
+  
   public function searchByName($search_string) { 
     $this->setString($search_string);
     $this->addArgument('per_page', $this->results_per_page);

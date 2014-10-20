@@ -58,20 +58,38 @@ function shanti_kmaps_fields_permission() {
 function shanti_kmaps_fields_admin() {
   $form['shanti_kmaps_fields_server_subjects'] = array(
     '#type' => 'textfield',
-    '#title' => t('KMaps Subjects server'),
+    '#title' => t('KMaps Subjects Server'),
     '#default_value' => variable_get('shanti_kmaps_fields_server_subjects', 'http://subjects.kmaps.virginia.edu'),
     '#size' => 60,
     '#maxlength' => 255,
-    '#description' => t('The server used to retrieve KMap subject terms.'),
+    '#description' => t('The server used to retrieve data for KMap subject terms.'),
     '#required' => TRUE,
   );
   $form['shanti_kmaps_fields_server_places'] = array(
     '#type' => 'textfield',
-    '#title' => t('KMaps Places server'),
+    '#title' => t('KMaps Places Server'),
     '#default_value' => variable_get('shanti_kmaps_fields_server_places', 'http://places.kmaps.virginia.edu'),
     '#size' => 60,
     '#maxlength' => 255,
-    '#description' => t('The server used to retrieve KMap place terms.'),
+    '#description' => t('The server used to retrieve data for KMap place terms.'),
+    '#required' => TRUE,
+  );
+  $form['shanti_kmaps_fields_server_subjects_explorer'] = array(
+    '#type' => 'textfield',
+    '#title' => t('KMaps Subjects Explorer'),
+    '#default_value' => variable_get('shanti_kmaps_fields_server_subjects_explorer', 'http://badger.drupal-dev.shanti.virginia.edu/subjects/__KMAPID__'),
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#description' => t('The site used to view and explore KMap subject terms in the SHANTI KMap Solr Index.'),
+    '#required' => TRUE,
+  );
+  $form['shanti_kmaps_fields_server_places_explorer'] = array(
+    '#type' => 'textfield',
+    '#title' => t('KMaps Places Explorer'),
+    '#default_value' => variable_get('shanti_kmaps_fields_server_places_explorer', 'http://badger.drupal-dev.shanti.virginia.edu/places/__KMAPID__'),
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#description' => t('The site used to view and explore KMap place terms in the SHANTI KMap Solr Index.'),
     '#required' => TRUE,
   );
   $form['shanti_kmaps_fields_server_solr_opt_in'] = array(
@@ -83,7 +101,7 @@ function shanti_kmaps_fields_admin() {
   );
   $form['shanti_kmaps_fields_server_solr'] = array(
     '#type' => 'textfield',
-    '#title' => t('KMaps Solr server'),
+    '#title' => t('KMaps Solr Server'),
     '#default_value' => variable_get('shanti_kmaps_fields_server_solr', 'http://kidx.shanti.virginia.edu/solr/kmindex'),
     '#size' => 60,
     '#maxlength' => 255,
@@ -559,6 +577,11 @@ function shanti_kmaps_fields_field_formatter_info() {
     'field types' => array('shanti_kmaps_fields_default'),
     'settings' => array('target' => '_blank'),
   );
+  $info['kmap_popover_formatter'] = array(
+    'label' => t('Popover with link options'),  
+    'field types' => array('shanti_kmaps_fields_default'),
+    'description' => "Designed for use with SHANTI's Sarvaka Theme.",
+  );
   return $info;
 }
 
@@ -604,11 +627,89 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       $element[$delta]['#markup'] = "<a href=\"http://{$domain}.kmaps.virginia.edu/features/{$item['id']}\" title=\"{$title}\" target=\"{$target}\">{$item['header']}</a>";
     }
   }
+  elseif ($display['type'] == 'kmap_popover_formatter') {
+    $target = $settings['target'];
+    foreach ($items as $delta => $item) {
+      $domain = $field['settings']['kmap_domain'];
+      $info = shanti_kmaps_fields_kmaps_get_info($domain, $item['id']);
+      $desc = t('For more information about this term, see Full Entry below.');
+      if ($info->feature->nested_descriptions[0]->title) {
+        $desc = $info->feature->nested_descriptions[0]->title;
+      };
+      $path = _shanti_kmaps_fields_decode_path($item['path'], '/');
+      $ancestors = array();
+      foreach($info->feature->ancestors as $a) {
+        $id = $a->id;
+        $title = $a->header;
+        $url = str_replace('__KMAPID__',$id,variable_get('shanti_kmaps_fields_server_'.$domain.'_explorer'));
+        $ancestors[] = "<a target='_blank' href='$url'>$title</a>";
+      }
+      array_pop($ancestors); // Because the last is the same is the current
+      $external_url = str_replace('__KMAPID__',$item['id'],variable_get('shanti_kmaps_fields_server_'.$domain.'_explorer'));
+      $internal_url = 'alltexts/'.$item['id']; // DEPENDENCY ON VIEW
+      
+      $element[$delta] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => 'shanti-kmaps-fields-term-popover'),
+      );
+      $element[$delta]['label'] = array(
+        '#markup' => "<span>{$item['header']}</span>",
+      );
+      $element[$delta]['popover_link'] = array(
+        '#type' => 'html_tag',
+        '#tag' => 'span',
+        '#value' => '<span><i class="icon shanticon-menu3"></i></span>', // DEPENDENCY ON THEME
+        '#attributes' => array('class' => 'popover-link'),
+      );
+      $element[$delta]['popover'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => 'popover'),      
+      );
+      $element[$delta]['popover']['title'] = array(
+        '#type' => 'html_tag',
+        '#tag' => 'h5',
+        '#value' => $item['header'],
+      );
+      $element[$delta]['popover']['description'] = array(
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $desc,
+      );
+      $element[$delta]['popover']['parents'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('parents')),
+        '#prefix' => count($ancestors) ? '<strong>Parent '. ucfirst($item['domain']) .'</strong> ' : '',
+      ); 
+      $element[$delta]['popover']['parents']['links'] = array(
+        '#markup' => join(' / ', $ancestors),
+      );
+      $element[$delta]['popover']['popover_footer'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => 'popover-footer'),
+      );
+      // More dependencies here ...
+      $element[$delta]['popover']['popover_footer']['links'] = array(
+        '#theme' => 'item_list',
+        '#type' => 'ul',
+        '#items' => array(
+          '<i class="icon shanticon-link-external"></i>' . l('Full Entry', $external_url,array('attributes' => array('target' => '_blank'))),
+          '<i class="icon shanticon-texts"></i>' . l('Related Texts', $internal_url),
+        ),
+      );
+    }
+  }
   return $element;
 }
+// Override this in Sarvaka
+function theme_shanti_kmaps_fields_kmap_term_popover($vars) {
+  kpr($vars);
+  $output = 'BOO';
+  // use drupal_render ...
+  return $output; 
+}
 
-function _shanti_kmaps_fields_decode_path($path){
-  $nicepath = str_replace("}}{{","--",$path);
+function _shanti_kmaps_fields_decode_path($path, $delim = '--'){
+  $nicepath = str_replace("}}{{",$delim,$path);
   $nicepath = str_replace("}}","",$nicepath);
   $nicepath = str_replace("{{","",$nicepath);
   return $nicepath;
@@ -628,6 +729,16 @@ function shanti_kmaps_fields_kmaps_autocomplete_func($domain = 'subjects', $stri
   $request = new KMapsAPI($domain, $server);
   $matches = $request->searchByName($string); 
   drupal_json_output($matches);    
+}
+
+
+// INTERNAL
+
+function shanti_kmaps_fields_kmaps_get_info($domain, $id) {
+  $server = _shanti_kmaps_fields_get_kmaps_server($domain);
+  $request = new KMapsAPI($domain, $server);
+  $result = $request->searchByID($id);
+  return $result;
 }
 
 function _shanti_kmaps_fields_get_kmaps_server($domain = 'subjects') {

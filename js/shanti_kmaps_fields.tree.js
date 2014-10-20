@@ -196,6 +196,7 @@ function extractKMapID(line) {
 }
 
 function ancestorsToPath(ancestors) {
+  //console.log(ancestors);
   path = '';
   var copy = ancestors.slice(0); // Clone
   for (i in copy) path += '{{' + copy[i].header + '}}';
