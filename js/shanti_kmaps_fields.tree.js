@@ -1,151 +1,125 @@
 (function($){
 
-/**
-* TO DO:
-* -- When creating this page from the database, the picklist needs to be
-* populated with dictionary data
-*/
-
 // Local "globals"
 var search_term   = '';
-var dictionary    = {}; // Needs to persist across reattachments ...
-var picked        = {}; // SHOULD BE POPULATED AHEAD OF TIME FROM SERVER
+var dictionary    = {}; 
+var picked        = {}; 
 var ancestor_tree = {};
-var t = 0; // Keeps track of how many times this code is attached; used for poor man's once()
-var S = {}; // Settings
+var S = {}; // Settings passed
+submit_count = 0;
 
 Drupal.behaviors.shantiKmapsFieldsTree = {
 
   attach: function (context, settings) {
   
-    t++; // DO NOT REMOVE!
-
     // Grab settings from server
-    S = settings.shanti_kmaps_fields;
-		
-    // Define widgets 
-    var thisField     = $('#'+S.field_id, context);
-    var searchField   = $('#'+S.search_input_id, context);
-    //var searchButton  = $('#'+S.field_id+' .kmap_search_term_button', context);
-    var pickTree      = $('#'+S.pick_tree_id, context);
-    var pickTreeItem  = $('#'+S.pick_tree_id+ ' li.kmap-item', context);
-    var resultBox     = $('#'+S.res_box_id, context);
-    var resultBoxDel  = $('#'+S.res_box_id+' .delete-me', context);
-    var hiddenBox     = $('#'+S.hidden_box_id, context).css('display','none');
-    
-    // Update the pick list from the server the first time this is attached
-		if(t==1) {    
-			var picked_already = $.parseJSON(S.picked_already);
-			for (kmap_id in picked_already) {
-				var item = picked_already[kmap_id];
-				picked[kmap_id] = item;
-				// Move this into a function with args (container, id, header, path) and use below too
-				var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
-				var deleteButton = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
-				var elementLabel = $("<span>"+item['header']+" "+kmap_id+"</span>").addClass('kmap_label').appendTo(pickedElement);
-				var kmapIDint = $("<span>"+item['id']+"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
-				var kmapPath = $("<span>"+item['path']+"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
-				var kmapHeader = $("<span>"+item['header']+"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
-			}
-			Drupal.attachBehaviors(); 
-		}
-		
+    S = settings.shanti_kmaps_fields; 
+		    
+    // Event handler 0: On first load, go through each instance of the field and update its picklist
+    $('.field-type-shanti-kmaps-fields-default.field-widget-kmap-tree-picker-.form-wrapper').once('each', function(){
+      var my_field = $(this).find('.my_field_id').val();
+      var resultBox = $('#'+ my_field + '_result_box');
+      var picked_already = $.parseJSON(S[my_field].picked_already);
+      picked[my_field] = {}; // Init picklist for this field
+      for (kmap_id in picked_already) {
+        var item = picked_already[kmap_id];
+        picked[my_field][kmap_id] = item;
+        updateDictionary(kmap_id, item.id, item.header, item.path, my_field);
+        var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
+        var deleteButton  = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
+        var elementLabel  = $("<span>"+item.header +" "+kmap_id+"</span>").addClass('kmap_label').appendTo(pickedElement);
+        var kmapIDint     = $("<span>"+item.id +"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
+        var kmapPath      = $("<span>"+item.path +"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
+        var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
+      }
+    });
+    		
     // Event handler 1: Fetch search results and build a "pick tree"
-    //searchButton.click(function(e){
-    searchField.blur(function(e){
+    $('.kmap_search_term_button').live('click', function(e){
+      var my_field = $(this).attr('id').replace('_search_button','');
+      var pickTree = $('#' + my_field + '_pick_tree');
       pickTree.html("<p>Searching ...</p>");
+      var searchField = $('#' + my_field + '_search_term');
       search_term = searchField.val();
-      $.getJSON(S.kmap_url + search_term,function(results){
-        ancestor_tree = {}; // reinit
-        dictionary = {}; // reinit
+      ancestor_tree[my_field] = {}; // reinit
+      dictionary[my_field] = {}; // reinit
+      $.getJSON(S[my_field].kmap_url + search_term, function(results){
         if (results.length != 0) {
-          var result_count = results.meta.count;
-          pickTree.html("<p>We found " + result_count + " item(s) containing the string /"+search_term+"/:</p>");
+          pickTree.html("<p>We found " + results.meta.count + " item(s) containing the string /"+search_term+"/:</p>");
           for (var i in results.data) {
             var R = results.data[i];
-            var kmap_id = 'F' + R.id;
-            updateDictionary(kmap_id, R.id, R.header, ancestorsToPath(R.ancestors));
-            addAncestorsToDictionary(R.ancestors);
-            parsePath(R.ancestors); // populates ancestor_tree
+            var kmap_id   = 'F' + R.id;
+            var path      = ancestorsToPath(R.ancestors);
+            updateDictionary(kmap_id, R.id, R.header, path, my_field);
+            addAncestorsToDictionary(R.ancestors, my_field)
+            parsePath(R.ancestors, my_field); // populates ancestor_tree              
           }
           // Need also to see if any of the new items are in the pick list ...
-          JSONTreeToHTML(ancestor_tree,pickTree); 
-          Drupal.attachBehaviors(thisField);     
+          JSONTreeToHTML(ancestor_tree[my_field],pickTree); 
+          Drupal.attachBehaviors();     
         } else {
           pickTree.html("No results for the string /" + search_term + "/.");
         }
       });
     });
-        
+    
     // Event handler 2: When kmap items are selected from the pick tree, cross them out
     // and populate the result box
-    pickTreeItem.unbind('click').click(function(e){
-    //pickTreeItem.click(function(e){ // CAN'T USE THIS BECAUSE attacheBehaviors rebinds below
-      //  alert("Picked");
+    $('.kmap_pick_tree .kmap-item').unbind('click').bind('click', function(e){
+      var my_field = $(this).closest('.kmap_pick_tree').attr('id').replace('_pick_tree',''); 
+      var resultBox = $('#' + my_field + '_result_box');
       var kmap_header = $(this).html();
       var kmap_id = extractKMapID(kmap_header);
       if ($(this).hasClass('picked') && $(this).hasClass(kmap_id)) {
         alert("This item is already in your pick list. " + kmap_id); // THIS GETS CALLED MULTIPLE TIMES!
       } else {
-        picked[kmap_id] = dictionary[kmap_id]; // TRAP ERROR
+        picked[my_field][kmap_id] = dictionary[my_field][kmap_id]; // TRAP ERROR
         $(this).addClass('picked');
         var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
         var deleteButton = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
         var elementLabel = $("<span>"+kmap_header+"</span>").addClass('kmap_label').appendTo(pickedElement);
-        var kmapIDint = $("<span>"+dictionary[kmap_id].id+"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
-        var kmapPath = $("<span>"+dictionary[kmap_id].path+"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
-        var kmapHeader = $("<span>"+dictionary[kmap_id].header+"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
-        Drupal.attachBehaviors(); // Gah! This does not take an arg; THIS MAY SCREW UP OTHER FIELDS ON THE PAGE
+        var kmapIDint = $("<span>"+dictionary[my_field][kmap_id].id+"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
+        var kmapPath = $("<span>"+dictionary[my_field][kmap_id].path+"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
+        var kmapHeader = $("<span>"+dictionary[my_field][kmap_id].header+"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
+        Drupal.attachBehaviors(resultBox);
       }
     });
     
     // Event handler 3: When selected items are deleted, remove them and reset the item in the pick tree
-    resultBoxDel.unbind('click').click(function(e){
+    $('.kmap_result_box .delete-me').unbind('click').bind('click', function(e){
+      var my_field = $(this).closest('.kmap_result_box').attr('id').replace('_result_box','');
+      var resultBox = $('#' + my_field + '_result_box');
       var pickedElement = $(this).parent();
       var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
-      
-      if (dictionary[kmap_id] == null) {
+      if (dictionary[my_field][kmap_id] == null) {
         if (!confirm("This term is not in the currently selected tree; if you delete it, you'll need to search for it again. Are you sure you want to delete it?")) return;
       }
-      delete picked[kmap_id]; 
-      var pickTreeElement = $('#'+S.pick_tree_id+' .kmap-item.'+kmap_id, context);
+      delete picked[my_field][kmap_id];
+      var pickTreeElement = $('#' + my_field + '_pick_tree .kmap-item.' + kmap_id);
       pickTreeElement.removeClass('picked');
-      Drupal.detachBehaviors(resultBox); // Don't know why this works but other times no
       pickedElement.remove();
-      Drupal.attachBehaviors(resultBox); 
+      //Drupal.attachBehaviors(); 
     });
-    
+
     // Event handler 4: When the form is submitted, dump picked items into hidden box
-    $('form',context).unbind('submit').submit(function(e){
-      for (kmap_id in picked) {
-        if (dictionary[kmap_id]) picked[kmap_id] = dictionary[kmap_id];
+    // Need to pass the entity type so this can work with other entity types ....
+    $('form.node-form').submit(function(e){
+      submit_count++; 
+      if (submit_count > 1) return; // No idea why I have to do this bullshit but without it this gets calls multiple times >:(
+      for (field in picked) {
+        for (kmap_id in picked[field]) {
+          if (dictionary[field][kmap_id]) {
+            picked[field][kmap_id] = dictionary[field][kmap_id];
+          }
+        }
+        $('#' + field + '_hidden_box').append(JSON.stringify(picked[field]));
       }
-      hiddenBox.append(JSON.stringify(picked));
       return;
     });
-            
+
   },
   
   detach: function (context, settings) {
-    
-    // Grab settings from server
-    var S = settings.shanti_kmaps_fields;
-    
-    // Define widgets 
-    //var thisField     = $('#'+S.field_id, context);
-    //var searchField   = $('#'+S.search_input_id, context);
-    //var searchButton  = $('#'+S.field_id+' .kmap_search_term_button', context);
-    //var pickTree      = $('#'+S.pick_tree_id, context);
-    var pickTreeItem    = $('#'+S.pick_tree_id+ ' li.kmap-item', context);
-    //var resultBox     = $('#'+S.res_box_id, context);
-    var resultBoxDel    = $('#'+S.res_box_id+' .delete-me', context);
-    //var hiddenBox     = $('#'+S.hidden_box_id, context).css('display','none');
-    var form            = $('form',context);
-        
-    // Unbind relevant event handlers? Not sure if these are doing anything
-    pickTreeItem.unbind('click',  function(e){  });
-    resultBoxDel.unbind('click',  function(e){  });
-    form.unbind('submit',         function(e){  });
   
   }
   
@@ -154,7 +128,6 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 // Utility Functions
 
 // Called within the search event handler    
-// Could be moved out attach scope ...
 function JSONTreeToHTML(tree,el,ulid) {
   var ul = $("<ul/>");
   if (ulid) { ul.attr("id",ulid); }
@@ -175,12 +148,11 @@ function JSONTreeToHTML(tree,el,ulid) {
   }
 }
 
-function parsePath(ancestors){
-  var cur = ancestor_tree;
+function parsePath(ancestors, cur_field){
+  var cur = ancestor_tree[cur_field];
   ancestors.slice(0).forEach(function(elem){
     var key = elem.header + " F" + elem.id;
     cur[key] = cur[key] || {};
-    // Add items to element here
     cur = cur[key];
   });
 }
@@ -196,32 +168,30 @@ function extractKMapID(line) {
 }
 
 function ancestorsToPath(ancestors) {
-  //console.log(ancestors);
-  path = '';
+  var path = '';
   var copy = ancestors.slice(0); // Clone
-  for (i in copy) path += '{{' + copy[i].header + '}}';
+  for (i in copy) {
+    path += '{{' + copy[i].header + '}}';
+  }
   return path;
 }
 
-function updateDictionary(kmap_id,id,header,path) {
-  dictionary[kmap_id] = dictionary[kmap_id] || {};
-  dictionary[kmap_id]['id'] = dictionary[kmap_id]['id'] || id;
-  dictionary[kmap_id]['header'] = dictionary[kmap_id]['header'] || header;
-  dictionary[kmap_id]['path'] = dictionary[kmap_id]['path'] || path;   
-  dictionary[kmap_id]['domain'] = dictionary[kmap_id]['domain'] || S.domain;   
+function updateDictionary(kmap_id,id,header,path,cur_field) {
+  dictionary[cur_field]                     = dictionary[cur_field] || {};
+  dictionary[cur_field][kmap_id]            = dictionary[cur_field][kmap_id] || {};
+  dictionary[cur_field][kmap_id]['id']      = dictionary[cur_field][kmap_id]['id'] || id;
+  dictionary[cur_field][kmap_id]['header']  = dictionary[cur_field][kmap_id]['header'] || header;
+  dictionary[cur_field][kmap_id]['path']    = dictionary[cur_field][kmap_id]['path'] || path;   
+  dictionary[cur_field][kmap_id]['domain']  = dictionary[cur_field][kmap_id]['domain'] || S[cur_field].domain;   
 }
 
-function addAncestorsToDictionary(ancestors) {
+function addAncestorsToDictionary(ancestors, cur_field) {
   var copy = ancestors.slice(0); // Clone
   while (a = copy.pop()) {
     var kmap_id = 'F' + a.id;
-    updateDictionary(kmap_id,a.id,a.header,ancestorsToPath(copy));
+    var path = ancestorsToPath(copy);
+    updateDictionary(kmap_id, a.id, a.header, path, cur_field);
   }
 }
 
-
 })(jQuery);
-
-
-
-

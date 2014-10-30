@@ -205,6 +205,7 @@ class KMapsAPI {
    */
   private function parse($data) {
     $parsed_data = array();
+    
     // Autocomplete expexts a simple id/label hash that will be converted to JSON
     if ($this->parse_mode == 'autocomplete') {
       if ($this->fetch_mode == 'by_name') {
@@ -364,19 +365,23 @@ class KMapsAPI {
     $this->setFetchModeToIDCached(); 
     $list = array('meta' => array(), 'data' => array(), 'dict' => array());
     $result_count = count($rs1->features);
-		$list['meta']['count'] = $result_count;
-		$list['meta']['search'] = $search_string;
+		$list['meta']['count']    = $result_count;
+		$list['meta']['search']   = $search_string;
+		$list['meta']['raw_url']  = $this->api_url . '/by_name/' . $this->kmap_string . '.' . $this->results_format;
+
     for ($i = 0; $i < $result_count; $i++) {
-    	$id 		= $rs1->features[$i]->id;
-    	$header = $rs1->features[$i]->header;    
-			$rs2 		= $this->setKMapID($id)->execute();
+    	$id 		    = $rs1->features[$i]->id;
+    	$header     = $rs1->features[$i]->header;    
+			$rs2 		    = $this->setKMapID($id)->execute();
+			// Note that [0] refers to a given perspective ...  
+			$ancestors  = isset($rs2->feature->ancestors) ? $rs2->feature->ancestors : $rs2->feature->perspectives[0]->ancestors;
 			$list['data'][] = array(
 				'id' => $id,
 				'header' => $header,
-				'ancestors' => $rs2->feature->ancestors,				
+				'ancestors' => $ancestors,
 			);
 			$list['dict'][$id]['header'] = $header;
-			$list['dict'][$id]['ancestors'] = $rs2->feature->ancestors;
+			$list['dict'][$id]['ancestors'] = $ancestors;
 		}
 		
 		$t2 = microtime();
