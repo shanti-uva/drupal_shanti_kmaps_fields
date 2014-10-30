@@ -640,14 +640,21 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       $domain = $field['settings']['kmap_domain'];
       $info = shanti_kmaps_fields_kmaps_get_info($domain, $item['id']);
       $desc = t('For more information about this term, see Full Entry below.');
-      if (isset($info->feature->nested_descriptions[0]->title)) {
+      if ($domain == 'subjects' && isset($info->feature->nested_descriptions[0]->title)) {
         $desc = $info->feature->nested_descriptions[0]->title;
-      };
-      
+      } elseif ($domain == 'places' && isset($info->feature->descriptions[0])) {
+        $desc = $info->feature->descriptions[0]->title;
+      }
       //$path = _shanti_kmaps_fields_decode_path($item['path'], '/');
       
+      $ancestors1 = array();
+      if ($domain == 'subjects') {
+        $ancestors1 = $info->feature->ancestors;
+      } elseif ($domain == 'places') {
+        $ancestors1 = $info->feature->perspectives[0]->ancestors; // Again, may need to choose perspectives
+      }
       $ancestors = array();
-      foreach($info->feature->ancestors as $i => $a) {
+      foreach($ancestors1 as $i => $a) {
         $id = $a->id;
         $title = $a->header;
         $url = str_replace('__KMAPID__',$id,variable_get('shanti_kmaps_fields_server_'.$domain.'_explorer'));
@@ -659,6 +666,8 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       
       // Should probably trap these
       $external_url = str_replace('__KMAPID__',$item['id'],variable_get('shanti_kmaps_fields_server_'.$domain.'_explorer'));
+
+      // Needs to pull from instance settings; will vary with field ...
       $internal_url = str_replace('__KMAPID__',$item['id'],variable_get('shanti_kmaps_fields_search_view__'.$entity->type));
       
       $asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type); 
@@ -667,6 +676,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
         //'#type' => 'container',
         //'#attributes' => array('class' => 'shanti-kmaps-fields-term-popover'),
       //);
+      
       $element[$delta]['label'] = array(
         '#markup' => '<span>'.$item['header'].'</span>',
       );
