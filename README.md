@@ -5,7 +5,7 @@ A field for adding KMap IDs from the KMaps API to Drupal assets and updating the
 ## How To Use This Module
 
 1. Install and enable as you would any Drupal module.
-2. Once installed, **visit the Admin page** (admin/config/content/shanti_kmaps_fields), which is organized under "Content Authoring." THere you need to enter the following values:
+2. **Visit the Admin page** (admin/config/content/shanti_kmaps_fields), which is organized under "Content Authoring." THere you need to enter the following values:
   1. *KMaps Subjects Server*: This is the server used to retrieve data for KMap subject terms. The current default value is "http://subjects.kmaps.virginia.edu".
   2. *KMaps Places Server*: This is the server used to retrieve data for KMap place terms. The current default value is "http://places.kmaps.virginia.edu".
   3. *KMaps Subjects Explorer*: This is the site used to view and explore KMap subject terms in the SHANTI KMap Solr Index.
