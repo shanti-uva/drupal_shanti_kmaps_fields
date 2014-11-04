@@ -328,7 +328,6 @@ function shanti_kmaps_fields_field_settings_form($field, $instance, $has_data) {
 function shanti_kmaps_fields_field_instance_settings_form($field, $instance) {
   $form = array();
   $settings = $instance['settings'];
-  $node_type = $form['#node_type']->type;
   if ($field['type'] == 'shanti_kmaps_fields_default') {
     $form['search_view'] = array(
       '#type' => 'textfield',
@@ -337,7 +336,7 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance) {
       '#size' => 120,
       '#maxlength' => 255,
       '#required' => FALSE,
-      '#default_value' => $settings['search_view'], //variable_get('shanti_kmaps_fields_search_view__'.$node_type, ''),        
+      '#default_value' => $settings['search_view'], 
     );
   }
   return $form;
@@ -501,13 +500,15 @@ function _shanti_kmaps_fields_get_json($items) {
 }
 
 function _shanti_kmaps_fields_extract_data_from_hidden_box($element, &$form_state) {
-  watchdog_array('SHANTI','form_state on extract',$form_state);
+  //watchdog_array('SHANTI','form_state on extract',$form_state);
   $field_name = $element['#field_name'];
   $delta      = $element['#delta'];
   $json       = $element['kmap_hidden_box']['#value'];
   $data       = drupal_json_decode($json);
-  $form_state['node']->kmap_data[$field_name] = $data;
-  watchdog_array('SHANTI','kmap_data extracted',$form_state['node']->kmap_data);
+  if ($data) {
+    $form_state['node']->kmap_data[$field_name] = $data;
+  }
+  //watchdog_array('SHANTI','kmap_data extracted',$form_state['node']->kmap_data);
 }
 
 function shanti_kmaps_fields_node_insert($node) {
@@ -655,8 +656,9 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       $desc = t('For more information about this term, see Full Entry below.');
       if ($domain == 'subjects' && isset($info->feature->nested_descriptions[0]->title)) {
         $desc = $info->feature->nested_descriptions[0]->title;
-      } elseif ($domain == 'places' && isset($info->feature->descriptions[0]->title)) {
-        $desc = $info->feature->descriptions[0]->title;
+      } elseif ($domain == 'places' && isset($info->feature->captions[0]->content)) {
+        //$desc = $info->feature->descriptions[0]->title;
+        $desc = $info->feature->captions[0]->content;
       }
       //$path = _shanti_kmaps_fields_decode_path($item['path'], '/');
       
