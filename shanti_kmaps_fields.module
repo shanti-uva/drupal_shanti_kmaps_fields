@@ -1,8 +1,11 @@
 <?php
 
 define('SHANTI_KMAPS_FIELDS_SERVICE', preg_replace("/[\.\/]/", '_', str_replace('http://', '', $GLOBALS['base_url'])));
-
-////////// GENERAL //////////
+define('SHANTI_KMAPS_FIELDS_SERVER_SUBJECTS','http://subjects.kmaps.virginia.edu');
+define('SHANTI_KMAPS_FIELDS_SERVER_PLACES','http://places.kmaps.virginia.edu');
+define('SHANTI_KMAPS_FIELDS_SERVER_SUBJECTS_EXPLORER','http://badger.drupal-dev.shanti.virginia.edu/subjects/__KMAPID__');
+define('SHANTI_KMAPS_FIELDS_SERVER_PLACES_EXPLORER','http://badger.drupal-dev.shanti.virginia.edu/places/__KMAPID__');
+define('SHANTI_KMAPS_FIELDS_SERVER_SOLR','http://kidx.shanti.virginia.edu/solr/kmindex');
 
 function shanti_kmaps_fields_menu() {
   return array(
@@ -59,7 +62,7 @@ function shanti_kmaps_fields_admin() {
   $form['shanti_kmaps_fields_server_subjects'] = array(
     '#type'           => 'textfield',
     '#title'          => t('KMaps Subjects Server'),
-    '#default_value'  => variable_get('shanti_kmaps_fields_server_subjects', 'http://subjects.kmaps.virginia.edu'),
+    '#default_value'  => variable_get('shanti_kmaps_fields_server_subjects', SHANTI_KMAPS_FIELDS_SERVER_SUBJECTS),
     '#size'           => 60,
     '#maxlength'      => 255,
     '#description'    => t('The server used to retrieve data for KMap subject terms.'),
@@ -68,7 +71,7 @@ function shanti_kmaps_fields_admin() {
   $form['shanti_kmaps_fields_server_places'] = array(
     '#type'           => 'textfield',
     '#title'          => t('KMaps Places Server'),
-    '#default_value'  => variable_get('shanti_kmaps_fields_server_places', 'http://places.kmaps.virginia.edu'),
+    '#default_value'  => variable_get('shanti_kmaps_fields_server_places', SHANTI_KMAPS_FIELDS_SERVER_PLACES),
     '#size'           => 60,
     '#maxlength'      => 255,
     '#description'    => t('The server used to retrieve data for KMap place terms.'),
@@ -77,7 +80,7 @@ function shanti_kmaps_fields_admin() {
   $form['shanti_kmaps_fields_server_subjects_explorer'] = array(
     '#type'           => 'textfield',
     '#title'          => t('KMaps Subjects Explorer'),
-    '#default_value'  => variable_get('shanti_kmaps_fields_server_subjects_explorer', 'http://badger.drupal-dev.shanti.virginia.edu/subjects/__KMAPID__'),
+    '#default_value'  => variable_get('shanti_kmaps_fields_server_subjects_explorer', SHANTI_KMAPS_FIELDS_SERVER_SUBJECTS_EXPLORER),
     '#size'           => 60,
     '#maxlength'      => 255,
     '#description'    => t('The site used to view and explore KMap subject terms in the SHANTI KMap Solr Index.'),
@@ -86,7 +89,7 @@ function shanti_kmaps_fields_admin() {
   $form['shanti_kmaps_fields_server_places_explorer'] = array(
     '#type'           => 'textfield',
     '#title'          => t('KMaps Places Explorer'),
-    '#default_value'  => variable_get('shanti_kmaps_fields_server_places_explorer', 'http://badger.drupal-dev.shanti.virginia.edu/places/__KMAPID__'),
+    '#default_value'  => variable_get('shanti_kmaps_fields_server_places_explorer', SHANTI_KMAPS_FIELDS_SERVER_PLACES_EXPLORER),
     '#size'           => 60,
     '#maxlength'      => 255,
     '#description'    => t('The site used to view and explore KMap place terms in the SHANTI KMap Solr Index.'),
@@ -102,7 +105,7 @@ function shanti_kmaps_fields_admin() {
   $form['shanti_kmaps_fields_server_solr'] = array(
     '#type'           => 'textfield',
     '#title'          => t('KMaps Solr Server'),
-    '#default_value'  => variable_get('shanti_kmaps_fields_server_solr', 'http://kidx.shanti.virginia.edu/solr/kmindex'),
+    '#default_value'  => variable_get('shanti_kmaps_fields_server_solr', SHANTI_KMAPS_FIELDS_SERVER_SOLR),
     '#size'           => 60,
     '#maxlength'      => 255,
     '#description'    => t("The URL to the SHANTI KMap index. This may include a path to the specific index."),
@@ -614,6 +617,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
     foreach ($items as $delta => $item) {
       $domain = $field['settings']['kmap_domain'];
       $title = _shanti_kmaps_fields_decode_path($item['path']);
+      // The following needs to work with what has defined earlier ...
       $element[$delta]['#markup'] = "<a href=\"http://{$domain}.kmaps.virginia.edu/features/{$item['id']}\" title=\"{$title}\" target=\"{$target}\">{$item['header']}</a>";
     }
   }
