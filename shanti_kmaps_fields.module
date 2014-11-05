@@ -614,6 +614,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
   } 
   elseif ($display['type'] == 'kmap_default_formatter') {
     $target = $settings['target'];
+    $kmap_terms = array();
     foreach ($items as $delta => $item) {
       $domain = $field['settings']['kmap_domain'];
       $title = _shanti_kmaps_fields_decode_path($item['path']);
@@ -624,8 +625,13 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
         $url = SHANTI_KMAPS_FIELDS_SERVER_PLACES_EXPLORER;      
       }
       $url = str_replace('__KMAPID__',$item['id'],$url);
-      $element[$delta]['#markup'] = l($item['header'],$url,array('attributes' => array('title' => $title, 'target' => $target)));
+      $kmap_terms[] = l($item['header'],$url,array('attributes' => array('title' => $title, 'target' => $target)));
     }
+    $element[$delta]['links'] = array(
+      '#theme' => 'item_list',
+      '#type' => 'ul',
+      '#items' => $kmap_terms,
+    );
   }
   elseif ($display['type'] == 'kmap_popover_formatter') {
     foreach ($items as $delta => $item) {
