@@ -617,8 +617,14 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
     foreach ($items as $delta => $item) {
       $domain = $field['settings']['kmap_domain'];
       $title = _shanti_kmaps_fields_decode_path($item['path']);
-      // The following needs to work with what has defined earlier ...
-      $element[$delta]['#markup'] = "<a href=\"http://{$domain}.kmaps.virginia.edu/features/{$item['id']}\" title=\"{$title}\" target=\"{$target}\">{$item['header']}</a>";
+      $url = '';
+      if ($domain == 'subjects') {
+        $url = SHANTI_KMAPS_FIELDS_SERVER_SUBJECTS_EXPLORER;
+      } elseif ($domain == 'places') {
+        $url = SHANTI_KMAPS_FIELDS_SERVER_PLACES_EXPLORER;      
+      }
+      $url = str_replace('__KMAPID__',$item['id'],$url);
+      $element[$delta]['#markup'] = l($item['header'],$url,array('attributes' => array('title' => $title, 'target' => $target)));
     }
   }
   elseif ($display['type'] == 'kmap_popover_formatter') {
