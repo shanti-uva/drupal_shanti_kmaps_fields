@@ -236,17 +236,18 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     $node = node_load($nid);
     if (!$node) { return "Not a node."; }
 
-    // We need a better way to grab the fields of the right type for each node
-    // Note also that this query assumes that we have defined only one field type in hook_field_info()
+    // This query assumes that we have defined only one field type in hook_field_info()
+    // If you add another field type to this module, you need to reproduce this logic for
+    // that field (although we could ensure that any new type has an ID and DOMAIN key)
     $fields = array();
-    $sql = "select i.field_name from field_config_instance i join field_config c on (i.field_id = c.id) where c.type = 'shanti_kmaps_fields_default' and i.bundle = :bundle";
-    $rs = db_query($sql, array(':bundle' => $node->type));
+    $field_type = 'shanti_kmaps_fields_default';
+    $sql = "select i.field_name from field_config_instance i join field_config c on (i.field_id = c.id) where c.type = :field_type and i.bundle = :bundle";
+    $rs = db_query($sql, array(':bundle' => $node->type, ':field_type' => $field_type));
     foreach ($rs as $r) {
       $fields[] = $r->field_name;
     }
 
-    // Note that we are losing info about the field here, which is essentially
-    // about the relationship between the KMap term and the node
+    // Note that we are losing info about the relation between the KMap term and the node
     $kmapids = array();
     foreach ($fields as $field_name) { /// NEED TO GET FIELD INSTANCE DATA HERE ....
       $terms = field_get_items('node',$node,$field_name);
