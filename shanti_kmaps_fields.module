@@ -237,9 +237,10 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     if (!$node) { return "Not a node."; }
 
     // We need a better way to grab the fields of the right type for each node
+    // Note also that this query assumes that we have defined only one field type in hook_field_info()
     $fields = array();
     $sql = "select i.field_name from field_config_instance i join field_config c on (i.field_id = c.id) where c.type = 'shanti_kmaps_fields_default' and i.bundle = :bundle";
-    $rs = db_query($sql, array(':bundle' => $node->type)); // BUNDLE?
+    $rs = db_query($sql, array(':bundle' => $node->type));
     foreach ($rs as $r) {
       $fields[] = $r->field_name;
     }
@@ -247,8 +248,9 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     // Note that we are losing info about the field here, which is essentially
     // about the relationship between the KMap term and the node
     $kmapids = array();
-    foreach ($fields as $field) { /// NEED TO GET FIELD INSTANCE DATA HERE ....
-      foreach ($node->{$field}[$node->language] as $term) {
+    foreach ($fields as $field_name) { /// NEED TO GET FIELD INSTANCE DATA HERE ....
+      $terms = field_get_items('node',$node,$field_name);
+      foreach ($terms as $term) {
         $kmapids[] = $term['domain'] .'-'. $term['id']; 
       }    
     }
@@ -489,7 +491,6 @@ function shanti_kmaps_fields_node_insert($node) {
 }
 
 function shanti_kmaps_fields_node_update($node) {
-  watchdog_array('SHANTI','node_update',$node);
   _shanti_kmaps_fields_add_kmaps_to_node($node);
 }
 
@@ -502,7 +503,6 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
   if ($node->kmap_data) {
     $lang = $node->language;    
     foreach ($node->kmap_data as $field_name => $data) {
-      watchdog_array('SHANTI','kmaps_to_node',array('field_name' => $field_name, 'data' => $data));
       $node->{$field_name}[$lang] = array();
       foreach ($data as $fid => $item) {
         $node->{$field_name}[$lang][] = array(
