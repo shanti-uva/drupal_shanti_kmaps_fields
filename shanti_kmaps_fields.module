@@ -680,55 +680,56 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
 
       $asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type); 
 
-      $element[$delta]['label'] = array(
-        '#markup'     => '<span>'.$item['header'].'</span>',
+      $links = array(
+        'Full Entry' => array('icon' => 'link-external', 'href' => $external_url, 'external' => TRUE),
+        "Related ".ucfirst($asset_type) => array('icon' => $asset_type, 'href' =>  $internal_url), 
       );
-      $element[$delta]['popover_link'] = array(
-        '#type'       => 'html_tag',
-        '#tag'        => 'span',
-        '#value'      => '<span><i class="icon shanticon-menu3"></i></span>',
-        '#attributes' => array('class' => 'popover-link', 'data-placement' => 'bottom'),
-      );
-      $element[$delta]['popover'] = array(
-        '#type'       => 'container',
-        '#attributes' => array('class' => array('popover')),
-      );
-      $element[$delta]['popover']['title'] = array(
-        '#type'       => 'html_tag',
-        '#tag'        => 'h5',
-        '#value'      => $item['header'],
-      );
-      $element[$delta]['popover']['description'] = array(
-        '#type'       => 'html_tag',
-        '#tag'        => 'p',
-        '#value'      => $desc,
-      );
-      $element[$delta]['popover']['parents'] = array(
-        '#type'       => 'container',
-        '#attributes' => array('class' => array('parents')),
-      ); 
-      $element[$delta]['popover']['parents']['links'] = array(
-        '#prefix'     => '<strong>'. ucfirst($item['domain']) .'</strong>',
-        '#theme'      => 'item_list',
-        '#type'       => 'ul',
-        '#items'      => $ancestors,
-      );      
-      $element[$delta]['popover']['popover_footer'] = array(
-        '#type'       => 'container',
-        '#attributes' => array('class' => 'popover-footer'),
-      );
-      $element[$delta]['popover']['popover_footer']['links'] = array(
-        '#theme'      => 'item_list',
-        '#type'       => 'ul',
-        '#items'      => array(
-          '<i class="icon shanticon-link-external"></i>' 
-          . l('Full Entry', $external_url,array('attributes' => array('target' => '_blank'))),
-          $internal_url ? '<i class="icon shanticon-'.$asset_type.'"></i>' . l('Related '. ucfirst($asset_type), $internal_url) : NULL,
+      
+      $element[$delta]['info_popover'] = array(
+        '#theme' => 'info_popover',
+        '#label' => $item['header'],
+        '#desc' => $desc,
+        '#tree' => array(
+          'label' => t(ucfirst($domain)),
+          'items' => $ancestors
         ),
-      );
+        '#links' => $links
+      );      
+      
     }
   }
   return $element;
+}
+
+function shanti_kmaps_fields_theme () {
+  return array(
+    'info_popover' => array(
+      'variables' => array('label' => '', 'desc' => '', 'tree' => array(), 'links' => array()),
+    ),
+  );
+}
+
+// CHANGE THIS TO DO SOMETHING THAT DOES NOT DEPEND ON SARVAKA
+function theme_info_popover($variables) {
+	$html = "<span>{$variables['label']}</span>"
+	  ."<span class=\"popover-link\"><span class=\"popover-link-tip\"></span>"
+	  ."<span class=\"icon shanticon-menu3\"></span></span>"
+	  ."<div class=\"popover\" data-title=\"{$variables['label']}\">"
+    ."<div class=\"popover-body\">"
+    ."<div class=\"desc\">{$variables['desc']}</div>"
+    ."<div class=\"parents clearfix\"><p><strong>" . $variables['tree']['label']. "</strong>";
+	foreach($variables['tree']['items'] as $n => $link) {
+		$html .= "{$link}";
+	}
+	$html .= "</p></div></div><div class=\"popover-footer\">";
+	foreach($variables['links'] as $label => $info) {
+		$options = array('attributes' => array());
+		if(!empty($info['external'])) { $options['attributes']['target'] = '_blank'; }
+		$options['attributes']['class'] = "icon shanticon-{$info['icon']}";
+		$html .= "<div class=\"popover-footer-button\">" . l($label, $info['href'], $options) . "</div>";
+	}
+	$html .= "</div></div>";
+	return $html;
 }
 
 function _shanti_kmaps_fields_decode_path($path, $delim = '--'){
@@ -744,7 +745,7 @@ function shanti_kmaps_fields_kmaps_list_func($domain = 'subjects', $string) {
   $server = _shanti_kmaps_fields_get_kmaps_server($domain);
   $request = new KMapsAPI($domain, $server);
   $result = $request->searchByNameGetList($string);
-	drupal_json_output($result);    
+  drupal_json_output($result);    
 }
 
 function shanti_kmaps_fields_kmaps_autocomplete_func($domain = 'subjects', $string) {
