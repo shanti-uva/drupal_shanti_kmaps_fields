@@ -634,7 +634,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       $url = str_replace('__KMAPID__',$item['id'],$url);
       $kmap_terms[] = l($item['header'],$url,array('attributes' => array('title' => $title, 'target' => $target)));
     }
-    $element[$delta]['links'] = array(
+    $element['links'] = array(
       '#theme' => 'item_list',
       '#type' => 'ul',
       '#items' => $kmap_terms,
