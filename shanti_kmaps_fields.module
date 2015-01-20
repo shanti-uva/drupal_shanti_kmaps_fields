@@ -644,7 +644,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
     foreach ($items as $delta => $item) {
       
       $domain = $field['settings']['kmap_domain'];
-      $info = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']);
+      $info = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']); // Should test this!
       
       $desc = t('For more information about this term, see Full Entry below.');
       if ($domain == 'subjects' && isset($info->feature->nested_descriptions[0]->title)) {

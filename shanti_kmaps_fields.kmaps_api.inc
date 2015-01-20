@@ -182,16 +182,16 @@ class KMapsAPI {
   private function request($request_url) {
     $response = drupal_http_request($request_url);
     if ($response->code != 200) {
-      watchdog('shanti_kmaps_utils', 'HTTP error !code received.', array('!code' => $response->code), WATCHDOG_ERROR);
+      watchdog('shanti_kmaps_fields', 'HTTP error !code received.', array('!code' => $response->code), WATCHDOG_ERROR);
       return FALSE;
     }
     $data = json_decode($response->data);
     if (!is_object($data)) {
-      watchdog('shanti_kmaps_utils', 'Did not receive valid API response (invalid JSON).', array(), WATCHDOG_ERROR);
+      watchdog('shanti_kmaps_fields', 'Did not receive valid API response (invalid JSON).', array(), WATCHDOG_ERROR);
       return FALSE;
     }
     if (isset($data->error)) {
-      watchdog('shanti_kmaps_utils', 'Error !code received: %message', array('!code' => $data->error, '%message' => $data->message), WATCHDOG_ERROR);
+      watchdog('shanti_kmaps_fields', 'Error !code received: %message', array('!code' => $data->error, '%message' => $data->message), WATCHDOG_ERROR);
       return FALSE;
     }
     
