@@ -34,7 +34,7 @@ function shanti_kmaps_fields_menu() {
       'type'              => MENU_NORMAL_ITEM,      
     ),
     'shanti_kmaps_fields/kmaps_list/%/%' => array(
-      'title' => 'KMaps Tree Function',
+      'title'             => 'KMaps Tree Function',
       'page callback'     => 'shanti_kmaps_fields_kmaps_list_func',
       'page arguments'    => array(2,3),
       'access arguments'  => array('access content'),
