@@ -528,7 +528,8 @@ function _shanti_kmaps_fields_push_solr_doc($nid) {
 }
 
 function _shanti_kmaps_fields_delete_solr_doc($nid) {
-  $solrdoc = "{ \"delete\": { \"query\":\"uid:essays-{$nid}\" } }";
+  $service = SHANTI_KMAPS_FIELDS_SERVICE;
+  $solrdoc = "{ \"delete\": { \"query\":\"uid:{$service}-{$nid}\" } }";
   _shanti_kmaps_fields_update_solr_index($solrdoc);
 }
 
