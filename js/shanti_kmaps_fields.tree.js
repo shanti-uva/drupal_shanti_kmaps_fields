@@ -35,7 +35,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     });
     		
     // Event handler 1: Fetch search results and build a "pick tree"
-    $('.kmap_search_term_button').live('click', function(e){
+    $('.kmap_search_term_button').on('click', function(e){
       var my_field = $(this).attr('id').replace('_search_button','');
       var pickTree = $('#' + my_field + '_pick_tree');
       pickTree.html("<p>Searching ...</p>");
@@ -43,9 +43,10 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
       search_term = searchField.val();
       ancestor_tree[my_field] = {}; // reinit
       dictionary[my_field] = {}; // reinit
-      $.getJSON(S[my_field].kmap_url + search_term, function(results){
-        if (results.length != 0) {
-          pickTree.html("<p>We found " + results.meta.count + " item(s) containing the string /"+search_term+"/:</p>");
+      search_url = S[my_field].kmap_url + search_term;
+      $.getJSON(search_url, function(results){
+        if (results.data.length != 0) {
+          pickTree.html("<p>We found " + results.meta.count + " item(s) containing the string /" + search_term + "/.</p>");
           for (var i in results.data) {
             var R = results.data[i];
             var kmap_id   = 'F' + R.id;
@@ -57,8 +58,8 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
           // Need also to see if any of the new items are in the pick list ...
           JSONTreeToHTML(ancestor_tree[my_field],pickTree); 
           Drupal.attachBehaviors();     
-        } else {
-          pickTree.html("No results for the string /" + search_term + "/.");
+        } else {  
+          pickTree.html("No results for the string /" + search_term + "/. Click <a href='" + search_url + "' target='_blank'>here</a> to see if the KMaps server is working.");
         }
       });
     });

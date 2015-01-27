@@ -250,7 +250,9 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     // Note that we are losing info about the relation between the KMap term and the node
     $kmapids = array();
     foreach ($fields as $field_name) { /// NEED TO GET FIELD INSTANCE DATA HERE ....
+      drupal_set_message('1 FN: ' . $field_name);
       $terms = field_get_items('node',$node,$field_name);
+      drupal_set_message(serialize($terms));
       foreach ($terms as $term) {
         $kmapids[] = $term['domain'] .'-'. $term['id']; 
       }    
@@ -484,14 +486,16 @@ function _shanti_kmaps_fields_extract_data_from_hidden_box($element, &$form_stat
   $delta      = $element['#delta'];
   $json       = $element['kmap_hidden_box']['#value'];
   $data       = drupal_json_decode($json);
+  watchdog_array('SHANTI','hidden box data',$data);
   $form_state['node']->kmap_data[$field_name] = $data;
 }
 
 function shanti_kmaps_fields_node_insert($node) {
-  _shanti_kmaps_fields_add_kmaps_to_node($node);
+  _shanti_kmaps_fields_add_kmaps_to_node($node);  
 }
 
 function shanti_kmaps_fields_node_update($node) {
+  watchdog_array('SHANTI','node from update',$node);
   _shanti_kmaps_fields_add_kmaps_to_node($node);
 }
 
@@ -503,7 +507,10 @@ function shanti_kmaps_fields_node_delete($node) {
 function _shanti_kmaps_fields_add_kmaps_to_node($node) {
   if ($node->kmap_data) {
     $lang = $node->language;    
+    drupal_set_message('2 FN: ' . $node->kmap_data);
     foreach ($node->kmap_data as $field_name => $data) {
+      drupal_set_message('3 FN: ' . $field_name);
+      drupal_set_message('4 FN: ' . $data);
       $node->{$field_name}[$lang] = array();
       foreach ($data as $fid => $item) {
         $node->{$field_name}[$lang][] = array(
