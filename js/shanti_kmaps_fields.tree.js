@@ -5,8 +5,8 @@ var search_term   = '';
 var dictionary    = {}; 
 var picked        = {}; 
 var ancestor_tree = {};
-var S = {}; // Settings passed
-submit_count = 0;
+var S             = {}; // Settings passed
+submit_count      = 0;
 
 Drupal.behaviors.shantiKmapsFieldsTree = {
 
