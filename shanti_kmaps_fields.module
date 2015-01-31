@@ -451,14 +451,12 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     $element['#attached']['css'][]  = $this_path . "/css/shanti_kmaps_fields.tree.css";
     
     // To construct URL below; move to top if needed elsewhere
-    //global $base_url;
 
     // Pass settings to the JS
     $js_settings = array(
       $field_id => array(
         'field_name'      => $field['field_name'],
         'domain'          => $domain,
-        //'kmap_url'        => "$base_url/shanti_kmaps_fields/kmaps_list/$domain/",
         'kmap_url'        => url("shanti_kmaps_fields/kmaps_list/$domain/"),
         'picked_already'  => _shanti_kmaps_fields_get_json($items),
       ),
@@ -671,7 +669,9 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       
       $ancestors1 = array();
       if ($domain == 'subjects') {
-        $ancestors1 = $info->feature->ancestors;
+        if (isset($info->feature->ancestors)) {
+          $ancestors1 = $info->feature->ancestors;
+        }
       } elseif ($domain == 'places') {
         $ancestors1 = $info->feature->perspectives[0]->ancestors; // Again, may need to choose perspectives
       }
@@ -680,9 +680,10 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
         $id = $a->id;
         $title = $a->header;
         $url = str_replace('__KMAPID__',$id,variable_get('shanti_kmaps_fields_server_'.$domain.'_explorer'));
-        $delim = '';
-        if ($i) $delim = '/';
-        $ancestors[] = "<a target='_blank' href='$url'>$delim$title</a>";
+        #$delim = '';
+        #if ($i) $delim = '';
+        #$ancestors[] = "<a target='_blank' href='$url'>$delim$title</a>";
+        $ancestors[] = "<a target='_blank' href='$url'>$title</a>";
       }
       array_pop($ancestors); // Because the last is the same is the current
       
@@ -709,6 +710,9 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
           'label' => t(ucfirst($domain)),
           'items' => $ancestors
         ),
+        '#attached' => array(
+            'js'  => array(drupal_get_path('module','shanti_kmaps_fields') . '/js/shanti_kmaps_fields.popover.js'),
+        ),
         '#links' => $links
       );      
       
@@ -717,7 +721,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
   return $element;
 }
 
-function shanti_kmaps_fields_theme () {
+function shanti_kmaps_fields_theme() {
   return array(
     'info_popover' => array(
       'variables' => array('label' => '', 'desc' => '', 'tree' => array(), 'links' => array()),
@@ -728,22 +732,26 @@ function shanti_kmaps_fields_theme () {
 // CHANGE THIS TO DO SOMETHING THAT DOES NOT DEPEND ON SARVAKA
 // AND THEN OVERRIDE IN THEME
 function theme_info_popover($variables) {
-	$html = "<span>{$variables['label']}</span>"
+  $label        = $variables['label'];
+  $description  = $variables['description'];
+  $tree         = $variables['tree'];
+  $links        = $variables['links'];
+	$html = "<span>$label</span>"
 	  ."<span class=\"popover-link\"><span class=\"popover-link-tip\"></span>"
 	  ."<span class=\"icon shanticon-menu3\"></span></span>"
-	  ."<div class=\"popover\" data-title=\"{$variables['label']}\">"
+	  ."<div class=\"popover\" data-title=\"$label\">"
     ."<div class=\"popover-body\">"
-    ."<div class=\"desc\">{$variables['desc']}</div>"
-    ."<div class=\"parents clearfix\"><p><strong>" . $variables['tree']['label']. "</strong>";
-	foreach($variables['tree']['items'] as $n => $link) {
+    ."<div class=\"desc\">$description</div>"
+    ."<div class=\"parents clearfix\"><p><strong>" . $tree['label']. "</strong>";
+	foreach($tree['items'] as $n => $link) {
 		$html .= "{$link}";
 	}
 	$html .= "</p></div></div><div class=\"popover-footer\">";
-	foreach($variables['links'] as $label => $info) {
+	foreach($links as $mylabel => $info) {
 		$options = array('attributes' => array());
 		if(!empty($info['external'])) { $options['attributes']['target'] = '_blank'; }
 		$options['attributes']['class'] = "icon shanticon-{$info['icon']}";
-		$html .= "<div class=\"popover-footer-button\">" . l($label, $info['href'], $options) . "</div>";
+		$html .= "<div class=\"popover-footer-button\">" . l($mylabel, $info['href'], $options) . "</div>";
 	}
 	$html .= "</div></div>";
 	return $html;
