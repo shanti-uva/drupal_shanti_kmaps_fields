@@ -6,6 +6,7 @@ define('SHANTI_KMAPS_FIELDS_SERVER_PLACES','http://places.kmaps.virginia.edu');
 define('SHANTI_KMAPS_FIELDS_SERVER_SUBJECTS_EXPLORER','http://badger.drupal-dev.shanti.virginia.edu/subjects/__KMAPID__');
 define('SHANTI_KMAPS_FIELDS_SERVER_PLACES_EXPLORER','http://badger.drupal-dev.shanti.virginia.edu/places/__KMAPID__');
 define('SHANTI_KMAPS_FIELDS_SERVER_SOLR','http://kidx.shanti.virginia.edu/solr/kmindex');
+define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module','shanti_kmaps_fields'));
 
 function shanti_kmaps_fields_menu() {
   return array(
@@ -190,9 +191,8 @@ function shanti_kmaps_fields_api_test() {
 
 function shanti_kmaps_fields_api_all() {
 
-  //global $base_url;
   $tables = array();
-  $data = array();
+  $data   = array();
 
   $sql = "SELECT `field_name` FROM {field_config} WHERE `type` LIKE 'shanti_kmaps_fields_default'";
   $rs = db_query($sql);
@@ -209,12 +209,9 @@ function shanti_kmaps_fields_api_all() {
       $data[$r->entity_id]['asset_type']  = variable_get('shanti_kmaps_fields_asset_type__' . $node_type);
       $data[$r->entity_id]['id']          = $r->entity_id;
       $data[$r->entity_id]['uid']         = SHANTI_KMAPS_FIELDS_SERVICE .'-'. $r->entity_id;      
-      //$data[$r->entity_id]['url_html']    = "$base_url/" . str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_html__'.$node_type));     
-      //$data[$r->entity_id]['url_ajax']    = "$base_url/" . str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_ajax__'.$node_type));     
-      //$data[$r->entity_id]['url_json']    = "$base_url/" . str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_json__'.$node_type));     
-      $data[$r->entity_id]['url_html']    = url(str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_html__'.$node_type)));     
-      $data[$r->entity_id]['url_ajax']    = url(str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_ajax__'.$node_type)));     
-      $data[$r->entity_id]['url_json']    = url(str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_json__'.$node_type)));           
+      $data[$r->entity_id]['url_html']    = url(str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_html__'.$node_type)), array('absolute' => TRUE));     
+      $data[$r->entity_id]['url_ajax']    = url(str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_ajax__'.$node_type)), array('absolute' => TRUE));     
+      $data[$r->entity_id]['url_json']    = url(str_replace('__NID__', $r->entity_id, variable_get('shanti_kmaps_fields_url_json__'.$node_type)), array('absolute' => TRUE));           
       $data[$r->entity_id]['caption']     = $r->title;      
       $data[$r->entity_id]['kmapid'][]    = $r->field_kmap_term_domain . '-' . $r->field_kmap_term_id;
     }
@@ -265,12 +262,9 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
       'asset_type'  => variable_get('shanti_kmaps_fields_asset_type__' . $node->type), 
       'id'          => $node->nid,
       'uid'         => SHANTI_KMAPS_FIELDS_SERVICE .'-'. $node->nid,
-      //'url_html'    => "$base_url/" . str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_html__'.$node->type)),
-      //'url_ajax'    => "$base_url/" . str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)),
-      //'url_json'    => "$base_url/" . str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)),
-      'url_html'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_html__'.$node->type))),
-      'url_ajax'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type))),
-      'url_json'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type))),
+      'url_html'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_html__'.$node->type)), array('absolute' => TRUE)),
+      'url_ajax'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)), array('absolute' => TRUE)),
+      'url_json'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)), array('absolute' => TRUE)),
       'caption'     => $node->title,
       'kmapid'      => $kmapids
     );
@@ -281,7 +275,6 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
 ////////// FIELD //////////
 
 function shanti_kmaps_fields_field_info() {
-  //global $base_url;
   $info = array();
   $info['shanti_kmaps_fields_default'] = array(
     'label'             => t('KMap Term'),
@@ -446,9 +439,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     );
 
     // Add CSS and JS to the form
-    $this_path = drupal_get_path('module','shanti_kmaps_fields');
-    $element['#attached']['js'][]   = $this_path . "/js/shanti_kmaps_fields.tree.js";
-    $element['#attached']['css'][]  = $this_path . "/css/shanti_kmaps_fields.tree.css";
+    $element['#attached']['js'][]   = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.tree.js";
+    $element['#attached']['css'][]  = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
     
     // To construct URL below; move to top if needed elsewhere
 
