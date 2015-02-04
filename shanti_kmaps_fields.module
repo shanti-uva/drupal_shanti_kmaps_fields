@@ -492,7 +492,6 @@ function shanti_kmaps_fields_node_insert($node) {
 }
 
 function shanti_kmaps_fields_node_update($node) {
-  watchdog_array('SHANTI','node from update',$node);
   _shanti_kmaps_fields_add_kmaps_to_node($node);
 }
 
@@ -502,7 +501,7 @@ function shanti_kmaps_fields_node_delete($node) {
 
 // This function assumes that we are the only ones using kmap_data as key attached to node
 function _shanti_kmaps_fields_add_kmaps_to_node($node) {
-  if ($node->kmap_data) {
+  if (isset($node->kmap_data) && $node->kmap_data) {
     $lang = $node->language;    
     foreach ($node->kmap_data as $field_name => $data) {
       $node->{$field_name}[$lang] = array();
@@ -516,10 +515,10 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
         );
       }    
     }
-    field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise  
-    entity_get_controller('node')->resetCache(array($node->nid)); // This is needs to get most recent ids
-    _shanti_kmaps_fields_push_solr_doc($node->nid);
   }
+  field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise
+  entity_get_controller('node')->resetCache(array($node->nid)); // This is needed to get most recent ids
+  _shanti_kmaps_fields_push_solr_doc($node->nid);
   return $node;
 }
 
@@ -537,7 +536,6 @@ function _shanti_kmaps_fields_delete_solr_doc($nid) {
 function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $message = TRUE) {
   $opt_in = variable_get('shanti_kmaps_fields_server_solr_opt_in');
   if ($opt_in) {
-    //global $base_url;
     $solr_url = variable_get('shanti_kmaps_fields_server_solr');
     $url = "$solr_url/update/json?commit=true";
     $options = array(
@@ -552,11 +550,10 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
       drupal_set_message("URL " . $url);
     }
     if ($message) {
-      //$x = json_decode($solrdoc);
-      //$kmapid = $x[0]->kmapid[0];
-      //$test = "http://kidx.shanti.virginia.edu/solr/kmindex/select?q=kmapid:$kmapid&wt=json";
-      //drupal_set_message("<a href='$test' target='_blank'>Check it out.</a>");
       drupal_set_message("Index response: " . $resp->status_message);
+    } 
+    else {
+      drupal_set_message("No response from index!");
     }
   } else {
     drupal_set_message("KMap data not published to SHANTI index, as requested.");
