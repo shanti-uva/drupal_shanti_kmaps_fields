@@ -1,5 +1,5 @@
 <?php
-
+# TEST
 define('SHANTI_KMAPS_FIELDS_SERVICE', preg_replace("/[\.\/]/", '_', str_replace('http://', '', $GLOBALS['base_url'])));
 define('SHANTI_KMAPS_FIELDS_SERVER_SUBJECTS','http://subjects.kmaps.virginia.edu');
 define('SHANTI_KMAPS_FIELDS_SERVER_PLACES','http://places.kmaps.virginia.edu');
@@ -230,7 +230,6 @@ function shanti_kmaps_fields_api_node($nid) {
 }
 
 function _shanti_kmaps_fields_get_solr_doc($nid_list) {
-  //global $base_url;
   $doc = array();  
   foreach ($nid_list as $nid) {
     $node = node_load($nid);
