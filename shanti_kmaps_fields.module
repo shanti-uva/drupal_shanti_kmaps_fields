@@ -185,8 +185,9 @@ function shanti_kmaps_fields_form_alter_submit($form, &$form_state) {
 }
 
 function shanti_kmaps_fields_api_test() {
-  $t = variable_get('shanti_kmaps_fields_server_solr_opt_in');
-  return "TEST: $t";
+  $assets = shanti_kmaps_fields_get_assets_for_kmapid('places',24108);
+  kpr($assets);
+  return "TEST";
 }
 
 function shanti_kmaps_fields_api_all() {
@@ -559,6 +560,17 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
   }
 }
 
+function shanti_kmaps_fields_get_assets_for_kmapid($kmap_domain, $kmap_id) {
+  $kmap_key = $kmap_domain . '-' . $kmap_id;
+  $assets = array();
+  $url = "http://kidx.shanti.virginia.edu/solr/kmindex/query?q=kmapid:{$kmap_key}&rows=3000";
+  $solr_request = drupal_http_request($url);
+  $solr_response = drupal_json_decode($solr_request->data);
+  foreach ($solr_response['response']['docs'] as $solr_doc) {
+    $assets[$solr_doc['asset_type']][] = array( 'url' => $solr_doc['url_html'], 'caption' => $solr_doc['caption']);
+  }
+  return $assets;
+}
 
 ////////// FORMATTERS //////////
 
@@ -684,12 +696,16 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       }
 
       $asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type); 
-
       $links = array(
         'Full Entry' => array('icon' => 'link-external', 'href' => $external_url, 'external' => TRUE),
         "Related ".ucfirst($asset_type) => array('icon' => $asset_type, 'href' =>  $internal_url), 
       );
-      
+      $asset_links = shanti_kmaps_fields_get_assets_for_kmapid($domain, $item['id']);
+      foreach($asset_links as $atype => $ainf) {
+        if ($atype == $asset_type) continue;
+        $links["Related ".ucfirst($atype)] = array('icon' => $atype, 'href' => '#');
+      }
+
       $element[$delta]['info_popover'] = array(
         '#theme' => 'info_popover',
         '#label' => $item['header'],
