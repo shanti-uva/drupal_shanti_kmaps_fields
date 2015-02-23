@@ -698,15 +698,19 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       $asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type); 
       $links = array(
         'Full Entry' => array('icon' => 'link-external', 'href' => $external_url, 'external' => TRUE),
-        "Related ".ucfirst($asset_type)." on this site" => array('icon' => $asset_type, 'href' =>  $internal_url), 
+        "Related ".ucfirst($asset_type) => array('icon' => $asset_type, 'href' =>  $internal_url), 
       );
       
-      $asset_links = shanti_kmaps_fields_get_assets_for_kmapid($domain, $item['id']);
-      foreach($asset_links as $atype => $ainf) {
+      $external_asset_links = shanti_kmaps_fields_get_assets_for_kmapid($domain, $item['id']);
+      foreach($external_asset_links as $atype => $ainf) {
+        if ($atype == 'texts') { continue; } // We skip our own assets
         $count = count($ainf);
         $href = preg_replace("/__KMAPID__\/overview/",$item['id'].'/'.$asset_type,variable_get('shanti_kmaps_fields_server_'.$domain.'_explorer'));
-        $links["Related ".ucfirst($atype)." on Mandala ($count)"] = array('icon' => $atype, 'href' => $href);
+        $links["Related ".ucfirst($atype)." ($count)"] = array('icon' => $atype, 'href' => $href);
       }
+      
+      $external_kmap_links = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']);
+      //watchdog_array('SHANTI','kmap links',$external_kmap_links);
 
       $element[$delta]['info_popover'] = array(
         '#theme' => 'info_popover',
@@ -717,7 +721,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
           'items' => $ancestors
         ),
         '#attached' => array(
-            'js'  => array(drupal_get_path('module','shanti_kmaps_fields') . '/js/shanti_kmaps_fields.popover.js'),
+          'js'  => array(drupal_get_path('module','shanti_kmaps_fields') . '/js/shanti_kmaps_fields.popover.js'),
         ),
         '#links' => $links
       );      
