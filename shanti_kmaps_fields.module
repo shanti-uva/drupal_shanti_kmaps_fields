@@ -413,7 +413,6 @@ function _shanti_kmaps_fields_extract_data_from_hidden_box($element, &$form_stat
   $delta      = $element['#delta'];
   $json       = $element['kmap_hidden_box']['#value'];
   $data       = drupal_json_decode($json);
-  watchdog_array('SHANTI','hidden box data',$data);
   $form_state['node']->kmap_data[$field_name] = $data;
 }
 
@@ -635,12 +634,12 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       foreach($external_asset_links as $atype => $ainf) {
         if ($atype == 'texts') { continue; } // We skip our own assets
         $count = count($ainf);
-        $href = preg_replace("/__KMAPID__\/overview/",$item['id'].'/'.$asset_type,variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
+        $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$atype, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
         $links["Related ".ucfirst($atype)." ($count)"] = array('icon' => $atype, 'href' => $href);
       }
       
-      $external_kmap_links = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']);
-      //watchdog_array('SHANTI','kmap links',$external_kmap_links);
+      // Waiting for info on what to do with this
+      //$external_kmap_links = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']);
 
       $element[$delta]['info_popover'] = array(
         '#theme' => 'info_popover',
