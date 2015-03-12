@@ -88,7 +88,7 @@ function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
   $service = SHANTI_KMAPS_ADMIN_SERVICE;
   $nid_count = count($context['results']['nids']);
   $count = 50;  
-  if ($nid_count < 50) { $count = $nid_count; }
+  if ($nid_count < $count) { $count = $nid_count; }
   $context['message'] = t("Processing next $count of $nid_count nodes.");
   for ($i = 0; $i < $count; $i++) {
     $nid = array_shift($context['results']['nids']); 
