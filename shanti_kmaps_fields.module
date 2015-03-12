@@ -34,8 +34,92 @@ function shanti_kmaps_fields_menu() {
       'access arguments'  => array('access content'),
       'type'              => MENU_CALLBACK,  
     ),
+    'shanti_kmaps_fields/reindexer' => array(
+      'title'             => 'KMaps Reindexer',
+      'page callback'     => 'shanti_kmaps_fields_reindexer',
+      'access arguments'  => array('administer shanti_kmaps_fields'),
+      'type'              => MENU_CALLBACK,
+    ),
   );
 }
+
+////// REINDEXER START //////////
+
+function shanti_kmaps_fields_reindexer() {
+  $batch = array(
+    'operations' => array(
+      array('shanti_kmaps_fields_reindexer_get_nids', array()),
+      array('shanti_kmaps_fields_reindexer_del_then_add', array()),
+    ),
+    'finished'          => 'shanti_kmaps_fields_reindexer_finished',
+    'title'             => t('KMaps Fields Reindexer'),
+    'init_message'      => t('Reindexer is starting.'),
+    'progress_message'  => t('Processed @current out of @total.'),
+    'error_message'     => t('KMaps Fields Reindexer has encountered an error.'),    
+  );
+  batch_set($batch);
+  batch_process("alltexts");
+}
+
+function shanti_kmaps_fields_reindexer_get_nids(&$context) {
+  $nids = array();
+  $kmap_field = 'shanti_kmaps_fields_default'; // May want to parametize later
+  $sql = "SELECT CONCAT('field_data_',`field_name`) as 'tname' FROM {field_config} WHERE `type` LIKE :kmap_field ";
+  $rs = db_query($sql,array(':kmap_field' => $kmap_field));
+  foreach ($rs as $r) { 
+    $rs2 = db_query("SELECT entity_id FROM {{$r->tname}}");
+    foreach ($rs2 as $r2) {
+      $nids[] = $r2->entity_id;
+    }
+  }
+  $context['results']['nid_count'] = count($nids);
+  $context['results']['nids'] = $nids;  
+}
+
+function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
+
+  if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['current_node'] = 0;
+    $context['sandbox']['max'] = count($context['results']['nids']);
+    $context['results']['processed'] = 0;
+  }
+  
+  $service = SHANTI_KMAPS_ADMIN_SERVICE;
+  $nid_count = count($context['results']['nids']);
+  $count = 50;  
+  if ($nid_count < 20) { $count = $nid_count; }
+  $context['message'] = t("Processing next $count of $nid_count nodes.");
+  for ($i = 0; $i < $count; $i++) {
+    $nid = array_shift($context['results']['nids']); 
+    $context['sandbox']['current_node'] = $nid;
+    $solrdoc_del = "{ \"delete\": { \"query\":\"uid:{$service}-{$nid}\" } }";
+    _shanti_kmaps_fields_update_solr_index($solrdoc_del, FALSE, FALSE);
+    $solrdoc_add = json_encode(_shanti_kmaps_fields_get_solr_doc(array($nid)));
+    _shanti_kmaps_fields_update_solr_index($solrdoc_add, FALSE, FALSE);
+    $context['sandbox']['progress']++;
+    $context['results']['processed']++;
+  }
+  
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+
+}
+
+function shanti_kmaps_fields_reindexer_finished($success, $results, $operations) {
+  // Not sure what to do here ...
+  if ($success) {
+    $message = $results['processed'] .' of ' . $results['nid_count'] . ' nodes reindexed.';
+    drupal_set_message($message);
+  } else {
+    $error_operation = reset($operations);
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', array('%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)));
+    drupal_set_message($message, 'error');
+  }
+}
+
+////// REINDEXER END //////////
 
 function shanti_kmaps_fields_permission() {
  return array(
@@ -481,9 +565,6 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
     if ($message) {
       drupal_set_message("Index response: " . $resp->status_message);
     } 
-    else {
-      drupal_set_message("No response from index!");
-    }
   } else {
     drupal_set_message("KMap data not published to SHANTI index, as requested.");
   }
