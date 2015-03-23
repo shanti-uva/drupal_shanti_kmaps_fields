@@ -582,6 +582,27 @@ function shanti_kmaps_fields_get_assets_for_kmapid($kmap_domain, $kmap_id) {
   return $assets;
 }
 
+function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id) {
+  $kmap_key = $kmap_domain . '-' . $kmap_id;
+  $terms = array();
+  $terms['places']    = 0;
+  $terms['subjects']  = 0;
+  $kmap_server = variable_get("shanti_kmaps_admin_server_$kmap_domain");
+  $kmap_request = drupal_http_request("$kmap_server/features/$kmap_id.json");
+  $kmap_response = drupal_json_decode($kmap_request->data);
+  if ($kmap_domain == 'places') {
+    $terms['subjects'] += $kmap_response['feature']['associated_resources']['subject_count'];
+    $terms['places']   += count($kmap_response['feature']['parents']);
+    $terms['places']   += count($kmap_response['feature']['children']);
+  }
+  else if ($kmap_domain == 'subjects') {
+    $terms['places']   += $kmap_response['feature']['associated_resources']['place_count'];
+    $terms['subjects'] += count($kmap_response['feature']['parents']);
+    $terms['subjects'] += count($kmap_response['feature']['children']);
+  }
+  return $terms;
+}
+
 ////////// FORMATTERS //////////
 
 function shanti_kmaps_fields_field_formatter_info() {
@@ -713,15 +734,23 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       
       $external_asset_links = shanti_kmaps_fields_get_assets_for_kmapid($domain, $item['id']);
       foreach($external_asset_links as $atype => $ainf) {
-        if ($atype == 'texts') { continue; } // We skip our own assets
+        if ($atype == 'texts') { 
+          // We skip our own assets
+          // But maybe we should get a count and only show if > 1
+          continue; 
+        } 
         $count = count($ainf);
         $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$atype, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
         $links["Related ".ucfirst($atype)." ($count)"] = array('icon' => $atype, 'href' => $href);
       }
-      
-      // Waiting for info on what to do with this
-      //$external_kmap_links = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']);
 
+      $external_term_links = shanti_kmaps_fields_get_terms_for_kmapid($domain, $item['id']);
+      foreach($external_term_links as $my_domain => $count) {
+        if (!$count) { continue; } 
+        $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$my_domain, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
+        $links["Related ".ucfirst($my_domain)." ($count)"] = array('icon' => $my_domain, 'href' => $href);
+      }
+      
       $element[$delta]['info_popover'] = array(
         '#theme' => 'info_popover',
         '#label' => $item['header'],
