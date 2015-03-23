@@ -587,18 +587,18 @@ function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id) {
   $terms = array();
   $terms['places']    = 0;
   $terms['subjects']  = 0;
+  $terms['images']    = 0;
   $kmap_server = variable_get("shanti_kmaps_admin_server_$kmap_domain");
   $kmap_request = drupal_http_request("$kmap_server/features/$kmap_id.json");
   $kmap_response = drupal_json_decode($kmap_request->data);
+  $terms['photos'] = $kmap_response['feature']['associated_resources']['picture_count'];
   if ($kmap_domain == 'places') {
     $terms['subjects'] += $kmap_response['feature']['associated_resources']['subject_count'];
-    $terms['places']   += count($kmap_response['feature']['parents']);
-    $terms['places']   += count($kmap_response['feature']['children']);
+    $terms['places']   += $kmap_response['feature']['associated_resources']['related_feature_count'];
   }
   else if ($kmap_domain == 'subjects') {
     $terms['places']   += $kmap_response['feature']['associated_resources']['place_count'];
-    $terms['subjects'] += count($kmap_response['feature']['parents']);
-    $terms['subjects'] += count($kmap_response['feature']['children']);
+    $terms['subjects'] += $kmap_response['feature']['associated_resources']['related_feature_count'];
   }
   return $terms;
 }
@@ -729,26 +729,32 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       $asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type); 
       $links = array(
         'Full Entry' => array('icon' => 'link-external', 'href' => $external_url, 'external' => TRUE),
-        "Related ".ucfirst($asset_type) => array('icon' => $asset_type, 'href' =>  $internal_url), 
+        //"Related ".ucfirst($asset_type) => array('icon' => $asset_type, 'href' =>  $internal_url), 
       );
       
+      // RELATED STUFF FROM SOLR
+      $this_asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type);
       $external_asset_links = shanti_kmaps_fields_get_assets_for_kmapid($domain, $item['id']);
       foreach($external_asset_links as $atype => $ainf) {
-        if ($atype == 'texts') { 
-          // We skip our own assets
-          // But maybe we should get a count and only show if > 1
-          continue; 
-        } 
         $count = count($ainf);
-        $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$atype, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
-        $links["Related ".ucfirst($atype)." ($count)"] = array('icon' => $atype, 'href' => $href);
+        if ($atype == $this_asset_type && $count <= 1) {
+          continue;
+        } 
+        if ($atype == $this_asset_type ) {
+          $links["Related ".ucfirst($asset_type). " ($count)"] =  array('icon' => $asset_type, 'href' =>  $internal_url);         
+        } 
+        else {
+          $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$atype, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
+          $links["Related ".ucfirst($atype)." ($count)"] = array('icon' => $atype, 'href' => $href, 'external' => TRUE);
+        }
       }
 
+      // RELATED STUFF FROM KMAPS
       $external_term_links = shanti_kmaps_fields_get_terms_for_kmapid($domain, $item['id']);
       foreach($external_term_links as $my_domain => $count) {
         if (!$count) { continue; } 
         $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$my_domain, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
-        $links["Related ".ucfirst($my_domain)." ($count)"] = array('icon' => $my_domain, 'href' => $href);
+        $links["Related ".ucfirst($my_domain)." ($count)"] = array('icon' => $my_domain, 'href' => $href, 'external' => TRUE);
       }
       
       $element[$delta]['info_popover'] = array(
@@ -797,8 +803,10 @@ function theme_info_popover($variables) {
 	}
 	$html .= "</p></div></div><div class=\"popover-footer\">";
 	foreach($links as $mylabel => $info) {
-		$options = array('attributes' => array());
-		if(!empty($info['external'])) { $options['attributes']['target'] = '_blank'; }
+		$options = array();
+		if(!empty($info['external'])) { 
+		  $options['attributes']['target'] = '_blank'; 
+		}
 		$options['attributes']['class'] = "icon shanticon-{$info['icon']}";
 		$html .= "<div class=\"popover-footer-button\">" . l($mylabel, $info['href'], $options) . "</div>";
 	}
