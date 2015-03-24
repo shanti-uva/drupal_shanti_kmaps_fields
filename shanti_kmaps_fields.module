@@ -588,9 +588,9 @@ function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id) {
   $terms['places']    = 0;
   $terms['subjects']  = 0;
   $terms['images']    = 0;
-  $kmap_server = variable_get("shanti_kmaps_admin_server_$kmap_domain");
-  $kmap_request = drupal_http_request("$kmap_server/features/$kmap_id.json");
-  $kmap_response = drupal_json_decode($kmap_request->data);
+  $kmap_server    = variable_get("shanti_kmaps_admin_server_$kmap_domain");
+  $kmap_request   = drupal_http_request("$kmap_server/features/$kmap_id.json");
+  $kmap_response  = drupal_json_decode($kmap_request->data);
   if ($kmap_domain == 'places') {
     $terms['subjects'] += $kmap_response['feature']['associated_resources']['subject_count'];
     $terms['places']   += $kmap_response['feature']['associated_resources']['related_feature_count'];
@@ -712,9 +712,6 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
         $id = $a->id;
         $title = $a->header;
         $url = str_replace('__KMAPID__',$id,variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
-        #$delim = '';
-        #if ($i) $delim = '';
-        #$ancestors[] = "<a target='_blank' href='$url'>$delim$title</a>";
         $ancestors[] = "<a target='_blank' href='$url'>$title</a>";
       }
       array_pop($ancestors); // Because the last is the same is the current
@@ -754,6 +751,9 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       foreach($external_term_links as $my_domain => $count) {
         if (!$count) { continue; } 
         $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$my_domain, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
+        if ($my_domain == 'photos') {
+          $href = preg_replace("/\/overview/","",$href);
+        }
         $links["Related ".ucfirst($my_domain)." ($count)"] = array('icon' => $my_domain, 'href' => $href, 'external' => TRUE);
       }
       
@@ -786,9 +786,10 @@ function shanti_kmaps_fields_theme() {
 
 // CHANGE THIS TO DO SOMETHING THAT DOES NOT DEPEND ON SARVAKA
 // AND THEN OVERRIDE IN THEME
+/*
 function theme_info_popover($variables) {
   $label        = $variables['label'];
-  $description  = $variables['description'];
+  $description  = $variables['desc'];
   $tree         = $variables['tree'];
   $links        = $variables['links'];
 	$html = "<span>$label</span>"
@@ -796,10 +797,12 @@ function theme_info_popover($variables) {
 	  ."<span class=\"icon shanticon-menu3\"></span></span>"
 	  ."<div class=\"popover\" data-title=\"$label\">"
     ."<div class=\"popover-body\">"
-    ."<div class=\"desc\">$description</div>"
-    ."<div class=\"parents clearfix\"><p><strong>" . $tree['label']. "</strong>";
-	foreach($tree['items'] as $n => $link) {
-		$html .= "{$link}";
+    ."<div class=\"desc\">$description</div>";
+  if (count($tree['items'])) {
+    $html .= "<div class=\"parents clearfix\"><p><strong>" . $tree['label']. "</strong>";
+	  foreach($tree['items'] as $n => $link) {
+		  $html .= "{$link}";
+	  }
 	}
 	$html .= "</p></div></div><div class=\"popover-footer\">";
 	foreach($links as $mylabel => $info) {
@@ -813,6 +816,7 @@ function theme_info_popover($variables) {
 	$html .= "</div></div>";
 	return $html;
 }
+*/ 
 
 function _shanti_kmaps_fields_decode_path($path, $delim = '--'){
   $nicepath = str_replace("}}{{",$delim,$path);
