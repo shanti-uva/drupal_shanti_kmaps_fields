@@ -582,12 +582,13 @@ function shanti_kmaps_fields_get_assets_for_kmapid($kmap_domain, $kmap_id) {
   return $assets;
 }
 
+// "Terms" should be "Associated Resources" here ... 
 function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id) {
   $kmap_key = $kmap_domain . '-' . $kmap_id;
   $terms = array();
   $terms['places']    = 0;
   $terms['subjects']  = 0;
-  $terms['images']    = 0;
+  $terms['photos']    = 0;
   $kmap_server    = variable_get("shanti_kmaps_admin_server_$kmap_domain");
   $kmap_request   = drupal_http_request("$kmap_server/features/$kmap_id.json");
   $kmap_response  = drupal_json_decode($kmap_request->data);
@@ -600,7 +601,7 @@ function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id) {
     $terms['subjects'] += $kmap_response['feature']['associated_resources']['related_feature_count'];
   }
   // For now, we count photos from MMS
-  $terms['photos'] += $kmap_response['feature']['associated_resources']['picture_count'];
+  $terms['photos']     += $kmap_response['feature']['associated_resources']['picture_count'];
   return $terms;
 }
 
@@ -689,9 +690,12 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
   elseif ($display['type'] == 'kmap_popover_formatter') {
     foreach ($items as $delta => $item) {
       
+      // General
       $domain = $field['settings']['kmap_domain'];
-      $info = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']); // Should test this!
-      
+      $info = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']); // trap?
+      $asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type); 
+
+      // Description
       $desc = t('For more information about this term, see Full Entry below.');
       if ($domain == 'subjects' && isset($info->feature->nested_descriptions[0]->title)) {
         $desc = $info->feature->nested_descriptions[0]->title;
@@ -699,12 +703,14 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
         $desc = $info->feature->captions[0]->content;
       }
       
+      // Ancestors
       $ancestors1 = array();
       if ($domain == 'subjects') {
         if (isset($info->feature->ancestors)) {
           $ancestors1 = $info->feature->ancestors;
         }
-      } elseif ($domain == 'places') {
+      } 
+      elseif ($domain == 'places') {
         $ancestors1 = $info->feature->perspectives[0]->ancestors; // Again, may need to choose perspectives
       }
       $ancestors = array();
@@ -716,47 +722,52 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       }
       array_pop($ancestors); // Because the last is the same is the current
       
-      // Should probably trap these
+
+      // Links to Related Resources
+      $links = array();
       $external_url = str_replace('__KMAPID__',$item['id'],variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
-
-      $internal_url = '';
-      if ($instance['settings']['search_view']) {
-        $internal_url = str_replace('__KMAPID__', $id, $instance['settings']['search_view']);
-      }
-
-      $asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type); 
-      $links = array(
-        'Full Entry' => array('icon' => 'link-external', 'href' => $external_url, 'external' => TRUE),
-      );
-      
-      // RELATED STUFF FROM SOLR
+      $links['Full Entry'] = array('icon' => 'link-external', 'href' => $external_url, 'external' => TRUE);
+      #$internal_url = '';
+      #if ($instance['settings']['search_view']) {
+      #  $internal_url = str_replace('__KMAPID__', $id, $instance['settings']['search_view']);
+      #  $links["Related ".ucfirst($asset_type)] = array('icon' => $asset_type, 'href' => $internal_url);
+      #}
+      // From the Solr index
       $this_asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type);
       $external_asset_links = shanti_kmaps_fields_get_assets_for_kmapid($domain, $item['id']);
       foreach($external_asset_links as $atype => $ainf) {
         $count = count($ainf);
-        if ($atype == $this_asset_type && $count <= 1) {
-          continue;
-        } 
-        else if ($atype == $this_asset_type ) {
-          $links["Related ".ucfirst($asset_type). " ($count)"] =  array('icon' => $asset_type, 'href' =>  $internal_url);         
+        if ($atype == $this_asset_type) {
+          /// TEST START ///
+          if ($count > 1) {
+            if ($instance['settings']['search_view']) {
+              $internal_url = str_replace('__KMAPID__', $id, $instance['settings']['search_view']);
+              $links["Related ".ucfirst($asset_type). " ($count)"] = array('icon' => $asset_type, 'href' => $internal_url);
+            } 
+            else {
+              $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$atype, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
+              $links["Related ".ucfirst($atype)." ($count)"] = array('icon' => $atype, 'href' => $href, 'external' => TRUE);            
+            }
+          }
+          /// TEST END ////
+          // Or, put internal URL here, if $count > 1
+          #continue;
         } 
         else {
           $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$atype, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
           $links["Related ".ucfirst($atype)." ($count)"] = array('icon' => $atype, 'href' => $href, 'external' => TRUE);
         }
       }
-
-      // RELATED STUFF FROM KMAPS
+      // From the KMaps index -- will go away eventually, but for terms?
       $external_term_links = shanti_kmaps_fields_get_terms_for_kmapid($domain, $item['id']);
       foreach($external_term_links as $my_domain => $count) {
         if (!$count) { continue; } 
         $href = preg_replace("/__KMAPID__/", $item['id'].'/'.$my_domain, variable_get('shanti_kmaps_admin_server_'.$domain.'_explorer'));
-        if ($my_domain == 'photos') {
-          $href = preg_replace("/\/overview/","",$href);
-        }
+        if ($my_domain == 'photos') { $href = preg_replace("/\/overview/","",$href); }
         $links["Related ".ucfirst($my_domain)." ($count)"] = array('icon' => $my_domain, 'href' => $href, 'external' => TRUE);
       }
-      
+       
+      // The Render Array
       $element[$delta]['info_popover'] = array(
         '#theme' => 'info_popover',
         '#label' => $item['header'],
@@ -788,16 +799,16 @@ function shanti_kmaps_fields_theme() {
 // AND THEN OVERRIDE IN THEME
 /*
 function theme_info_popover($variables) {
-  $label        = $variables['label'];
-  $description  = $variables['desc'];
-  $tree         = $variables['tree'];
-  $links        = $variables['links'];
+  $label  = $variables['label'];
+  $desc   = $variables['desc'];
+  $tree   = $variables['tree'];
+  $links  = $variables['links'];
 	$html = "<span>$label</span>"
 	  ."<span class=\"popover-link\"><span class=\"popover-link-tip\"></span>"
 	  ."<span class=\"icon shanticon-menu3\"></span></span>"
 	  ."<div class=\"popover\" data-title=\"$label\">"
     ."<div class=\"popover-body\">"
-    ."<div class=\"desc\">$description</div>";
+    ."<div class=\"desc\">$desc</div>";
   if (count($tree['items'])) {
     $html .= "<div class=\"parents clearfix\"><p><strong>" . $tree['label']. "</strong>";
 	  foreach($tree['items'] as $n => $link) {
