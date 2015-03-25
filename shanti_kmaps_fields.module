@@ -769,7 +769,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
        
       // The Render Array
       $element[$delta]['info_popover'] = array(
-        '#theme' => 'info_popover',
+        '#theme' => 'info_popover', // Found in Sarvaka Theme, but need a local one too
         '#label' => $item['header'],
         '#desc' => $desc,
         '#tree' => array(
@@ -795,39 +795,34 @@ function shanti_kmaps_fields_theme() {
   );
 }
 
-// CHANGE THIS TO DO SOMETHING THAT DOES NOT DEPEND ON SARVAKA
-// AND THEN OVERRIDE IN THEME
-/*
+// Not used; overridden by the theme
 function theme_info_popover($variables) {
   $label  = $variables['label'];
   $desc   = $variables['desc'];
   $tree   = $variables['tree'];
   $links  = $variables['links'];
-	$html = "<span>$label</span>"
-	  ."<span class=\"popover-link\"><span class=\"popover-link-tip\"></span>"
-	  ."<span class=\"icon shanticon-menu3\"></span></span>"
-	  ."<div class=\"popover\" data-title=\"$label\">"
-    ."<div class=\"popover-body\">"
-    ."<div class=\"desc\">$desc</div>";
+  $ancestors = '';
   if (count($tree['items'])) {
-    $html .= "<div class=\"parents clearfix\"><p><strong>" . $tree['label']. "</strong>";
-	  foreach($tree['items'] as $n => $link) {
-		  $html .= "{$link}";
-	  }
-	}
-	$html .= "</p></div></div><div class=\"popover-footer\">";
+    $ancestors .= "<div><strong>" . $tree['label'] . "</strong>: ";
+    $ancestors .= implode('/', $tree['items']) . "</div>\n";
+  }
+  $links_expanded = '';
 	foreach($links as $mylabel => $info) {
 		$options = array();
 		if(!empty($info['external'])) { 
 		  $options['attributes']['target'] = '_blank'; 
 		}
 		$options['attributes']['class'] = "icon shanticon-{$info['icon']}";
-		$html .= "<div class=\"popover-footer-button\">" . l($mylabel, $info['href'], $options) . "</div>";
+		$links_expanded .= "<div>" . l($mylabel, $info['href'], $options) . "</div>";
 	}
-	$html .= "</div></div>";
+  $html = "<div>\n"
+    . "<div>$label</div>\n"
+    . "<div>$desc</div>\n"
+    . $ancestors
+    . $links_expanded
+    . "</div>\n";
 	return $html;
 }
-*/ 
 
 function _shanti_kmaps_fields_decode_path($path, $delim = '--'){
   $nicepath = str_replace("}}{{",$delim,$path);
