@@ -596,7 +596,7 @@ function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id) {
     $terms['subjects'] += $kmap_response['feature']['associated_resources']['subject_count'];
     $terms['places']   += $kmap_response['feature']['associated_resources']['related_feature_count'];
   }
-  else if ($kmap_domain == 'subjects') {
+  elseif ($kmap_domain == 'subjects') {
     $terms['places']   += $kmap_response['feature']['associated_resources']['place_count'];
     $terms['subjects'] += $kmap_response['feature']['associated_resources']['related_feature_count'];
   }
