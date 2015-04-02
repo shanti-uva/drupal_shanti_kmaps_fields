@@ -262,8 +262,8 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     }
 
     // Note that we are losing info about the relation between the KMap term and the node
-    $kmapids = array();
-    $kmapids_strict = array(); // Just the ones directly linked
+    $kmapids = array(); // This now includes the ancestors
+    $kmapids_strict = array(); // And this just the ones directly tagged
     foreach ($fields as $field_name) { // NEED TO GET FIELD INSTANCE DATA HERE ....
       $terms = field_get_items('node',$node,$field_name);
       if ($terms) {
@@ -272,13 +272,24 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
 			// Kludge -- this ancestor info really needs to come earlier in the process, and
 			// should come from the path value in the field.
 			$term_info = _shanti_kmaps_fields_kmaps_get_info($term['domain'],$term['id']);
-			foreach ($term_info->feature->ancestors as $ancestor) {
-    			$kmapids_tmp[$term['domain'] .'-'. $ancestor->id] = 1; 			
+			watchdog_array('SHANTI','ancestors',$term_info->feature);
+			if ($term['domain'] == 'subjects') {
+				foreach ($term_info->feature->ancestors as $ancestor) {
+					$kmapids_tmp[$term['domain'] .'-'. $ancestor->id] = 1; 			
+				}
+			}
+			elseif ($term['domain'] == 'places') {
+				foreach ($term_info->feature->feature_types as $feature_type) {
+					foreach ($feature_type->ancestors->feature_type as $ancestor) {
+						$kmapids_tmp[$term['domain'] .'-'. $ancestor->id] = 1; 			
+					}
+				}			
 			}
     		$kmapids_tmp[$term['domain'] .'-'. $term['id']] = 2;
     		$kmapids_strict[] = $term['domain'] .'-'. $term['id'];
         }    
         $kmapids = array_keys($kmapids_tmp);
+        watchdog_array('SHANTI','kmapids',$kmapids);
       }
     }
         
