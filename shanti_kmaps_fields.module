@@ -279,8 +279,8 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
 				}
 			}
 			elseif ($term['domain'] == 'places') {
-				foreach ($term_info->feature->feature_types as $feature_type) {
-					foreach ($feature_type->ancestors->feature_type as $ancestor) {
+				foreach ($term_info->feature->perspectives as $perspective) {
+					foreach ($perspective->ancestors as $ancestor) {
 						$kmapids_tmp[$term['domain'] .'-'. $ancestor->id] = 1; 			
 					}
 				}			
@@ -288,7 +288,7 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     		$kmapids_tmp[$term['domain'] .'-'. $term['id']] = 2;
     		$kmapids_strict[] = $term['domain'] .'-'. $term['id'];
         }    
-        $kmapids = array_keys($kmapids_tmp);
+        $kmapids += array_keys($kmapids_tmp);
         watchdog_array('SHANTI','kmapids',$kmapids);
       }
     }
@@ -306,6 +306,7 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
       'kmapid_strict'	=> $kmapids_strict,
     );
   }
+  watchdog_array('SHANTI','solrdoc',$doc);
   return $doc;
 }
 
