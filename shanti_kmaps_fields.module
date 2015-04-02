@@ -263,14 +263,23 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
 
     // Note that we are losing info about the relation between the KMap term and the node
     $kmapids = array();
-    foreach ($fields as $field_name) { /// NEED TO GET FIELD INSTANCE DATA HERE ....
+    foreach ($fields as $field_name) { // NEED TO GET FIELD INSTANCE DATA HERE ....
       $terms = field_get_items('node',$node,$field_name);
       if ($terms) {
+      	$kmapids_tmp = array(); // Store as hash keys to remove duplicates since ancestor tree often includes the term itself
         foreach ($terms as $term) {
-          $kmapids[] = $term['domain'] .'-'. $term['id']; 
+			// Kludge -- this ancestor info really needs to come earlier in the process, and
+			// should come from the path value in the field.
+			$term_info = _shanti_kmaps_fields_kmaps_get_info($term['domain'],$term['id']);
+			foreach ($term_info->feature->ancestors as $ancestor) {
+    			$kmapids_tmp[$term['domain'] .'-'. $ancestor->id] = 1; 			
+			}
+    		$kmapids_tmp[$term['domain'] .'-'. $term['id']] = 2;
         }    
+        $kmapids = array_keys($kmapids_tmp);
       }
     }
+        
     $doc[] = array(
       'service'     => SHANTI_KMAPS_ADMIN_SERVICE,
       'asset_type'  => variable_get('shanti_kmaps_fields_asset_type__' . $node->type), 
