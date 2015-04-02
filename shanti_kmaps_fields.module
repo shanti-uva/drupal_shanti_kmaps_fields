@@ -263,6 +263,7 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
 
     // Note that we are losing info about the relation between the KMap term and the node
     $kmapids = array();
+    $kmapids_strict = array(); // Just the ones directly linked
     foreach ($fields as $field_name) { // NEED TO GET FIELD INSTANCE DATA HERE ....
       $terms = field_get_items('node',$node,$field_name);
       if ($terms) {
@@ -275,21 +276,23 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     			$kmapids_tmp[$term['domain'] .'-'. $ancestor->id] = 1; 			
 			}
     		$kmapids_tmp[$term['domain'] .'-'. $term['id']] = 2;
+    		$kmapids_strict[] = $term['domain'] .'-'. $term['id'];
         }    
         $kmapids = array_keys($kmapids_tmp);
       }
     }
         
     $doc[] = array(
-      'service'     => SHANTI_KMAPS_ADMIN_SERVICE,
-      'asset_type'  => variable_get('shanti_kmaps_fields_asset_type__' . $node->type), 
-      'id'          => $node->nid,
-      'uid'         => SHANTI_KMAPS_ADMIN_SERVICE .'-'. $node->nid,
-      'url_html'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_html__'.$node->type)), array('absolute' => TRUE)),
-      'url_ajax'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)), array('absolute' => TRUE)),
-      'url_json'    => url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)), array('absolute' => TRUE)),
-      'caption'     => $node->title,
-      'kmapid'      => $kmapids
+      'service'     	=> SHANTI_KMAPS_ADMIN_SERVICE,
+      'asset_type'  	=> variable_get('shanti_kmaps_fields_asset_type__' . $node->type), 
+      'id'          	=> $node->nid,
+      'uid'         	=> SHANTI_KMAPS_ADMIN_SERVICE .'-'. $node->nid,
+      'url_html'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_html__'.$node->type)), array('absolute' => TRUE)),
+      'url_ajax'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)), array('absolute' => TRUE)),
+      'url_json'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)), array('absolute' => TRUE)),
+      'caption'     	=> $node->title,
+      'kmapid'      	=> $kmapids,
+      'kmapid_strict'	=> $kmapids_strict,
     );
   }
   return $doc;
