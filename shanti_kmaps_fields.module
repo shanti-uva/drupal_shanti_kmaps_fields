@@ -2,6 +2,8 @@
 
 define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module','shanti_kmaps_fields'));
 
+//$shanti_kmaps_fields_kmap_info = array();
+
 function shanti_kmaps_fields_menu() {
   return array(
     'shanti_kmaps_fields/api/test' => array(
@@ -87,7 +89,7 @@ function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
   
   $service = SHANTI_KMAPS_ADMIN_SERVICE;
   $nid_count = count($context['results']['nids']);
-  $count = 50;  
+  $count = 100;  # Experimenting ... 50 worked
   if ($nid_count < $count) { $count = $nid_count; }
   $context['message'] = t("Processing next $count of $nid_count nodes.");
   $solr_actions = array();
@@ -249,7 +251,7 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
   $doc = array();  
   foreach ($nid_list as $nid) {
     $node = node_load($nid);
-	$kmapids = array(); // This now includes the ancestors
+		$kmapids = array(); // This now includes the ancestors
   	//$kmapids_strict = array(); // And this just the ones directly tagged
     if (!$node) { return "Not a node."; }
 
@@ -269,23 +271,8 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
       $terms = field_get_items('node',$node,$field_name);
       if ($terms) {
         foreach ($terms as $term) {
-			// Kludge -- this ancestor info really needs to come earlier in the process, and
-			// should come from the path value in the field.
-			$term_info = _shanti_kmaps_fields_kmaps_get_info($term['domain'],$term['id']);
-			if ($term['domain'] == 'subjects') {
-				foreach ($term_info->feature->ancestors as $ancestor) {
-					$kmapids[] = $term['domain'] .'-'. $ancestor->id;
-				}
-			}
-			elseif ($term['domain'] == 'places') {
-				foreach ($term_info->feature->perspectives as $perspective) {
-					foreach ($perspective->ancestors as $ancestor) {
-						$kmapids[] = $term['domain'] .'-'. $ancestor->id;
-					}
-				}			
-			}
-    		$kmapids[] = $term['domain'] .'-'. $term['id'];
-    		//$kmapids_strict[] = $term['domain'] .'-'. $term['id'];
+					$these_ids = _shanti_kmaps_fields_get_related_kmap_terms($term['domain'],$term['id']);
+					$kmapids = array_merge($kmapids, $these_ids);
         }                 
       }
     }
@@ -302,6 +289,7 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
       //'kmapid_strict'	=> array_unique($kmapids_strict),
     );
   }
+  watchdog_array('x','y',$doc);
   return $doc;
 }
 
@@ -538,8 +526,13 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
     foreach ($node->kmap_data as $field_name => $data) {
       $node->{$field_name}[$lang] = array();
       foreach ($data as $fid => $item) {
+      
+      	// Get the ancestors and put in RAW
+      	$kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'],$item['id']);
+				$raw_string = '|'.implode('|',$kmapids).'|';
+				watchdog_array('SHANTI','raw',$raw_string);
         $node->{$field_name}[$lang][] = array(
-          'raw'     => "NOT USED",
+          'raw'     => $raw_string,
           'id'      => $item['id'],
           'header'  => $item['header'],
           'path'    => $item['path'],
@@ -582,7 +575,7 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
       drupal_set_message("URL " . $url);
     }
     if ($message) {
-      dpm($resp);
+      //dpm($resp);
       drupal_set_message("Index response: " . $resp->status_message);
     } 
   } else {
@@ -870,10 +863,33 @@ function shanti_kmaps_fields_kmaps_autocomplete_func($domain = 'subjects', $stri
 // INTERNAL
 
 function _shanti_kmaps_fields_kmaps_get_info($domain, $id) {
+	//
+	$kmap_id = "$domain-$id";
+	$kmap_info = null;
+	//$shanti_kmaps_fields_kmap_info[$kmap_id] = &drupal_static(__FUNCTION__);
+	//if (!isset($shanti_kmaps_fields_kmap_info[$kmap_id])) {
+    if ($cache = cache_get('shanti_kmaps_fields_kmap_info_' . $kmap_id)) {
+      //$shanti_kmaps_fields_kmap_info[$kmap_id] = $cache->data;
+      $kmap_info = $cache->data;
+    }
+    else {
+			$server = _shanti_kmaps_fields_get_kmaps_server($domain);
+			$request = new KMapsAPI($domain, $server);
+      //$shanti_kmaps_fields_kmap_info[$kmap_id] = $request->searchByID($id);
+      //cache_set('shanti_kmaps_fields_kmap_info_' . $kmap_id, $shanti_kmaps_fields_kmap_info[$kmap_id], 'cache');
+      $kmap_info = $request->searchByID($id);
+      cache_set('shanti_kmaps_fields_kmap_info_' . $kmap_id, $kmap_info, 'cache');
+    }
+  //}
+  return $kmap_info;
+  //return $shanti_kmaps_fields_kmap_info[$kmap_id];
+  //
+  /*
   $server = _shanti_kmaps_fields_get_kmaps_server($domain);
   $request = new KMapsAPI($domain, $server);
   $result = $request->searchByID($id);
   return $result;
+  */
 }
 
 function _shanti_kmaps_fields_get_kmaps_server($domain = 'subjects') {
@@ -882,4 +898,23 @@ function _shanti_kmaps_fields_get_kmaps_server($domain = 'subjects') {
   } else {
     return FALSE;
   }
+}
+
+function _shanti_kmaps_fields_get_related_kmap_terms($domain, $kid) {
+	$kmap_terms = array();
+	$term_info = _shanti_kmaps_fields_kmaps_get_info($domain, $kid);
+	if ($domain == 'subjects') {
+		foreach ($term_info->feature->ancestors as $ancestor) {
+			$kmap_terms[] = $domain .'-'. $ancestor->id;
+		}
+	}
+	elseif ($domain == 'places') {
+		foreach ($term_info->feature->perspectives as $perspective) {
+			foreach ($perspective->ancestors as $ancestor) {
+				$kmap_terms[] = $domain .'-'. $ancestor->id;
+			}
+		}			
+	}
+	$kmap_terms[] = $domain .'-'. $kid;
+	return $kmap_terms;
 }
