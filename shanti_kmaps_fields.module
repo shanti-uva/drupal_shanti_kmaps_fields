@@ -297,7 +297,7 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
       'url_ajax'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)), array('absolute' => TRUE)),
       'url_json'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)), array('absolute' => TRUE)),
       'caption'     	=> $node->title,
-      'kmapid'      	=> array_unique($kmapids),
+      'kmapid'      	=> array_values(array_unique($kmapids)),
       //'kmapid_strict'	=> array_unique($kmapids_strict),
     );
   }
@@ -581,6 +581,7 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
       drupal_set_message("URL " . $url);
     }
     if ($message) {
+      dpm($resp);
       drupal_set_message("Index response: " . $resp->status_message);
     } 
   } else {
