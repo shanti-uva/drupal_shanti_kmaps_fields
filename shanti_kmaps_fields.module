@@ -248,6 +248,8 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
   $doc = array();  
   foreach ($nid_list as $nid) {
     $node = node_load($nid);
+	$kmapids = array(); // This now includes the ancestors
+  	//$kmapids_strict = array(); // And this just the ones directly tagged
     if (!$node) { return "Not a node."; }
 
     // This query assumes that we have defined only one field type in hook_field_info()
@@ -262,37 +264,30 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
     }
 
     // Note that we are losing info about the relation between the KMap term and the node
-    $kmapids = array(); // This now includes the ancestors
-    $kmapids_strict = array(); // And this just the ones directly tagged
     foreach ($fields as $field_name) { // NEED TO GET FIELD INSTANCE DATA HERE ....
       $terms = field_get_items('node',$node,$field_name);
       if ($terms) {
-      	$kmapids_tmp = array(); // Store as hash keys to remove duplicates since ancestor tree often includes the term itself
         foreach ($terms as $term) {
 			// Kludge -- this ancestor info really needs to come earlier in the process, and
 			// should come from the path value in the field.
 			$term_info = _shanti_kmaps_fields_kmaps_get_info($term['domain'],$term['id']);
-			watchdog_array('SHANTI','ancestors',$term_info->feature);
 			if ($term['domain'] == 'subjects') {
 				foreach ($term_info->feature->ancestors as $ancestor) {
-					$kmapids_tmp[$term['domain'] .'-'. $ancestor->id] = 1; 			
+					$kmapids[] = $term['domain'] .'-'. $ancestor->id;
 				}
 			}
 			elseif ($term['domain'] == 'places') {
 				foreach ($term_info->feature->perspectives as $perspective) {
 					foreach ($perspective->ancestors as $ancestor) {
-						$kmapids_tmp[$term['domain'] .'-'. $ancestor->id] = 1; 			
+						$kmapids[] = $term['domain'] .'-'. $ancestor->id;
 					}
 				}			
 			}
-    		$kmapids_tmp[$term['domain'] .'-'. $term['id']] = 2;
-    		$kmapids_strict[] = $term['domain'] .'-'. $term['id'];
-        }    
-        $kmapids += array_keys($kmapids_tmp);
-        watchdog_array('SHANTI','kmapids',$kmapids);
+    		$kmapids[] = $term['domain'] .'-'. $term['id'];
+    		//$kmapids_strict[] = $term['domain'] .'-'. $term['id'];
+        }                 
       }
     }
-        
     $doc[] = array(
       'service'     	=> SHANTI_KMAPS_ADMIN_SERVICE,
       'asset_type'  	=> variable_get('shanti_kmaps_fields_asset_type__' . $node->type), 
@@ -302,11 +297,10 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
       'url_ajax'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)), array('absolute' => TRUE)),
       'url_json'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)), array('absolute' => TRUE)),
       'caption'     	=> $node->title,
-      'kmapid'      	=> $kmapids,
-      'kmapid_strict'	=> $kmapids_strict,
+      'kmapid'      	=> array_unique($kmapids),
+      //'kmapid_strict'	=> array_unique($kmapids_strict),
     );
   }
-  watchdog_array('SHANTI','solrdoc',$doc);
   return $doc;
 }
 
