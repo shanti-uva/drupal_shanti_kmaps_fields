@@ -202,9 +202,10 @@ function shanti_kmaps_fields_form_alter_submit($form, &$form_state) {
 }
 
 function shanti_kmaps_fields_api_test() {
-	$parents = shanti_kmaps_fields_get_my_parents('field_kmap_places',15553);
-	$out = implode('+',$parents);
-	print "OUT: $out";
+	//print "<pre>\n";
+	shanti_kmaps_fields_update_fields();
+	//print "</pre>\n";
+	print "DONE";
 }
 
 function shanti_kmaps_fields_api_all() {
@@ -528,7 +529,7 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
       	
       	// Get the ancestors and put in RAW
       	$kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'],$item['id']);
-				$raw_string = implode(' ',$kmapids);
+				$raw_string = '<'.implode('> <',$kmapids).'>'; // CREATE RAW FUNCTION
 				$raw_string = preg_replace('/(subjects|places)-/','',$raw_string); // Kludge 
 				watchdog_array('SHANTI','raw',$raw_string);
       
@@ -918,9 +919,45 @@ function shanti_kmaps_fields_get_my_parents($field_name, $kid) {
 	$col_id  	= $field_name . '_id';
 	$sql = 'SELECT `'.$col_id.'` FROM {'.$table.'} WHERE `'.$col_raw.'` RLIKE :kid';
 	$parents = array();
-	$rs = db_query($sql,array(':kid' => $kid));
+	$rs = db_query($sql,array(':kid' => "<$kid>"));
 	while ($parent = $rs->fetchColumn(0)) {
 		$parents[] = $parent;
 	}
 	return $parents;
+}
+
+function shanti_kmaps_fields_update_fields() {
+	
+	// Turn indexing off
+	$opt_val = variable_get('shanti_kmaps_admin_server_solr_opt_in');
+	variable_set('shanti_kmaps_admin_server_solr_opt_in',0);
+	
+	$fields = array();
+	$sql1 = "select i.field_name as 'f' from field_config_instance i JOIN field_config c ON (c.id = i.field_id) where i.bundle = 'book' and c.type = 'shanti_kmaps_fields_default'";
+  $rs1 = db_query($sql1);
+  while ($r = $rs1->fetchObject()) {
+    $fields[] = $r->f;
+  }
+	
+	$sql2 = "SELECT nid FROM {book} WHERE nid = bid";
+	$rs2 = db_query($sql2);
+	while ($r = $rs2->fetchObject()) {
+		$node = node_load($r->nid);
+		
+		$lang = $node->language;
+		foreach ($fields as $field) {
+			foreach ($node->{$field}[$lang] as $i => $f) {
+				$related = _shanti_kmaps_fields_get_related_kmap_terms($f['domain'],$f['id']);
+				$raw_string = '<'.implode('> <',$related).'>'; // CREATE RAW FUNCTION
+				$raw_string = preg_replace('/(subjects|places)-/','',$raw_string); // Kludge 
+				$node->{$field}[$lang][$i]['raw'] = $raw_string;
+			}		
+		}
+		
+		node_save($node);
+		print "$r->nid ";
+	}
+	
+	// Reset indexing
+	variable_set('shanti_kmaps_admin_server_solr_opt_in',$opt_val);
 }
