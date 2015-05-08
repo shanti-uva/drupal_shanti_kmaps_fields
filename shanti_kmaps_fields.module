@@ -108,7 +108,7 @@ function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
     $context['results']['processed']++;
   }
   $solr_actions_doc_del = '{' . implode(',',$solr_actions['del']) . '}';
-  $solr_actions_doc_add = json_encode(_shanti_kmaps_fields_get_solr_doc(array($solr_actions['add'])));
+  $solr_actions_doc_add = json_encode(_shanti_kmaps_fields_get_solr_doc($solr_actions['add']));
 	_shanti_kmaps_fields_update_solr_index($solr_actions_doc_del, TRUE, TRUE);
 	_shanti_kmaps_fields_update_solr_index($solr_actions_doc_add, TRUE, TRUE);
 
