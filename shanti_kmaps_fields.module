@@ -95,9 +95,9 @@ function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
   
   $service = SHANTI_KMAPS_ADMIN_SERVICE;
   $nid_count = count($context['results']['nids']);
-  $count = 100;  # Experimenting ... 50 worked
+  $count = 100;  
   if ($nid_count < $count) { $count = $nid_count; }
-  $context['message'] = t("Processing next $count of " . $context['sandbox']['max'] . " nodes.");
+  $context['message'] = t("Indexing next $count of " . $context['sandbox']['max'] . " nodes.");
   $solr_actions = array();
   for ($i = 0; $i < $count; $i++) {
     $nid = array_shift($context['results']['nids']); 
@@ -109,8 +109,8 @@ function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
   }
   $solr_actions_doc_del = '{' . implode(',',$solr_actions['del']) . '}';
   $solr_actions_doc_add = json_encode(_shanti_kmaps_fields_get_solr_doc($solr_actions['add']));
-	_shanti_kmaps_fields_update_solr_index($solr_actions_doc_del, TRUE, TRUE);
-	_shanti_kmaps_fields_update_solr_index($solr_actions_doc_add, TRUE, TRUE);
+	_shanti_kmaps_fields_update_solr_index($solr_actions_doc_del, FALSE, FALSE);
+	_shanti_kmaps_fields_update_solr_index($solr_actions_doc_add, FALSE, FALSE);
 
   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
