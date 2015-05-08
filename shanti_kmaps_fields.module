@@ -2,8 +2,6 @@
 
 define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module','shanti_kmaps_fields'));
 
-//$shanti_kmaps_fields_kmap_info = array();
-
 function shanti_kmaps_fields_menu() {
   return array(
     'shanti_kmaps_fields/api/test' => array(
@@ -37,13 +35,13 @@ function shanti_kmaps_fields_menu() {
       'type'              => MENU_CALLBACK,  
     ),
     'admin/config/content/shanti_kmaps_fields' => array(
-      'title' 	=> 'SHANTI KMaps Fields',
-      'page callback' 	=> 'shanti_kmaps_fields_admin_page',
-      'type' 	=> MENU_NORMAL_ITEM,
-      'weight' 	=> 10,
+      'title' 						=> 'SHANTI KMaps Fields',
+      'page callback' 		=> 'shanti_kmaps_fields_admin_page',
+      'type' 							=> MENU_NORMAL_ITEM,
+      'weight' 						=> 10,
       'access arguments' 	=> array('administer shanti_kmaps_fields'),                 
     ),
-    'shanti_kmaps_fields/reindexer' => array(
+    'admin/shanti_kmaps_fields/reindexer' => array(
       'title'             => 'KMaps Reindexer',
       'page callback'     => 'shanti_kmaps_fields_reindexer',
       'access arguments'  => array('administer shanti_kmaps_fields'),
@@ -63,7 +61,7 @@ function shanti_kmaps_fields_reindexer() {
     'finished'          => 'shanti_kmaps_fields_reindexer_finished',
     'title'             => t('KMaps Fields Reindexer'),
     'init_message'      => t('Reindexer is starting.'),
-    'progress_message'  => t('Processed @current out of @total.'),
+    'progress_message'  => t('Processed @current out of @total batch jobs.'),
     'error_message'     => t('KMaps Fields Reindexer has encountered an error.'),    
   );
   batch_set($batch);
@@ -71,6 +69,7 @@ function shanti_kmaps_fields_reindexer() {
 }
 
 function shanti_kmaps_fields_reindexer_get_nids(&$context) {
+  $context['message'] = t("Acquiring all text node IDs to reindex.");
   $nids = array();
   $kmap_field = 'shanti_kmaps_fields_default'; // May want to parametize later
   $sql = "SELECT CONCAT('field_data_',`field_name`) as 'tname' FROM {field_config} WHERE `type` LIKE :kmap_field ";
@@ -140,7 +139,7 @@ function shanti_kmaps_fields_admin_page() {
       '#theme' => 'item_list',
       '#attributes' => array(),
       '#items' => array(
-        array('data' => l('Reindex nodes with kmaps fields','shanti_kmaps_fields/reindexer')),
+        array('data' => l('Reindex nodes with kmaps fields','admin/shanti_kmaps_fields/reindexer')),
       ),
     ),
   );
