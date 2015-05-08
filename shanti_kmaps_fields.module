@@ -102,17 +102,13 @@ function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
   for ($i = 0; $i < $count; $i++) {
     $nid = array_shift($context['results']['nids']); 
     $context['sandbox']['current_node'] = $nid;
-		//_shanti_kmaps_fields_update_solr_index("{ \"delete\": { \"query\":\"uid:{$service}-{$nid}\" } }", TRUE, TRUE);
-		//_shanti_kmaps_fields_update_solr_index(json_encode(_shanti_kmaps_fields_get_solr_doc(array($nid))), TRUE, TRUE);
     $solr_actions['del'][] = "\"delete\": { \"query\":\"uid:{$service}-{$nid}\" }";
-		//$solr_actions['add'][] = json_encode(_shanti_kmaps_fields_get_solr_doc(array($nid)));
-		$solr_actions['add'][] = _shanti_kmaps_fields_get_solr_doc(array($nid));
+		$solr_actions['add'][] = $nid;
     $context['sandbox']['progress']++;
     $context['results']['processed']++;
   }
   $solr_actions_doc_del = '{' . implode(',',$solr_actions['del']) . '}';
-  //$solr_actions_doc_add = implode(',',$solr_actions['add']);
-  $solr_actions_doc_add = json_encode($solr_actions['add']);
+  $solr_actions_doc_add = json_encode(_shanti_kmaps_fields_get_solr_doc(array($solr_actions['add'[)));
 	_shanti_kmaps_fields_update_solr_index($solr_actions_doc_del, TRUE, TRUE);
 	_shanti_kmaps_fields_update_solr_index($solr_actions_doc_add, TRUE, TRUE);
 
