@@ -107,9 +107,9 @@ function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
     $context['sandbox']['progress']++;
     $context['results']['processed']++;
   }
-  $solr_actions_doc = implode(',',$solr_actions);
+  $solr_actions_doc = '['.implode(',',$solr_actions).']';
 	//_shanti_kmaps_fields_update_solr_index($solr_actions_doc, FALSE, FALSE);
-	_shanti_kmaps_fields_update_solr_index($solr_actions_doc, TRUE, TURE);
+	_shanti_kmaps_fields_update_solr_index($solr_actions_doc, TRUE, TRUE);
   
   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
