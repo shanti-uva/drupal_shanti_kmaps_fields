@@ -36,6 +36,13 @@ function shanti_kmaps_fields_menu() {
       'access arguments'  => array('access content'),
       'type'              => MENU_CALLBACK,  
     ),
+    'admin/config/content/shanti_kmaps_fields' => array(
+      'title' 						=> 'SHANTI KMaps Fields',
+      'page callback' 		=> 'shanti_kmaps_fields_admin_page',
+      'type' 							=> MENU_CALLBACK,
+      'weight' 						=> 10,
+      'access arguments' 	=> array('administer shanti_kmaps_fields'),                 
+    ),
     'shanti_kmaps_fields/reindexer' => array(
       'title'             => 'KMaps Reindexer',
       'page callback'     => 'shanti_kmaps_fields_reindexer',
@@ -101,7 +108,7 @@ function shanti_kmaps_fields_reindexer_del_then_add(&$context) {
     $context['sandbox']['progress']++;
     $context['results']['processed']++;
   }
-  $solr_actions_doc = implode(',',$solr_dels);
+  $solr_actions_doc = implode(',',$solr_actions);
 	_shanti_kmaps_fields_update_solr_index($solr_actions_doc, FALSE, FALSE);
   
   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
@@ -123,6 +130,24 @@ function shanti_kmaps_fields_reindexer_finished($success, $results, $operations)
 }
 
 ////// REINDEXER END //////////
+
+function shanti_kmaps_fields_admin_page() {
+  $build = array(
+    '#type' => 'container',
+    '#prefix' => ('<h2>SHANTI KMaps Fields Admin Page</h2>'),
+    'actions' => array(
+      '#type' => 'ul',
+      '#theme' => 'item_list',
+      '#attributes' => array(),
+      '#items' => array(
+        array('data' => l('Reindex nodes with kmaps fields','shanti_kmaps_fields/reindexer')),
+      ),
+    ),
+  );
+  return $build;
+}
+
+
 
 function shanti_kmaps_fields_permission() {
  return array(
@@ -531,7 +556,6 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
       	$kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'],$item['id']);
 				$raw_string = '<'.implode('> <',$kmapids).'>'; // CREATE RAW FUNCTION
 				$raw_string = preg_replace('/(subjects|places)-/','',$raw_string); // Kludge 
-				watchdog_array('SHANTI','raw',$raw_string);
       
       	$node->{$field_name}[$lang][] = array(
           'raw'     => $raw_string,
