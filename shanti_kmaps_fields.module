@@ -37,10 +37,10 @@ function shanti_kmaps_fields_menu() {
       'type'              => MENU_CALLBACK,  
     ),
     'admin/config/content/shanti_kmaps_fields' => array(
-      'title' 						=> 'SHANTI KMaps Fields',
-      'page callback' 		=> 'shanti_kmaps_fields_admin_page',
-      'type' 							=> MENU_CALLBACK,
-      'weight' 						=> 10,
+      'title' 	=> 'SHANTI KMaps Fields',
+      'page callback' 	=> 'shanti_kmaps_fields_admin_page',
+      'type' 	=> MENU_NORMAL_ITEM,
+      'weight' 	=> 10,
       'access arguments' 	=> array('administer shanti_kmaps_fields'),                 
     ),
     'shanti_kmaps_fields/reindexer' => array(
