@@ -320,6 +320,7 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
       'url_html'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_html__'.$node->type)), array('absolute' => TRUE)),
       'url_ajax'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_ajax__'.$node->type)), array('absolute' => TRUE)),
       'url_json'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_json__'.$node->type)), array('absolute' => TRUE)),
+      'url_thumb'    	=> url(str_replace('__NID__', $node->nid, variable_get('shanti_kmaps_fields_url_thumb__'.$node->type)), array('absolute' => TRUE)),
       'caption'     	=> $node->title,
       'kmapid'      	=> array_values(array_unique($kmapids)),
       //'kmapid_strict'	=> array_unique($kmapids_strict),
