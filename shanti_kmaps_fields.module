@@ -209,6 +209,15 @@ function shanti_kmaps_fields_form_alter(&$form, &$form_state, $form_id) {
       '#required'       => FALSE,
       '#default_value'  => variable_get('shanti_kmaps_fields_url_json__'.$node_type, ''),        
     );
+    $form['shanti_kmaps_fields']['shanti_kmaps_fields_url_thumb'] = array(
+      '#type'           => 'textfield',
+      '#title'          => t('Thumbnail Path'),
+      '#description'    => t('The local Drupal path where the thumbnail for this entity exists.'),
+      '#size'           => 120,
+      '#maxlength'      => 255,
+      '#required'       => FALSE,
+      '#default_value'  => variable_get('shanti_kmaps_fields_url_thumb__'.$node_type, ''),        
+    );
     $form['#submit'][] = 'shanti_kmaps_fields_form_alter_submit';
   }
 }
@@ -218,7 +227,7 @@ function shanti_kmaps_fields_form_alter_submit($form, &$form_state) {
   $var1 = 'shanti_kmaps_fields_asset_type__' . $node_type;
   $val1 = $form_state['input']['shanti_kmaps_fields_asset_type'];
   variable_set($var1,$val1);
-  $url_types = array('html','ajax','json');
+  $url_types = array('html','ajax','json','thumb');
   foreach ($url_types as $url_type) {
     $input_var = 'shanti_kmaps_fields_url_'.$url_type;
     $save_var = $input_var.'__'.$node_type;
