@@ -558,9 +558,12 @@ function shanti_kmaps_fields_node_delete($node) {
 // This function assumes that we are the only ones using kmap_data as key attached to node
 function _shanti_kmaps_fields_add_kmaps_to_node($node) {
   if (isset($node->kmap_data) && $node->kmap_data) {
+  	dpm($node->kmap_data, 'kmap data in if');
+		dpm($node, 'node given');
     $lang = $node->language;    
     foreach ($node->kmap_data as $field_name => $data) {
-      $node->{$field_name}[$lang] = array();
+      $flang = array_shift(array_keys($node->{$field_name})); // use lang in field array if exists
+			if (empty($flang)) { $flang = $lang; }									// otherwise use node's lang
       foreach ($data as $fid => $item) {
       	
       	// Get the ancestors and put in RAW
@@ -568,7 +571,7 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
 				$raw_string = '<'.implode('> <',$kmapids).'>'; // CREATE RAW FUNCTION
 				$raw_string = preg_replace('/(subjects|places)-/','',$raw_string); // Kludge 
       
-      	$node->{$field_name}[$lang][] = array(
+      	$node->{$field_name}[$flang][] = array(
           'raw'     => $raw_string,
           'id'      => $item['id'],
           'header'  => $item['header'],
@@ -578,9 +581,11 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
       }    
     }
   }
+	field_attach_presave('node', $node);
   field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise
   entity_get_controller('node')->resetCache(array($node->nid)); // This is needed to get most recent ids
   _shanti_kmaps_fields_push_solr_doc($node->nid);
+	dpm($node, 'node after attach');
   return $node;
 }
 
