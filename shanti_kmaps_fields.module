@@ -586,8 +586,13 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
 }
 
 function _shanti_kmaps_fields_push_solr_doc($nid) {
-  $solrdoc = json_encode(_shanti_kmaps_fields_get_solr_doc(array($nid)));
-  _shanti_kmaps_fields_update_solr_index($solrdoc);
+	// Added by ndg8f, prevents nodes that cannot be viewed by anonymous users from being indexed
+	if (node_access('view', node_load($nid), user_load(0))) {
+	  $solrdoc = json_encode(_shanti_kmaps_fields_get_solr_doc(array($nid)));
+	  _shanti_kmaps_fields_update_solr_index($solrdoc);
+	} else {
+		watchdog('kmaps fields', "No anonymous viewing for node {$nid} (remove this msg)");
+	}
 }
 
 function _shanti_kmaps_fields_delete_solr_doc($nid) {
