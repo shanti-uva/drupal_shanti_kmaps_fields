@@ -4,11 +4,11 @@ define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module','shanti_kmaps_fields
 
 function shanti_kmaps_fields_menu() {
   return array(
-    'shanti_kmaps_fields/api/test' => array(
+   /* 'shanti_kmaps_fields/api/test' => array(
       'page callback'     => 'shanti_kmaps_fields_api_test',
       'type'              => MENU_CALLBACK,
       'access arguments'  => array('access content'),
-    ),
+    ),*/
     'shanti_kmaps_fields/api/all' => array(
       'page callback'     => 'shanti_kmaps_fields_api_all',
       'type'              => MENU_CALLBACK,
@@ -236,12 +236,14 @@ function shanti_kmaps_fields_form_alter_submit($form, &$form_state) {
   } 
 }
 
+/** Only works for books
 function shanti_kmaps_fields_api_test() {
 	//print "<pre>\n";
 	shanti_kmaps_fields_update_fields();
 	//print "</pre>\n";
 	print "DONE";
 }
+*/
 
 function shanti_kmaps_fields_api_all() {
 
@@ -967,6 +969,7 @@ function shanti_kmaps_fields_get_my_parents($field_name, $kid) {
 	return $parents;
 }
 
+/* Specifically for books
 function shanti_kmaps_fields_update_fields() {
 	
 	// Turn indexing off
@@ -1003,6 +1006,7 @@ function shanti_kmaps_fields_update_fields() {
 	// Reset indexing
 	variable_set('shanti_kmaps_admin_server_solr_opt_in',$opt_val);
 }
+*/
 
 /**
  * Function to extract a list of ancestors from a field data table row
