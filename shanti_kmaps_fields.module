@@ -560,7 +560,6 @@ function shanti_kmaps_fields_node_delete($node) {
 // This function assumes that we are the only ones using kmap_data as key attached to node
 function _shanti_kmaps_fields_add_kmaps_to_node($node) {
   if (isset($node->kmap_data) && $node->kmap_data) {
-  	
     foreach ($node->kmap_data as $field_name => $data) {
 			$lang = field_language('node', $node, $field_name);
       foreach ($data as $fid => $item) {
@@ -569,12 +568,11 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
       	$kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'],$item['id']);
 				$raw_string = '<'.implode('> <',$kmapids).'>'; // CREATE RAW FUNCTION
 				$raw_string = preg_replace('/(subjects|places)-/','',$raw_string); // Kludge 
-      
       	$node->{$field_name}[$lang][] = array(
           'raw'     => $raw_string,
           'id'      => $item['id'],
           'header'  => $item['header'],
-          'path'    => $item['path'],
+          'path'    => _shanti_kmaps_fields_get_kmap_path($item['domain'],$item['id']), // Added by ndg to update path as well as raw
           'domain'  => $item['domain'],
         );
       }    
@@ -954,6 +952,36 @@ function _shanti_kmaps_fields_get_related_kmap_terms($domain, $kid) {
 		cache_set('shanti_kmaps_fields_get_related_kmap_terms' . $kmap_id, $kmap_terms, 'cache');
 	}
 	return $kmap_terms;
+}
+
+/**
+ * Function to build the path of kmaps using {{header}} format
+ */
+function _shanti_kmaps_fields_get_kmap_path($domain, $kid) {
+	$kmap_id = "$domain-$kid";
+	$cacheid = 'shanti_kmaps_fields_get_kmap_path_' . $domain . '_' . $kmap_id;
+	$kmap_path = array();
+	if ($cache = cache_get($cacheid)) {
+		$kmap_path  = $cache->data;
+	}
+	else {
+		$term_info = _shanti_kmaps_fields_kmaps_get_info($domain, $kid);
+		if ($domain == 'subjects') {
+			foreach ($term_info->feature->ancestors as $ancestor) {
+				$kmap_path [] = '{{' . $ancestor->header . "}}";
+			}
+		}
+		elseif ($domain == 'places') {
+			foreach ($term_info->feature->perspectives as $perspective) {
+				foreach ($perspective->ancestors as $ancestor) {
+					$kmap_path[] = '{{' . $ancestor->header . "}}";;
+				}
+			}			
+		}	
+		//$kmap_path[] = '{{' . $term_info->feature->header . '}}';
+		cache_set($cacheid, $kmap_path, 'cache');
+	}
+	return implode('',$kmap_path);
 }
 
 function shanti_kmaps_fields_get_my_parents($field_name, $kid) {
