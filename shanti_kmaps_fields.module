@@ -661,6 +661,18 @@ function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id) {
   return $terms;
 }
 
+/**
+ * Just get the title for a kmaps from its ID
+ */
+function shanti_kmaps_fields_get_title_by_id($domain = 'subjects', $kmap_id) {
+	$server = 'http://' . $domain . '.kmaps.virginia.edu';
+	$kma = new KMapsAPI($domain, $server);
+	$kma->setKMapID($kmap_id);
+	$qres = $kma->execute();
+	$pts = explode('|', $qres[$kmap_id]);
+	return $pts[0];
+}
+
 ////////// FORMATTERS //////////
 
 function shanti_kmaps_fields_field_formatter_info() {
