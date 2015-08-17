@@ -670,7 +670,7 @@ function shanti_kmaps_fields_get_title_by_id($domain = 'subjects', $kmap_id) {
 	$kma->setKMapID($kmap_id);
 	$qres = $kma->execute();
 	$pts = explode('|', $qres[$kmap_id]);
-	return $pts[0];
+	return trim($pts[0]);
 }
 
 ////////// FORMATTERS //////////

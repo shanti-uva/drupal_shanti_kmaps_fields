@@ -222,9 +222,17 @@ class KMapsAPI {
       elseif ($this->fetch_mode == 'by_fid_cached') {
         // We append an ancestor path to provide context for the item
         $ancestors = array();
-        foreach ($data->feature->ancestors as $ancestor) { $ancestors[] = $ancestor->header; }
-        array_pop($ancestors); // Remove the last ancestor, which is the current item
-        $parsed_data[$data->feature->id] = $data->feature->header . ' | ' . implode('/', $ancestors); 
+				if (isset($data->feature->ancestors)) { // Subjects
+	        foreach ($data->feature->ancestors as $ancestor) { $ancestors[] = $ancestor->header; }
+	        array_pop($ancestors); // Remove the last ancestor, which is the current item
+	        $parsed_data[$data->feature->id] = $data->feature->header . ' | ' . implode('/', $ancestors); 
+				} elseif (isset($data->feature->parents)) { // Places
+					foreach ($data->feature->parents as $ancestor) { $ancestors[] = $ancestor->header; }
+	        array_pop($ancestors); // Remove the last ancestor, which is the current item
+	        $parsed_data[$data->feature->id] = $data->feature->header . ' | ' . implode('/', $ancestors); 
+				} else {
+					watchdog('shanti kmaps fields', "Ancestor or parent property not defined: " . serialize($data));
+				}
       }    
     // Raw mode is for other purposes
     } 
