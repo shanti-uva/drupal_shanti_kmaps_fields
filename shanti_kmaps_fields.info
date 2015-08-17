@@ -2,7 +2,7 @@ name = SHANTI KMaps Fields
 description = Defines fields, widgets, and formatters for adding KMap items to entities.
 core = 7.x
 package = SHANTI
-
+version = 7.x-1.0-beta (AV-MANU-19)
 configure = admin/config/content/shanti_kmaps_fields
 
 dependencies[] = jquery_update
