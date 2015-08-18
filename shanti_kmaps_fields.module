@@ -589,7 +589,7 @@ function _shanti_kmaps_fields_push_solr_doc($nid) {
 	// Added by ndg8f, prevents nodes that cannot be viewed by anonymous users from being indexed
 	if (node_access('view', node_load($nid), user_load(0))) {
 	  $solrdoc = json_encode(_shanti_kmaps_fields_get_solr_doc(array($nid)));
-	  _shanti_kmaps_fields_update_solr_index($solrdoc);
+	  _shanti_kmaps_fields_update_solr_index($solrdoc, FALSE, FALSE);
 	} else {
 		watchdog('kmaps fields', "No anonymous viewing for node {$nid} (remove this msg)");
 	}
@@ -598,7 +598,7 @@ function _shanti_kmaps_fields_push_solr_doc($nid) {
 function _shanti_kmaps_fields_delete_solr_doc($nid) {
   $service = SHANTI_KMAPS_ADMIN_SERVICE;
   $solrdoc = "{ \"delete\": { \"query\":\"uid:{$service}-{$nid}\" } }";
-  _shanti_kmaps_fields_update_solr_index($solrdoc);
+  _shanti_kmaps_fields_update_solr_index($solrdoc, FALSE, FALSE);
 }
 
 function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $message = TRUE) {
@@ -619,7 +619,7 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
     }
     if ($message) {
       //dpm($resp);
-      drupal_set_message("Index response: " . $resp->status_message);
+      drupal_set_message("Index response: " . $resp->status_message, 'status', FALSE);
     } 
   } else {
     drupal_set_message("KMap data not published to SHANTI index, as requested.", 'status', FALSE);
@@ -967,7 +967,8 @@ function _shanti_kmaps_fields_get_related_kmap_terms($domain, $kid) {
 }
 
 /**
- * Function to build the path of kmaps using {{header}} format
+ * Function to retrieve a kmap node's ancestor list and return its path 
+ * in the format, "{{ancestor1}}{{ancestor2}}...", for the path variable in a Shanti Kmaps Field
  */
 function _shanti_kmaps_fields_get_kmap_path($domain, $kid) {
 	$kmap_id = "$domain-$kid";
@@ -986,11 +987,10 @@ function _shanti_kmaps_fields_get_kmap_path($domain, $kid) {
 		elseif ($domain == 'places') {
 			foreach ($term_info->feature->perspectives as $perspective) {
 				foreach ($perspective->ancestors as $ancestor) {
-					$kmap_path[] = '{{' . $ancestor->header . "}}";;
+					$kmap_path[] = '{{' . $ancestor->header . "}}";
 				}
 			}			
 		}	
-		//$kmap_path[] = '{{' . $term_info->feature->header . '}}';
 		cache_set($cacheid, $kmap_path, 'cache');
 	}
 	return implode('',$kmap_path);
@@ -1049,21 +1049,36 @@ function shanti_kmaps_fields_update_fields() {
 */
 
 /**
- * Function to extract a list of ancestors from a field data table row
+ * Function to extract a list of ancestors from a field's data table's entry by finding the variable with
+ * the "_raw" value in it and parsing that.
+ * 
+ * @param array $row
+ * A single row returned from a Database Connection object as one iterates through results. 
+ * 
+ * @param boolean $include_self
+ * Whether or not to include the current kmap node
+ * 
  */
 function shanti_kmaps_fields_get_ancestors($row, $include_self = TRUE) {
 	foreach($row as $col => $value) {
 		if (preg_match('/_raw$/', $col)) {
-			return shanti_kmaps_fields_process_raw($value, $include_self);
+			return shanti_kmaps_fields_parse_raw($value, $include_self);
 		}
 	}
 }
 
 /**
  * Helper function that takes a "raw" string and turns it into an unique array of kmap values
- * Return an a
+ * Returns an list of ancestors as an array
+ * 
+ * @param string $raw
+ * The "raw" value from a kmap fields data table
+ * 
+ * @param boolean $include_self
+ * Whether or not to include the current kmap node
+ * 
  */
-function shanti_kmaps_fields_process_raw($raw, $include_self = TRUE) {
+function shanti_kmaps_fields_parse_raw($raw, $include_self = TRUE) {
 	$ancestors = array_unique(explode('> <', substr($raw,1, strlen($raw) - 2)));
 	if (!$include_self) {
 		array_pop($ancestors);
