@@ -562,20 +562,22 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
   if (isset($node->kmap_data) && $node->kmap_data) {
     foreach ($node->kmap_data as $field_name => $data) {
 			$lang = field_language('node', $node, $field_name);
-      foreach ($data as $fid => $item) {
-      	
-      	// Get the ancestors and put in RAW
-      	$kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'],$item['id']);
-				$raw_string = '<'.implode('> <',$kmapids).'>'; // CREATE RAW FUNCTION
-				$raw_string = preg_replace('/(subjects|places)-/','',$raw_string); // Kludge 
-      	$node->{$field_name}[$lang][] = array(
-          'raw'     => $raw_string,
-          'id'      => $item['id'],
-          'header'  => $item['header'],
-          'path'    => _shanti_kmaps_fields_get_kmap_path($item['domain'],$item['id']), // Added by ndg to update path as well as raw
-          'domain'  => $item['domain'],
-        );
-      }    
+			if($data && is_array($data)) { 
+	      foreach ($data as $fid => $item) {
+	      	
+	      	// Get the ancestors and put in RAW
+	      	$kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'],$item['id']);
+					$raw_string = '<'.implode('> <',$kmapids).'>'; // CREATE RAW FUNCTION
+					$raw_string = preg_replace('/(subjects|places)-/','',$raw_string); // Kludge 
+	      	$node->{$field_name}[$lang][] = array(
+	          'raw'     => $raw_string,
+	          'id'      => $item['id'],
+	          'header'  => $item['header'],
+	          'path'    => _shanti_kmaps_fields_get_kmap_path($item['domain'],$item['id']), // Added by ndg to update path as well as raw
+	          'domain'  => $item['domain'],
+	        );
+	      }    
+			} 
     }
   }
 
