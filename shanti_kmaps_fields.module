@@ -334,12 +334,13 @@ function _shanti_kmaps_fields_get_solr_doc($nid_list) {
 function shanti_kmaps_fields_field_info() {
   $info = array();
   $info['shanti_kmaps_fields_default'] = array(
-    'label'             => t('KMap Term'),
-    'description'       => t('A KMap Term for integrating content into the Mandala ecology.'),
-    'settings'          => array('kmap_domain' => 'subjects'),
-    'instance_settings' => array('search_view' => NULL), 
-    'default_widget'    => 'kmap_default_widget',
-    'default_formatter' => 'kmap_default_formatter',  
+    'label'             	=> t('KMap Term'),
+    'description'       	=> t('A KMap Term for integrating content into the Mandala ecology.'),
+    'settings'          	=> array('kmap_domain' => 'subjects'),
+    'instance_settings' 	=> array('search_view' => NULL), 
+    'default_widget'    	=> 'kmap_default_widget',
+    'default_formatter' 	=> 'kmap_default_formatter',  
+		'property_type' 			=> 'text', 
   );
   return $info;
 }
