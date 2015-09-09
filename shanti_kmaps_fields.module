@@ -1,6 +1,7 @@
 <?php
 
 define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module','shanti_kmaps_fields'));
+define('SHANTI_KMAPS_CACHE_DURATION', (60 * 60 * 4));  // Cache duration 4 hours
 
 function shanti_kmaps_fields_menu() {
   return array(
@@ -630,10 +631,20 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
 
 function shanti_kmaps_fields_get_assets_for_kmapid($kmap_domain, $kmap_id) {
   $kmap_key = $kmap_domain . '-' . $kmap_id;
+	$cid = 'shanti-kmaps-assets-' . $kmap_key; // Cache id
   $assets = array();
-  $solr_request = drupal_http_request(variable_get('shanti_kmaps_admin_server_solr') 
-    . "/query?q=kmapid:{$kmap_key}&rows=3000");
-  $solr_response = drupal_json_decode($solr_request->data);
+	$cache_row = cache_get($cid);
+	$data = '';
+	// Check is http request is cached, if not cache it
+	if (!$cache_row) {
+	  $solr_request = drupal_http_request(variable_get('shanti_kmaps_admin_server_solr') 
+	    . "/query?q=kmapid:{$kmap_key}&rows=3000");
+	  $data = $solr_request->data;
+		cache_set($cid, $data, 'cache', SHANTI_KMAPS_CACHE_DURATION);
+	} else {
+		$data = $cache_row->data;
+	}
+  $solr_response = drupal_json_decode($data);
   foreach ($solr_response['response']['docs'] as $solr_doc) {
     $assets[$solr_doc['asset_type']][] = array( 'url' => $solr_doc['url_html'], 'caption' => $solr_doc['caption']);
   }
@@ -643,13 +654,25 @@ function shanti_kmaps_fields_get_assets_for_kmapid($kmap_domain, $kmap_id) {
 // "Terms" should be "Associated Resources" here ... 
 function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id) {
   $kmap_key = $kmap_domain . '-' . $kmap_id;
+	$cid = 'shanti-kmaps-terms-' . $kmap_key;
   $terms = array();
   $terms['places']    = 0;
   $terms['subjects']  = 0;
   $terms['photos']    = 0;
-  $kmap_server    = variable_get("shanti_kmaps_admin_server_$kmap_domain");
-  $kmap_request   = drupal_http_request("$kmap_server/features/$kmap_id.json");
-  $kmap_response  = drupal_json_decode($kmap_request->data);
+	
+	$cache_row = cache_get($cid);
+	$data = '';
+	// Check is http request is cached, if not cache it
+	if (!$cache_row) {
+	  $kmap_server    = variable_get("shanti_kmaps_admin_server_$kmap_domain");
+	  $kmap_request   = drupal_http_request("$kmap_server/features/$kmap_id.json");
+		$data = $kmap_request->data;
+		cache_set($cid, $data, 'cache', SHANTI_KMAPS_CACHE_DURATION);
+	} else {
+		$data = $cache_row->data;
+	}
+  $kmap_response  = drupal_json_decode($data);
+	
   if ($kmap_domain == 'places') {
     $terms['subjects'] += $kmap_response['feature']['associated_resources']['subject_count'];
     $terms['places']   += $kmap_response['feature']['associated_resources']['related_feature_count'];
