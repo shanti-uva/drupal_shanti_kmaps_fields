@@ -1061,9 +1061,9 @@ function shanti_kmaps_fields_update_fields() {
  * Whether or not to include the current kmap node
  * 
  */
-function shanti_kmaps_fields_get_ancestors($row, $include_self = TRUE) {
+function shanti_kmaps_fields_get_ancestors($raw, $include_self = TRUE) {
 	foreach($row as $col => $value) {
-		if (preg_match('/_raw$/', $col)) {
+		if (strrpos($col, '_raw') == strlen($col) - 4) {
 			return shanti_kmaps_fields_parse_raw($value, $include_self);
 		}
 	}
