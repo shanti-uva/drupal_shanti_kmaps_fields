@@ -740,7 +740,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
   }
   elseif ($display['type'] == 'kmap_popover_formatter') {
     foreach ($items as $delta => $item) {
-      
+
       // General
       $domain = $field['settings']['kmap_domain'];
       $info = _shanti_kmaps_fields_kmaps_get_info($domain, $item['id']); // trap?
@@ -783,6 +783,7 @@ function shanti_kmaps_fields_field_formatter_view($entity_type, $entity, $field,
       #  $internal_url = str_replace('__KMAPID__', $id, $instance['settings']['search_view']);
       #  $links["Related ".ucfirst($asset_type)] = array('icon' => $asset_type, 'href' => $internal_url);
       #}
+      
       // From the Solr index
       $this_asset_type = variable_get('shanti_kmaps_fields_asset_type__'.$entity->type);
       $external_asset_links = shanti_kmaps_fields_get_assets_for_kmapid($domain, $item['id']);
