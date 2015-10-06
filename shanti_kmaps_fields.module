@@ -434,9 +434,19 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
       
     $domain = $field['settings']['kmap_domain'];
 
-    $element['kmap_raw'] = array( // THIS NEEDS TO GO
+    $element += array(
+      '#type'             => 'fieldset',
+      '#collapsible'      => TRUE, 
+      '#collapsed'        => FALSE,
+      '#tree'             => FALSE,
+      '#element_validate' => array(),
+      '#attributes'       => array('id' => $field_id .'_fieldset'),
+    );
+
+    $element['kmap_raw'] = array(
+      '#title'            	=> t('Search for ' . $domain),
       '#type'               => 'textfield',
-      '#size'               => 200,
+      '#size'               => 80,
       '#maxlength'          => 500,
       '#default_value'      => isset($items[$delta]['raw']) ? $items[$delta]['raw'] : '', // Grab existing content from three field,
       '#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
