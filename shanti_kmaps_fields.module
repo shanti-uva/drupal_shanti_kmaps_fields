@@ -444,7 +444,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     watchdog_array('t','auto',"shanti_kmaps_fields/kmaps_autocomplete/$domain");
 
     $element['kmap_raw'] = array(
-      '#title'            	=> t('Enter a search string'),
+      '#title'            	=> t('Enter a search string 1'),
       '#type'               => 'textfield',
       '#size'               => 80,
       '#maxlength'          => 500,
