@@ -444,11 +444,11 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     watchdog_array('t','auto',"shanti_kmaps_fields/kmaps_autocomplete/$domain");
 
     $element['kmap_raw'] = array(
-      '#title'            	=> t('Enter a search string 1'),
+      '#title'            	=> t('Enter a search string 2'),
       '#type'               => 'textfield',
       '#size'               => 80,
       '#maxlength'          => 500,
-      '#default_value'      => isset($items[$delta]['raw']) ? $items[$delta]['raw'] : '', // Grab existing content from three field,
+      '#default_value'      => isset($items[$delta]['raw']) ? $items[$delta]['raw'] : 'FOO', // Grab existing content from three field,
       '#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
       '#weight'							=> -1
     );
