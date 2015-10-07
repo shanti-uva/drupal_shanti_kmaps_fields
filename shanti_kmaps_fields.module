@@ -438,6 +438,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
   if ($instance['widget']['type'] == 'kmap_default_widget') {
       
     $domain = $field['settings']['kmap_domain'];
+    
+    $element['#type'] = 'fieldset';
 
     $element['kmap_raw'] = array(
       '#title'            	=> t('Enter a search string'),
