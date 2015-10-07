@@ -442,12 +442,13 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     //$element['#type'] = 'fieldset';
     
     $element['kmap_pull'] = array(
-      '#title'            	=> t('Enter a search string 2'),
+      '#title'            	=> t('Enter a search string 56'),
       '#type'               => 'textfield',
       '#size'               => 80,
       '#maxlength'          => 500,
-      '#default_value'      => '...',
-      '#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
+      '#default_value'      => '',
+      '#autocomplete_path'  => 'user/autocomplete',
+      //'#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
 			'#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
     );
 
