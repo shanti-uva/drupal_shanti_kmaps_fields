@@ -410,6 +410,11 @@ function shanti_kmaps_fields_field_widget_info() {
   $info['kmap_default_widget'] = array(
     'label'         => t('Autocomplete'),
     'field types'   => array('shanti_kmaps_fields_default')
+    'settings'      => array(),
+    'behaviors'     => array(
+      'multiple values' => TRUE, 
+      'default value'   => FIELD_BEHAVIOR_DEFAULT,
+    ),    
   );
   $info['kmap_tree_picker '] = array(
     'label'         => t("Tree"),
