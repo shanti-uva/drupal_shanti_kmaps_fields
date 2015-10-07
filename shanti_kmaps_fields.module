@@ -447,8 +447,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
       '#size'               => 80,
       '#maxlength'          => 500,
       '#default_value'      => '',
-      '#autocomplete_path'  => 'user/autocomplete',
-      //'#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
+      //'#autocomplete_path'  => 'user/autocomplete',
+      '#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
 			'#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
     );
 
