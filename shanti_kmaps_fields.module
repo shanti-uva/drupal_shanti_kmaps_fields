@@ -414,7 +414,7 @@ function shanti_kmaps_fields_field_widget_info() {
     'behaviors'     => array(
       'multiple values' => TRUE, 
       'default value'   => FIELD_BEHAVIOR_DEFAULT,
-    ),    
+    ),
   );
   $info['kmap_tree_picker '] = array(
     'label'         => t("Tree"),
