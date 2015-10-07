@@ -448,7 +448,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
       '#type'               => 'textfield',
       '#size'               => 80,
       '#maxlength'          => 500,
-      '#default_value'      => 'Enter a string ...", //sset($items[$delta]['raw']) ? $items[$delta]['raw'] : 'FOO', // Grab existing content from three field,
+      '#default_value'      => 'Enter a string ...', //sset($items[$delta]['raw']) ? $items[$delta]['raw'] : 'FOO', // Grab existing content from three field,
       '#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
     );
     $element['kmap_id'] = array(
