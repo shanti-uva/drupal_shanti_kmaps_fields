@@ -931,20 +931,22 @@ function shanti_kmaps_fields_kmaps_autocomplete_func($domain = 'subjects', $stri
   drupal_json_output($matches);    
 }
 
-// TEST
+// TEST -- WORKED, apparenty can't pass other args to autocomplete functions
 function shanti_kmaps_fields_kmaps_autocomplete_subjects_func($string) {
-  $server = _shanti_kmaps_fields_get_kmaps_server('subjects');
-  $request = new KMapsAPI('subjects', $server);
-  $matches = $request->searchByName($string); 
-  drupal_json_output($matches);    
+	shanti_kmaps_fields_kmaps_autocomplete_func('subjects',$string);
+  #$server = _shanti_kmaps_fields_get_kmaps_server('subjects');
+  #$request = new KMapsAPI('subjects', $server);
+  #$matches = $request->searchByName($string); 
+  #drupal_json_output($matches);    
 }
 
 // TEST
 function shanti_kmaps_fields_kmaps_autocomplete_places_func($string) {
-  $server = _shanti_kmaps_fields_get_kmaps_server('places');
-  $request = new KMapsAPI('places', $server);
-  $matches = $request->searchByName($string); 
-  drupal_json_output($matches);    
+	shanti_kmaps_fields_kmaps_autocomplete_func('places',$string);
+  #$server = _shanti_kmaps_fields_get_kmaps_server('places');
+  #$request = new KMapsAPI('places', $server);
+  #$matches = $request->searchByName($string); 
+  #drupal_json_output($matches);    
 }
 
 // INTERNAL
