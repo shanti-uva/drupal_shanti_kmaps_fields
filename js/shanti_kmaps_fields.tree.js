@@ -88,6 +88,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     // Event handler 2: When kmap items are selected from the pick tree, cross them out
     // and populate the result box
 		for (var my_field in S) {
+			console.log(my_field);
 			$('#'+my_field+'_pick_tree .kmap-item').unbind('click').bind('click', function(e){
 				var my_field = $(this).closest('.kmap_pick_tree').attr('id').replace('_pick_tree',''); 
 				var resultBox = $('#' + my_field + '_result_box');
