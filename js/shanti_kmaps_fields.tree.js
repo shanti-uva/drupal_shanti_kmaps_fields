@@ -56,8 +56,10 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     */
     		
     // Event handler 1: Fetch search results and build a "pick tree"
-    $('.kmap_search_term_button').on('click', function(e){
+    //$('.kmap_search_term_button').on('click', function(e){
+    $(S.field_id+'_search_button').on('click', function(e){
       var my_field = $(this).attr('id').replace('_search_button','');
+      console.log('my_field:'+my_field);
       var pickTree = $('#' + my_field + '_pick_tree');
       pickTree.html("<p>Searching ...</p>");
       var searchField = $('#' + my_field + '_search_term');
