@@ -494,7 +494,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
       '#type'             => 'fieldset',
       '#collapsible'      => TRUE, 
       '#collapsed'        => FALSE,
-      '#tree'             => TRUE,
+      '#tree'             => FALSE,
       '#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
       '#attributes'       => array('id' => $field_id .'_fieldset'),
     );
