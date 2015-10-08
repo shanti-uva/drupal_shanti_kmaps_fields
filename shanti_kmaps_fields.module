@@ -537,6 +537,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     // Pass settings to the JS
     $js_settings = array(
       $field_id => array(
+      	'field_id'				=> $field_id,
         'field_name'      => $field['field_name'],
         'domain'          => $domain,
         'kmap_url'        => url("shanti_kmaps_fields/kmaps_list/$domain/"),
