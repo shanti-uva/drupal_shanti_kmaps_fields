@@ -17,7 +17,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 		    
     // Event handler 0: On first load, go through each instance of the field and update its picklist
 		for (var my_field in S) {
-			#$('#'+my_field).once(function(){
+			// $('#'+my_field).once(function(){
 				var resultBox = $('#'+ my_field + '_result_box');
 				var picked_already = $.parseJSON(S[my_field].picked_already);
 				picked[my_field] = {}; // Init picklist for this field
@@ -33,7 +33,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 					var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
 				}
 				console.log(my_field + ": "+pickedElement);
-			#});
+			// });
 		}
     /*
     $('.field-type-shanti-kmaps-fields-default.field-widget-kmap-tree-picker-.form-wrapper').once('each', function(){
