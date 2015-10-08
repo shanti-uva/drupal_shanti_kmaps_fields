@@ -934,7 +934,7 @@ function shanti_kmaps_fields_kmaps_autocomplete_func($domain = 'subjects', $stri
 // TEST
 function shanti_kmaps_fields_kmaps_autocomplete_subjects_func($string) {
   $server = _shanti_kmaps_fields_get_kmaps_server('subjects');
-  $request = new KMapsAPI($domain, $server);
+  $request = new KMapsAPI('subjects', $server);
   $matches = $request->searchByName($string); 
   drupal_json_output($matches);    
 }
@@ -942,7 +942,7 @@ function shanti_kmaps_fields_kmaps_autocomplete_subjects_func($string) {
 // TEST
 function shanti_kmaps_fields_kmaps_autocomplete_places_func($string) {
   $server = _shanti_kmaps_fields_get_kmaps_server('places');
-  $request = new KMapsAPI($domain, $server);
+  $request = new KMapsAPI('places', $server);
   $matches = $request->searchByName($string); 
   drupal_json_output($matches);    
 }
