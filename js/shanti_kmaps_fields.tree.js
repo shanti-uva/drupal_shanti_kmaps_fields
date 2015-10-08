@@ -17,24 +17,26 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     console.log(S);
 		    
     // Event handler 0: On first load, go through each instance of the field and update its picklist
-    $('#'+S.field_id).once(function(){
-      var my_field = $(this).find('.my_field_id').val();
-      var resultBox = $('#'+ my_field + '_result_box');
-      var picked_already = $.parseJSON(S[my_field].picked_already);
-      picked[my_field] = {}; // Init picklist for this field
-      for (kmap_id in picked_already) {
-        var item = picked_already[kmap_id];
-        picked[my_field][kmap_id] = item;
-        updateDictionary(kmap_id, item.id, item.header, item.path, my_field);
-        var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
-        var deleteButton  = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
-        var elementLabel  = $("<span>"+item.header +" "+kmap_id+"</span>").addClass('kmap_label').appendTo(pickedElement);
-        var kmapIDint     = $("<span>"+item.id +"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
-        var kmapPath      = $("<span>"+item.path +"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
-        var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
-      }
-        
-    });
+		for (var my_field in S) {
+			$('#'+field_id).once(function(){
+				//var my_field = $(this).find('.my_field_id').val();
+				var resultBox = $('#'+ my_field + '_result_box');
+				var picked_already = $.parseJSON(S[my_field].picked_already);
+				picked[my_field] = {}; // Init picklist for this field
+				for (kmap_id in picked_already) {
+					var item = picked_already[kmap_id];
+					picked[my_field][kmap_id] = item;
+					updateDictionary(kmap_id, item.id, item.header, item.path, my_field);
+					var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
+					var deleteButton  = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
+					var elementLabel  = $("<span>"+item.header +" "+kmap_id+"</span>").addClass('kmap_label').appendTo(pickedElement);
+					var kmapIDint     = $("<span>"+item.id +"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
+					var kmapPath      = $("<span>"+item.path +"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
+					var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
+				}
+				
+			});
+		}
     /*
     $('.field-type-shanti-kmaps-fields-default.field-widget-kmap-tree-picker-.form-wrapper').once('each', function(){
       var my_field = $(this).find('.my_field_id').val();
