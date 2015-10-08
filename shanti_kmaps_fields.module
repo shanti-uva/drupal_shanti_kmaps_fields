@@ -34,6 +34,18 @@ function shanti_kmaps_fields_menu() {
       'access arguments'  => array('access content'),
       'type'              => MENU_CALLBACK,  
     ),
+    'shanti_kmaps_fields/kmaps_autocomplete/subjects' => array(
+      'title'             => 'KMaps Autocomplete Function',
+      'page callback'     => 'shanti_kmaps_fields_kmaps_autocomplete_subjects_func',
+      'access arguments'  => array('access content'),
+      'type'              => MENU_CALLBACK,  
+    ),
+    'shanti_kmaps_fields/kmaps_autocomplete/places' => array(
+      'title'             => 'KMaps Autocomplete Function',
+      'page callback'     => 'shanti_kmaps_fields_kmaps_autocomplete_places_func',
+      'access arguments'  => array('access content'),
+      'type'              => MENU_CALLBACK,  
+    ),
     'admin/config/content/shanti_kmaps_fields' => array(
       'title' 						=> 'SHANTI KMaps Fields',
       'page callback' 		=> 'shanti_kmaps_fields_admin_page',
@@ -914,6 +926,22 @@ function shanti_kmaps_fields_kmaps_list_func($domain = 'subjects', $string) {
 
 function shanti_kmaps_fields_kmaps_autocomplete_func($domain = 'subjects', $string) {
   $server = _shanti_kmaps_fields_get_kmaps_server($domain);
+  $request = new KMapsAPI($domain, $server);
+  $matches = $request->searchByName($string); 
+  drupal_json_output($matches);    
+}
+
+// TEST
+function shanti_kmaps_fields_kmaps_autocomplete_subjects_func($string) {
+  $server = _shanti_kmaps_fields_get_kmaps_server('subjects');
+  $request = new KMapsAPI($domain, $server);
+  $matches = $request->searchByName($string); 
+  drupal_json_output($matches);    
+}
+
+// TEST
+function shanti_kmaps_fields_kmaps_autocomplete_places_func($string) {
+  $server = _shanti_kmaps_fields_get_kmaps_server('places');
   $request = new KMapsAPI($domain, $server);
   $matches = $request->searchByName($string); 
   drupal_json_output($matches);    
