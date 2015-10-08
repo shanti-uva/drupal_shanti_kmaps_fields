@@ -445,15 +445,12 @@ function shanti_kmaps_fields_field_widget_info() {
 
 function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
 
-	$field_name = $field['field_name'];
   $field_id = $field['field_name'] . '_' . $delta;
 
   if ($instance['widget']['type'] == 'kmap_default_widget') {
       
     $domain = $field['settings']['kmap_domain'];
-    
-    //$element['#type'] = 'fieldset';
-    
+        
     $element['kmap_pull'] = array(
       '#title'            	=> t('Enter a search string'),
       '#type'               => 'textfield',
@@ -499,29 +496,24 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
       '#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
       '#attributes'       => array('id' => $field_id .'_fieldset'),
     );
-    $element['kmap_search_field_id'] = array(
-      '#type'             => 'hidden',
-      '#value'            => $field_id,
-      '#attributes'       => array('class' => 'my_field_id'),
-    );
-    $element['kmap_search_term'] = array(
+    $element["{$field_id}_search_term"] = array(
       '#title'            => t('Search for ' . $domain),
       '#type'             => 'textfield',
       '#description'      => "<p>Enter a search term for the KMap $domain server and press tab to see the results.</p>",
       '#size'             => 30,
       '#default_value'    => '',
-      '#attributes'       => array('id' => $field_id .'_search_term'),
-      '#field_suffix'     => "<span id='".$field_id."_search_button' class='kmap_search_term_button' style='border:1px solid black;padding:2px 5px;'>Search</search>",
+      '#attributes'       => array('id' => $field_id .'_search_term', 'class' => array('kmap_search_term')),
+      '#field_suffix'     => "<button type='button' id='{$field_id}_search_button' name='{$field_id}_search_button' class='kmap_search_button' value=''>SEARCH</button>",
     );
-    $element['kmap_pick_tree'] = array(
+    $element["{$field_id}_pick_tree"] = array(
       '#type'             => 'container',
       '#attributes'       => array('id' => $field_id .'_pick_tree', 'class' => array('kmap_pick_tree')),
     );
-    $element['kmap_result_box'] = array(
+    $element["{$field_id}_result_box"] = array(
       '#type'             => 'container',
       '#attributes'       => array('id' => $field_id .'_result_box', 'class' => array('kmap_result_box')),      
     );
-    $element['kmap_hidden_box'] = array(
+    $element["{$field_id}_hidden_box"] = array(
       '#title'            => '',
       '#type'             => 'textarea',
       '#prefix'           => '<div class="datastore">',
@@ -570,11 +562,12 @@ function _shanti_kmaps_fields_get_json($items) {
 }
 
 function _shanti_kmaps_fields_extract_data_from_hidden_box($element, &$form_state) {
-  $field_name = $element['#field_name'];
+  $field_name = $element['#field_name']; 
   $delta      = $element['#delta'];
-  $json       = $element['kmap_hidden_box']['#value'];
+  $field_id		= $field_name .'_'.$delta;
+  $json       = $element["{$field_id}_hidden_box"]['#value'];
   $data       = drupal_json_decode($json);
-  $form_state['node']->kmap_data[$field_name] = $data;
+  $form_state['node']->kmap_data[$field_name] = $data; // NEEDS TO HAVE ID!
 }
 
 function shanti_kmaps_fields_node_insert($node) {
@@ -589,10 +582,11 @@ function shanti_kmaps_fields_node_delete($node) {
   _shanti_kmaps_fields_delete_solr_doc($node->nid);
 }
 
+// THIS NEEDS TO HANDLE DELTAS! OR ELSE GET RID OF DELTAS IN THE FORM
 // This function assumes that we are the only ones using kmap_data as key attached to node
 function _shanti_kmaps_fields_add_kmaps_to_node($node) {
   if (isset($node->kmap_data) && $node->kmap_data) {
-    $lang = $node->language;    
+    $lang = $node->language;
     foreach ($node->kmap_data as $field_name => $data) {
       $node->{$field_name}[$lang] = array();
       foreach ($data as $fid => $item) {
