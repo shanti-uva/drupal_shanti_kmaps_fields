@@ -76,7 +76,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 						}
 						// Need also to see if any of the new items are in the pick list ...
 						JSONTreeToHTML(ancestor_tree[my_field],pickTree); 
-						//Drupal.attachBehaviors();     
+						Drupal.attachBehaviors();     
 					} else {  
 						pickTree.html("No results for the string /" + search_term + "/. Click <a href='" + search_url + "' target='_blank'>here</a> to see if the KMaps server is working.");
 					}
