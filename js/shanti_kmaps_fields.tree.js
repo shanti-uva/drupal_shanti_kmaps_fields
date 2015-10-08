@@ -14,7 +14,6 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
   
     // Grab settings from server
     S = settings.shanti_kmaps_fields;
-    console.log(S);
 		    
     // Event handler 0: On first load, go through each instance of the field and update its picklist
 		for (var my_field in S) {
@@ -33,7 +32,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 					var kmapPath      = $("<span>"+item.path +"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
 					var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
 				}
-				console.log(pickedElement);
+				console.log(my_field + ": "+pickedElement);
 			});
 		}
     /*
@@ -183,6 +182,7 @@ function parsePath(ancestors, cur_field){
 }
 
 var rgx1 = /\s(\w?\d+)$/; // THIS COULD CHANGE
+
 function extractKMapID(line) {
   var kmap_id = null;
   var matches = rgx1.exec(line);

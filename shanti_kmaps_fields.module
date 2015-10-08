@@ -445,9 +445,7 @@ function shanti_kmaps_fields_field_widget_info() {
 
 function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
 
-	kpr($field);
-	kpr($items);
-	kpr($instance);
+	$field_name = $field['field_name'];
   $field_id = $field['field_name'] . '_' . $delta;
 
   if ($instance['widget']['type'] == 'kmap_default_widget') {
