@@ -56,7 +56,6 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 		for (var my_field in S) {
 			$('#'+my_field+'_search_button').on('click', function(e){
 				var my_field = $(this).attr('id').replace('_search_button','');
-				console.log('my_field:'+my_field);
 				var pickTree = $('#' + my_field + '_pick_tree');
 				pickTree.html("<p>Searching ...</p>");
 				var searchField = $('#' + my_field + '_search_term');
@@ -77,7 +76,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 						}
 						// Need also to see if any of the new items are in the pick list ...
 						JSONTreeToHTML(ancestor_tree[my_field],pickTree); 
-						Drupal.attachBehaviors();     
+						//Drupal.attachBehaviors();     
 					} else {  
 						pickTree.html("No results for the string /" + search_term + "/. Click <a href='" + search_url + "' target='_blank'>here</a> to see if the KMaps server is working.");
 					}
@@ -88,9 +87,8 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     // Event handler 2: When kmap items are selected from the pick tree, cross them out
     // and populate the result box
 		for (var my_field in S) {
-			console.log(my_field);
 			$('#'+my_field+'_pick_tree .kmap-item').unbind('click').bind('click', function(e){
-				var my_field = $(this).closest('.kmap_pick_tree').attr('id').replace('_pick_tree',''); 
+				//var my_field = $(this).closest('.kmap_pick_tree').attr('id').replace('_pick_tree',''); 
 				var resultBox = $('#' + my_field + '_result_box');
 				var kmap_header = $(this).html();
 				var kmap_id = extractKMapID(kmap_header);
