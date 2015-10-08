@@ -32,7 +32,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 					var kmapPath      = $("<span>"+item.path +"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
 					var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
 				}
-				console.log(my_field + ": "+pickedElement);
+				console.log(my_field + ": "+picked);
 			// });
 		}
     /*
