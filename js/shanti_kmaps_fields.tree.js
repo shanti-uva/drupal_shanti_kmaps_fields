@@ -17,7 +17,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     console.log('t');
 		    
     // Event handler 0: On first load, go through each instance of the field and update its picklist
-    $('#'+field_id).once(function(){
+    $('#'+S.field_id).once(function(){
       var my_field = $(this).find('.my_field_id').val();
       var resultBox = $('#'+ my_field + '_result_box');
       var picked_already = $.parseJSON(S[my_field].picked_already);
