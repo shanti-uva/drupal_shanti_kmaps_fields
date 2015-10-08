@@ -14,7 +14,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
   
     // Grab settings from server
     S = settings.shanti_kmaps_fields;
-    console.log('t');
+    console.log('field_id: ' + S.field_id);
 		    
     // Event handler 0: On first load, go through each instance of the field and update its picklist
     $('#'+S.field_id).once(function(){
