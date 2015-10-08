@@ -13,7 +13,8 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
   attach: function (context, settings) {
   
     // Grab settings from server
-    S = settings.shanti_kmaps_fields; 
+    S = settings.shanti_kmaps_fields;
+    console.log(S);
 		    
     // Event handler 0: On first load, go through each instance of the field and update its picklist
     $('.field-type-shanti-kmaps-fields-default.field-widget-kmap-tree-picker-.form-wrapper').once('each', function(){
