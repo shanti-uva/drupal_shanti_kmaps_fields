@@ -53,7 +53,6 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     */
     		
     // Event handler 1: Fetch search results and build a "pick tree"
-    //$('.kmap_search_term_button').on('click', function(e){
 		for (var my_field in S) {
 			$('#'+my_field+'_search_button').on('click', function(e){
 				var my_field = $(this).attr('id').replace('_search_button','');
@@ -88,25 +87,27 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 		
     // Event handler 2: When kmap items are selected from the pick tree, cross them out
     // and populate the result box
-    $('.kmap_pick_tree .kmap-item').unbind('click').bind('click', function(e){
-      var my_field = $(this).closest('.kmap_pick_tree').attr('id').replace('_pick_tree',''); 
-      var resultBox = $('#' + my_field + '_result_box');
-      var kmap_header = $(this).html();
-      var kmap_id = extractKMapID(kmap_header);
-      if ($(this).hasClass('picked') && $(this).hasClass(kmap_id)) {
-        alert("This item is already in your pick list. " + kmap_id); // THIS GETS CALLED MULTIPLE TIMES!
-      } else {
-        picked[my_field][kmap_id] = dictionary[my_field][kmap_id]; // TRAP ERROR
-        $(this).addClass('picked');
-        var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
-        var deleteButton = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
-        var elementLabel = $("<span>"+kmap_header+"</span>").addClass('kmap_label').appendTo(pickedElement);
-        var kmapIDint = $("<span>"+dictionary[my_field][kmap_id].id+"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
-        var kmapPath = $("<span>"+dictionary[my_field][kmap_id].path+"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
-        var kmapHeader = $("<span>"+dictionary[my_field][kmap_id].header+"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
-        Drupal.attachBehaviors(resultBox);
-      }
-    });
+		for (var my_field in S) {
+			$('#'+my_field+'_pick_tree .kmap-item').unbind('click').bind('click', function(e){
+				var my_field = $(this).closest('.kmap_pick_tree').attr('id').replace('_pick_tree',''); 
+				var resultBox = $('#' + my_field + '_result_box');
+				var kmap_header = $(this).html();
+				var kmap_id = extractKMapID(kmap_header);
+				if ($(this).hasClass('picked') && $(this).hasClass(kmap_id)) {
+					alert("This item is already in your pick list. " + kmap_id); // THIS GETS CALLED MULTIPLE TIMES!
+				} else {
+					picked[my_field][kmap_id] = dictionary[my_field][kmap_id]; // TRAP ERROR
+					$(this).addClass('picked');
+					var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
+					var deleteButton = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
+					var elementLabel = $("<span>"+kmap_header+"</span>").addClass('kmap_label').appendTo(pickedElement);
+					var kmapIDint = $("<span>"+dictionary[my_field][kmap_id].id+"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
+					var kmapPath = $("<span>"+dictionary[my_field][kmap_id].path+"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
+					var kmapHeader = $("<span>"+dictionary[my_field][kmap_id].header+"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
+					Drupal.attachBehaviors(resultBox);
+				}
+			});
+		}
     
     // Event handler 3: When selected items are deleted, remove them and reset the item in the pick tree
     $('.kmap_result_box .delete-me').unbind('click').bind('click', function(e){
