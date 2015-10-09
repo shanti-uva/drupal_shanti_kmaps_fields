@@ -419,6 +419,7 @@ function shanti_kmaps_fields_field_validate($obj_type, $object, $field, $instanc
 
 function shanti_kmaps_fields_field_widget_info() {
   $info = array();
+  /*
   $info['kmap_default_widget'] = array(
     'label'         => t('Autocomplete'),
     'field types'   => array('shanti_kmaps_fields_default'),
@@ -428,6 +429,7 @@ function shanti_kmaps_fields_field_widget_info() {
       'default value'   => FIELD_BEHAVIOR_DEFAULT,
     ),
   );
+  */
   $info['kmap_tree_picker '] = array(
     'label'         => t("Tree"),
     'field types'   => array('shanti_kmaps_fields_default'),
@@ -447,6 +449,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
 
   $field_id = $field['field_name']; // . '_' . $delta; // DON'T NEED DELTAS, NOT MULTI-VALUE
 
+	/*
   if ($instance['widget']['type'] == 'kmap_default_widget') {
       
     $domain = $field['settings']['kmap_domain'];
@@ -458,34 +461,12 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
       '#maxlength'          => 500,
       '#default_value'      => '',
       '#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
-			'#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
     );
 
-		/*
-    $element['kmap_raw'] = array(
-      '#title'            	=> t('Enter a search string 2'),
-      '#type'               => 'textfield',
-      '#size'               => 80,
-      '#maxlength'          => 500,
-      '#default_value'      => 'Enter a string ...', //sset($items[$delta]['raw']) ? $items[$delta]['raw'] : 'FOO', // Grab existing content from three field,
-      '#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
-    );
-    $element['kmap_id'] = array(
-      '#type'               => 'value',
-      '#default_value'      => 0   
-    );    
-    $element['kmap_header'] = array(
-      '#type'               => 'value',    
-      '#default_value'      => 'None entered'
-    );
-    $element['kmap_path'] = array(
-      '#type'               => 'value',    
-      '#default_value'      => 'None entered'
-    );
-    */
   }
+  */
   
-  elseif ($instance['widget']['type'] == 'kmap_tree_picker ') {
+  if ($instance['widget']['type'] == 'kmap_tree_picker ') {
     $domain = $field['settings']['kmap_domain'];
     $server = _shanti_kmaps_fields_get_kmaps_server($domain);
     $element += array(
@@ -525,8 +506,6 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     $element['#attached']['js'][]   = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.tree.js";
     $element['#attached']['css'][]  = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
     
-    // To construct URL below; move to top if needed elsewhere
-
     // Pass settings to the JS
     $js_settings = array(
       $field_id => array(
@@ -535,10 +514,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         'kmap_url'        => url("shanti_kmaps_fields/kmaps_list/$domain/"),
         'picked_already'  => _shanti_kmaps_fields_get_json($items),
       ),
-    );
-  
-    // Try to load settings for each instance of the field ... does not work
-    // only loads the second one. :-(
+    );  
     $element['#attached']['js'][] = array(
       'data' => array('shanti_kmaps_fields' => $js_settings),
       'type' => 'setting',
