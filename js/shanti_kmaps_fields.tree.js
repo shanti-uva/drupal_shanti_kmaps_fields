@@ -97,8 +97,6 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
       var pickTreeElement = $('#' + my_field + '_pick_tree .kmap-item.' + kmap_id);
       pickTreeElement.removeClass('picked');
       pickedElement.remove();
-			//var pickTree = $('#' + my_field + '_pick_tree');				
-      //Drupal.attachBehaviors(); 
     });
 
     // Event handler 4: When the form is submitted, dump picked items into hidden form box

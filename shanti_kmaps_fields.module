@@ -999,3 +999,41 @@ function shanti_kmaps_fields_update_fields() {
 	// Reset indexing
 	variable_set('shanti_kmaps_admin_server_solr_opt_in',$opt_val);
 }
+
+/**
+ * Function to extract a list of ancestors from a field's data table's entry by finding the variable with
+ * the "_raw" value in it and parsing that.
+ * 
+ * @param array $row
+ * A single row returned from a Database Connection object as one iterates through results. 
+ * 
+ * @param boolean $include_self
+ * Whether or not to include the current kmap node
+ * 
+ */
+function shanti_kmaps_fields_get_ancestors($raw, $include_self = TRUE) {
+	foreach($row as $col => $value) {
+		if (strrpos($col, '_raw') == strlen($col) - 4) {
+			return shanti_kmaps_fields_parse_raw($value, $include_self);
+		}
+	}
+}
+
+/**
+ * Helper function that takes a "raw" string and turns it into an unique array of kmap values
+ * Returns an list of ancestors as an array
+ * 
+ * @param string $raw
+ * The "raw" value from a kmap fields data table
+ * 
+ * @param boolean $include_self
+ * Whether or not to include the current kmap node
+ * 
+ */
+function shanti_kmaps_fields_parse_raw($raw, $include_self = TRUE) {
+	$ancestors = array_unique(explode('> <', substr($raw,1, strlen($raw) - 2)));
+	if (!$include_self) {
+		array_pop($ancestors);
+	}
+	return $ancestors;
+}
