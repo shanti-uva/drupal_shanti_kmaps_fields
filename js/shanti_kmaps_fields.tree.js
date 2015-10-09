@@ -55,7 +55,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 					}
 					// Need also to see if any of the new items are in the pick list ...
 					JSONTreeToHTML(my_field,ancestor_tree[my_field],pickTree,search_term); 
-					Drupal.attachBehaviors();     
+					Drupal.attachBehaviors(pickTree);
 				} else {  
 					pickTree.html("No results for the string /" + search_term + "/. Click <a href='" + search_url + "' target='_blank'>here</a> to see if the KMaps server is working.");
 				}
@@ -98,7 +98,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
       pickTreeElement.removeClass('picked');
       pickedElement.remove();
 			//var pickTree = $('#' + my_field + '_pick_tree');				
-      Drupal.attachBehaviors(); 
+      //Drupal.attachBehaviors(); 
     });
 
     // Event handler 4: When the form is submitted, dump picked items into hidden form box
