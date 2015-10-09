@@ -605,11 +605,10 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
       drupal_set_message("URL " . $url);
     }
     if ($message) {
-      //dpm($resp);
-      drupal_set_message("Index response: " . $resp->status_message);
+      //drupal_set_message("Index response: " . $resp->status_message);
     } 
   } else {
-    drupal_set_message("KMap data not published to SHANTI index, as requested.");
+    drupal_set_message("KMap data not published to SHANTI index, as requested.", 'status', FALSE);
   }
 }
 
