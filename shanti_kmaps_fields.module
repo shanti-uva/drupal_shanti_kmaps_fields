@@ -445,7 +445,7 @@ function shanti_kmaps_fields_field_widget_info() {
 
 function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
 
-  $field_id = $field['field_name'] . '_' . $delta;
+  $field_id = $field['field_name']; // . '_' . $delta; // DON'T NEED DELTAS, NOT MULTI-VALUE
 
   if ($instance['widget']['type'] == 'kmap_default_widget') {
       
@@ -562,12 +562,10 @@ function _shanti_kmaps_fields_get_json($items) {
 }
 
 function _shanti_kmaps_fields_extract_data_from_hidden_box($element, &$form_state) {
-  $field_name = $element['#field_name']; 
-  $delta      = $element['#delta'];
-  $field_id		= $field_name .'_'.$delta;
-  $json       = $element["{$field_id}_hidden_box"]['#value'];
+  $field_name = $element['#field_name']; // Same as field_id, since we're not using delta
+  $json       = $element["{$field_name}_hidden_box"]['#value'];
   $data       = drupal_json_decode($json);
-  $form_state['node']->kmap_data[$field_name] = $data; // NEEDS TO HAVE ID!
+  $form_state['node']->kmap_data[$field_name] = $data;
 }
 
 function shanti_kmaps_fields_node_insert($node) {
@@ -582,13 +580,12 @@ function shanti_kmaps_fields_node_delete($node) {
   _shanti_kmaps_fields_delete_solr_doc($node->nid);
 }
 
-// THIS NEEDS TO HANDLE DELTAS! OR ELSE GET RID OF DELTAS IN THE FORM
 // This function assumes that we are the only ones using kmap_data as key attached to node
 function _shanti_kmaps_fields_add_kmaps_to_node($node) {
   if (isset($node->kmap_data) && $node->kmap_data) {
     $lang = $node->language;
     foreach ($node->kmap_data as $field_name => $data) {
-      $node->{$field_name}[$lang] = array();
+      $node->{$field_name}[$lang] = array(); // What is this?
       foreach ($data as $fid => $item) {
       	
       	// Get the ancestors and put in RAW
@@ -596,7 +593,7 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node) {
 				$raw_string = '<'.implode('> <',$kmapids).'>'; // CREATE RAW FUNCTION
 				$raw_string = preg_replace('/(subjects|places)-/','',$raw_string); // Kludge 
       
-      	$node->{$field_name}[$lang][] = array(
+      	$node->{$field_name}[$lang][] = array( // These are the real deltas
           'raw'     => $raw_string,
           'id'      => $item['id'],
           'header'  => $item['header'],

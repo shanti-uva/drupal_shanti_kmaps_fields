@@ -1,7 +1,6 @@
 (function($){
 
 // Local "globals"
-//var search_term   = '';
 var dictionary    = {}; 
 var picked        = {}; 
 var ancestor_tree = {};
@@ -82,7 +81,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 				var kmapIDint = $("<span>"+dictionary[my_field][kmap_id].id+"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
 				var kmapPath = $("<span>"+dictionary[my_field][kmap_id].path+"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
 				var kmapHeader = $("<span>"+dictionary[my_field][kmap_id].header+"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
-				Drupal.attachBehaviors(resultBox);
+				Drupal.attachBehaviors(resultBox); // Needed?
 			}
 		});
     
@@ -158,10 +157,10 @@ function parsePath(ancestors, cur_field){
   });
 }
 
-var rgx1 = /\s(\w?\d+)$/; // THIS COULD CHANGE
 
 function extractKMapID(line) {
   var kmap_id = null;
+	var rgx1 = /\s(\w?\d+)$/;
   var matches = rgx1.exec(line);
   if (matches != null) {
     var kmap_id = matches[1];
