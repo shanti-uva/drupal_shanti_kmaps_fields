@@ -349,8 +349,8 @@ function shanti_kmaps_fields_field_info() {
     'label'             	=> t('KMap Term'),
     'description'       	=> t('A KMap Term for integrating content into the Mandala ecology.'),
     'settings'          	=> array('kmap_domain' => 'subjects'),
-    'instance_settings' 	=> array('search_view' => NULL), 
-    'default_widget'    	=> 'kmap_default_widget',
+    'instance_settings' 	=> array('search_view' => NULL, 'search_root_kmapid' => NULL), 
+    'default_widget'    	=> 'kmap_tree_picker',
     'default_formatter' 	=> 'kmap_default_formatter',  
 		'property_type' 			=> 'text', 
   );
@@ -395,6 +395,15 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance) {
       '#maxlength'      => 255,
       '#required'       => FALSE,
       '#default_value'  => $settings['search_view'], 
+    );
+    $form['search_root_kmapid'] = array(
+      '#type'           => 'textfield',
+      '#title'          => t('Root KMap ID'),
+      '#description'    => t('The root node of the KMap tree under which searches will be performed.'),
+      '#size'           => 20,
+      '#maxlength'      => 20,
+      '#required'       => FALSE,
+      '#default_value'  => $settings['search_root_kmapid'], 
     );
   }
   return $form;
