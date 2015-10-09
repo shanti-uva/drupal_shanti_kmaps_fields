@@ -458,23 +458,6 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
 
   $field_id = $field['field_name']; // . '_' . $delta; // DON'T NEED DELTAS, NOT MULTI-VALUE
 
-	/*
-  if ($instance['widget']['type'] == 'kmap_default_widget') {
-      
-    $domain = $field['settings']['kmap_domain'];
-        
-    $element['kmap_pull'] = array(
-      '#title'            	=> t('Enter a search string'),
-      '#type'               => 'textfield',
-      '#size'               => 80,
-      '#maxlength'          => 500,
-      '#default_value'      => '',
-      '#autocomplete_path'  => "shanti_kmaps_fields/kmaps_autocomplete/$domain",
-    );
-
-  }
-  */
-  
   if ($instance['widget']['type'] == 'kmap_tree_picker ') {
     $domain = $field['settings']['kmap_domain'];
     $server = _shanti_kmaps_fields_get_kmaps_server($domain);
@@ -894,6 +877,7 @@ function _shanti_kmaps_fields_decode_path($path, $delim = '--'){
 
 ////////// KMAP Server Interaction //////////
 
+// Add cache
 function shanti_kmaps_fields_kmaps_list_func($domain = 'subjects', $string) {
   $server = _shanti_kmaps_fields_get_kmaps_server($domain);
   $request = new KMapsAPI($domain, $server);

@@ -80,7 +80,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 				var kmapIDint = $("<span>"+dictionary[my_field][kmap_id].id+"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
 				var kmapPath = $("<span>"+dictionary[my_field][kmap_id].path+"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
 				var kmapHeader = $("<span>"+dictionary[my_field][kmap_id].header+"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
-				Drupal.attachBehaviors();
+				Drupal.attachBehaviors(resultBox);
 			}
 		});
     
