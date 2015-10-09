@@ -106,7 +106,6 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
     // Need to pass the entity type so this can work with other entity types (i.e. node-form) ...
     $('form.node-form').submit(function(e){
       submit_count++;
-      alert(submit_count);
       if (submit_count > 1) return; // No idea why I have to do this bullshit but without it this gets calls multiple times >:(
       for (my_field in picked) {
         for (kmap_id in picked[my_field]) {
