@@ -24,7 +24,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 				var item = picked_already[kmap_id];
 				picked[my_field][kmap_id] = item;
 				updateDictionary(kmap_id, item.id, item.header, item.path, my_field);
-				var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
+				var pickedElement = $("<div/>").addClass('selected-kmap ' + kmap_id).appendTo(resultBox);         
 				var deleteButton  = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
 				var elementLabel  = $("<span>"+item.header +" "+kmap_id+"</span>").addClass('kmap_label').appendTo(pickedElement);
 				var kmapIDint     = $("<span>"+item.id +"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
@@ -70,17 +70,17 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
 			var kmap_header = $(this).html();
 			var kmap_id = extractKMapID(kmap_header);
 			if ($(this).hasClass('picked') && $(this).hasClass(kmap_id)) {
-				alert("This item is already in your pick list. " + kmap_id); // THIS GETS CALLED MULTIPLE TIMES!
+				$('.selected-kmap.'+kmap_id).stop().css("background-color", "#FFFF9C").animate({ backgroundColor: "#FFFFFF"}, 1500);;
 			} else {
 				picked[my_field][kmap_id] = dictionary[my_field][kmap_id]; // TRAP ERROR
-				$(this).addClass('picked');
-				var pickedElement = $("<div/>").addClass('selected-kmap').appendTo(resultBox);         
+				var pickedElement = $("<div/>").addClass('selected-kmap '+kmap_id).appendTo(resultBox);         
 				var deleteButton = $("<span>X</span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
 				var elementLabel = $("<span>"+kmap_header+"</span>").addClass('kmap_label').appendTo(pickedElement);
 				var kmapIDint = $("<span>"+dictionary[my_field][kmap_id].id+"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
 				var kmapPath = $("<span>"+dictionary[my_field][kmap_id].path+"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
 				var kmapHeader = $("<span>"+dictionary[my_field][kmap_id].header+"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
 				Drupal.attachBehaviors(resultBox);
+				$(this).addClass('picked');
 			}
 		});
     
@@ -90,13 +90,14 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
       var resultBox = $('#' + my_field + '_result_box');
       var pickedElement = $(this).parent();
       var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
-      if (dictionary[my_field][kmap_id] == null) {
-        if (!confirm("This term is not in the currently selected tree; if you delete it, you'll need to search for it again. Are you sure you want to delete it?")) return;
-      }
+      //if (!$('#'+my_field+'_pick_tree .kmap_item.'+kmap_id).val()) { // TRUTH FAILS
+      //  if (!confirm("This term is not in the currently selected tree; if you delete it, you'll need to search for it again. Are you sure you want to delete it?")) return;
+      //}
       delete picked[my_field][kmap_id];
       var pickTreeElement = $('#' + my_field + '_pick_tree .kmap-item.' + kmap_id);
       pickTreeElement.removeClass('picked');
       pickedElement.remove();
+			//Drupal.attachBehaviors(resultBox);
     });
 
     // Event handler 4: When the form is submitted, dump picked items into hidden form box
