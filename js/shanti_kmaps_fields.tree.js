@@ -5,16 +5,15 @@ var dictionary    = {};
 var picked        = {}; 
 var ancestor_tree = {};
 var S             = {}; // Settings passed
-submit_count      = 0;
+var submit_count  = 0;
 
 Drupal.behaviors.shantiKmapsFieldsTree = {
-
-
+  
   attach: function (context, settings) {
-
-    // Grab settings from server
-    S = settings.shanti_kmaps_fields;
     
+    S = settings.shanti_kmaps_fields;
+   
+
     // Event handler 0: On first load, go through each instance of the field and update its picklist
     $('.kmap_result_box').once(function(){
       var resultBox = $(this); 
@@ -28,7 +27,7 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
         addPickedItem(resultBox,kmap_id,item);
       }         
     });
-        
+
     // Event handler 1: Fetch search results and build a "pick tree"
     $('.kmap_search_button').on('click',function (e){
       var my_field = $(this).attr('id').replace('_search_button',''); 
@@ -51,12 +50,13 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
           }
           // Need also to see if any of the new items are in the pick list ...
           JSONTreeToHTML(my_field,ancestor_tree[my_field],pickTree,search_term); 
+          Drupal.attachBehaviors(pickTree);
         } else {  
           pickTree.html("No results for the string /" + search_term + "/. Click <a href='" + search_url + "' target='_blank'>here</a> to see if the KMaps server is working.");
         }
       });
     });
-    
+  
     // Event handler 2: When kmap items are selected from the pick tree, cross them out
     // and populate the result box
     $('.kmap_pick_tree .kmap-item').on('click', function(e){
@@ -107,6 +107,9 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
       return;
     });
 
+
+
+
   },
   
   detach: function (context, settings) {
@@ -137,8 +140,6 @@ function JSONTreeToHTML(my_field,tree,el,ulid,search_term) {
       li.addClass('terminal');
     } 
   }
-  // Add behaviors to the newly created tree
-  Drupal.attachBehaviors(tree);
 }
 
 function parsePath(ancestors, cur_field){
@@ -194,9 +195,11 @@ function addPickedItem(containerElement,kmap_id,item) {
   var elementLabel  = $("<span>"+item.header +" "+kmap_id+"</span>").addClass('kmap_label').appendTo(pickedElement);
   var kmapIDint     = $("<span>"+item.id +"</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
   var kmapPath      = $("<span>"+item.path +"</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
-  var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);    
-  Drupal.attachBehaviors(containerElement);
+  var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
+  Drupal.attachBehaviors(pickedElement);
 }
+
+
 
 
 })(jQuery);
