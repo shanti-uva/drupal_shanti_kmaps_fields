@@ -12,7 +12,6 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
   attach: function (context, settings) {
     
     S = settings.shanti_kmaps_fields;
-   
 
     // Event handler 0: On first load, go through each instance of the field and update its picklist
     $('.kmap_result_box').once(function(){
@@ -49,7 +48,8 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
             parsePath(R.ancestors, my_field); // populates ancestor_tree              
           }
           // Need also to see if any of the new items are in the pick list ...
-          JSONTreeToHTML(my_field,ancestor_tree[my_field],pickTree,search_term); 
+          JSONTreeToHTML(my_field,ancestor_tree[my_field],pickTree,search_term);
+          pickTree.css({'max-height':'350px','overflow':'scroll','padding':'5px','margin-bottom':'5px','background':'#EEE'}); 
           Drupal.attachBehaviors(pickTree);
         } else {  
           pickTree.html("No results for the string /" + search_term + "/. Click <a href='" + search_url + "' target='_blank'>here</a> to see if the KMaps server is working.");
@@ -107,22 +107,18 @@ Drupal.behaviors.shantiKmapsFieldsTree = {
       return;
     });
 
-
-
-
   },
   
   detach: function (context, settings) {
   
   }
 
-  
 };
 
 // Utility Functions
 
 // Called within the search event handler    
-function JSONTreeToHTML(my_field,tree,el,ulid,search_term) {
+function JSONTreeToHTML(my_field,tree,el,ulid,search_term,root_kmapid) {
   var ul = $("<ul/>");
   if (ulid) { ul.attr("id",ulid); }
   el.append(ul);
@@ -198,8 +194,5 @@ function addPickedItem(containerElement,kmap_id,item) {
   var kmapHeader    = $("<span>"+item.header +"</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
   Drupal.attachBehaviors(pickedElement);
 }
-
-
-
 
 })(jQuery);

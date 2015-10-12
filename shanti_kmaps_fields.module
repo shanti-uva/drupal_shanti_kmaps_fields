@@ -503,6 +503,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         'domain'          => $domain,
         'kmap_url'        => url("shanti_kmaps_fields/kmaps_list/$domain/"),
         'picked_already'  => _shanti_kmaps_fields_get_json($items),
+        'root_kmapid'     => $instance['settings']['root_kmapid'],
       ),
     );  
     $element['#attached']['js'][] = array(
