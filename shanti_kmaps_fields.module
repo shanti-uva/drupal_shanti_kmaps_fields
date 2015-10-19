@@ -573,7 +573,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             '#description' => "<p>Start typing to search for a term from KMap $domain server. Click on a term to select it.</p>",
             '#size' => 60,
             '#default_value' => '',
-            '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term', 'form-control', 'kmaps-typeahead')),
+            '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term')), // 'form-control', 'kmaps-typeahead')),
         );
         $element["{$field_id}_result_box"] = array(
             '#type' => 'container',
@@ -588,7 +588,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         );
 
         // Add CSS and JS to the form
-        $element['#attached']['js'][] = array('https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js' => array('type' => 'external'));
+        $element['#attached']['js'][] = array('data' => 'https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js', 'type' => 'external');
         $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.typeahead.js";
         $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.tree.js";
         $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.typeahead.css";

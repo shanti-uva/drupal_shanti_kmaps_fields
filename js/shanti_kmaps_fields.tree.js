@@ -81,7 +81,7 @@
             });
 
             //Event handler for picking item from typeahead
-            $('.kmaps-typeahead').once('kmaps-pick').bind('typeahead:select',
+            $('.field-widget-kmap-typeahead-picker').once('kmaps-pick').find('.kmap_search_term').bind('typeahead:select',
                 function (ev, sel) {
                     var my_field = $(this).attr('id').replace('_search_term', '');
                     var resultBox = $('#' + my_field + '_result_box');

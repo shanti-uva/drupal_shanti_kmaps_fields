@@ -1,12 +1,9 @@
-/**
- * Created by edwardjgarrett on 10/14/15.
- */
-
 (function ($) {
     Drupal.behaviors.kmaps_typeahead = {
         attach: function (context, settings) {
-            $('.kmaps-typeahead', context).once('kmaps-fields').each(function () {
-                var my_field = $(this).attr('id').replace('_search_term', '');
+            $('.field-widget-kmap-typeahead-picker', context).once('kmaps-search').find('.kmap_search_term').each(function () {
+                var $input = $(this);
+                var my_field = $input.attr('id').replace('_search_term', '');
                 var admin_settings = settings.shanti_kmaps_admin;
                 var widget_settings = settings.shanti_kmaps_fields[my_field];
                 var index = admin_settings.shanti_kmaps_admin_server_solr_terms;
@@ -39,13 +36,12 @@
                     queryTokenizer: Bloodhound.tokenizers.whitespace,
                     remote: {
                         url: url,
-                        replace: function () { //should change to prepare: http://stackoverflow.com/questions/18688891/typeahead-js-include-dynamic-variable-in-remote-url
-                            var q = url;
-                            var val = $('.kmaps-tt-input').val();
+                        prepare: function (query, settings) { //should change to prepare: http://stackoverflow.com/questions/18688891/typeahead-js-include-dynamic-variable-in-remote-url
+                            var val = $input.val();
                             if (val) {
-                                q += preq + encodeURIComponent(val.replace(/\s/g, '\\ ') + '*');
+                                settings.url += preq + encodeURIComponent(val.replace(/\s/g, '\\ ') + '*');
                             }
-                            return q;
+                            return settings;
                         },
                         filter: function (json) {
                             return $.map(json.response.docs, function (doc) {
@@ -61,7 +57,7 @@
                     }
                 });
                 terms.initialize();
-                $('.kmaps-typeahead').typeahead(
+                $input.typeahead(
                     {
                         highlight: false,
                         hint: true,
