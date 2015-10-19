@@ -6,8 +6,9 @@
     Drupal.behaviors.kmaps_typeahead = {
         attach: function (context, settings) {
             $('.kmaps-typeahead', context).once('kmaps-fields').each(function () {
+                var my_field = $(this).attr('id').replace('_search_term', '');
                 var admin_settings = settings.shanti_kmaps_admin;
-                var widget_settings = settings.shanti_kmaps_fields[$(this).attr('id').replace('_search_term','')];
+                var widget_settings = settings.shanti_kmaps_fields[my_field];
                 var index = admin_settings.shanti_kmaps_admin_server_solr_terms;
                 var domain = widget_settings.domain;
                 var limit = widget_settings.term_limit == 0 ? 999 : widget_settings.term_limit;
@@ -25,7 +26,7 @@
                     'wt': 'json',
                     'indent': true,
                     'fq': filters.concat(['tree:' + domain]),
-                    'fl': 'id,ancestors',
+                    'fl': 'id,header,ancestors',
                     'rows': limit,
                     'hl': true,
                     'hl.fl': field,
@@ -38,7 +39,7 @@
                     queryTokenizer: Bloodhound.tokenizers.whitespace,
                     remote: {
                         url: url,
-                        replace: function () {
+                        replace: function () { //should change to prepare: http://stackoverflow.com/questions/18688891/typeahead-js-include-dynamic-variable-in-remote-url
                             var q = url;
                             var val = $('.kmaps-tt-input').val();
                             if (val) {
@@ -48,11 +49,11 @@
                         },
                         filter: function (json) {
                             return $.map(json.response.docs, function (doc) {
-                                var ancestors = doc.ancestors;
-                                ancestors.reverse().shift();
                                 return {
                                     id: doc.id,
-                                    ancestors: ancestors.join(separator),
+                                    header: doc.header,
+                                    ancestors: doc.ancestors,
+                                    anstring: doc.ancestors.slice(0).reverse().join(separator),
                                     value: json.highlighting[doc.id][field][0] //take first highlight
                                 };
                             });
@@ -84,7 +85,7 @@
                         templates: {
                             suggestion: function (data) {
                                 return '<div><span class="kmaps-term">' + data.value + '</span> ' +
-                                    '<span class="kmaps-ancestors">' + data.ancestors + '</span></div>';
+                                    '<span class="kmaps-ancestors">' + data.anstring + '</span></div>';
                             }
                         }
                     }
