@@ -154,12 +154,15 @@ class KMapsAPI {
     // Build the base URL for each fetch mode
     if ($this->fetch_mode == 'by_name') {
       $raw_url .= '/by_name/' . $this->kmap_string . '.' . $this->results_format;
-    } elseif ($this->fetch_mode == 'by_fid') {
+    } 
+    elseif ($this->fetch_mode == 'by_fid') {
       $kmap_id_string = implode(',',$this->kmap_ids);
       $raw_url .= '/by_fid/' . $kmap_id_string . '.' . $this->results_format;
-    } elseif ($this->fetch_mode == 'by_fid_cached') {
+    } 
+    elseif ($this->fetch_mode == 'by_fid_cached') {
       $raw_url .= '/' . $this->kmap_id . '.' . $this->results_format;
-    } else {
+    } 
+    else {
       // Anomalous; do nothing for now. Or define a default.
     }
 
