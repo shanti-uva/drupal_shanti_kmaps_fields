@@ -2,7 +2,6 @@
 .field-widget-kmap-typeahead-picker .kmaps-value {
     font-face: bold;
 }
-.field-widget-kmap-typeahead-picker .kmaps-features,
 .field-widget-kmap-typeahead-picker .kmaps-ancestors {
     display: inline-block;
     margin-left: 3px;

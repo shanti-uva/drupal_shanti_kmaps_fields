@@ -36,7 +36,7 @@
                     queryTokenizer: Bloodhound.tokenizers.whitespace,
                     remote: {
                         url: url,
-                        prepare: function (query, settings) { //should change to prepare: http://stackoverflow.com/questions/18688891/typeahead-js-include-dynamic-variable-in-remote-url
+                        prepare: function (query, settings) { //http://stackoverflow.com/questions/18688891/typeahead-js-include-dynamic-variable-in-remote-url
                             var val = $input.val();
                             if (val) {
                                 settings.url += preq + encodeURIComponent(val.replace(/\s/g, '\\ ') + '*');
