@@ -10,7 +10,7 @@
                 var domain = widget_settings.domain;
                 var limit = widget_settings.term_limit == 0 ? 999 : widget_settings.term_limit;
                 var separator = ' - ';
-                var field = 'name';
+                var field = 'name_tok';
                 var preq = '&q=' + field + ':';
                 var filters = [];
                 if (admin_settings.shanti_kmaps_admin_solr_filter_query) {
@@ -39,7 +39,8 @@
                         prepare: function (query, settings) { //http://stackoverflow.com/questions/18688891/typeahead-js-include-dynamic-variable-in-remote-url
                             var val = $input.val();
                             if (val) {
-                                settings.url += preq + encodeURIComponent(val.replace(/\s/g, '\\ ') + '*');
+                                settings.url += preq + encodeURIComponent(val.toLowerCase().replace(/\s/g, '\\ '));
+                                //settings.url += preq + encodeURIComponent(val.replace(/\s/g, '\\ ') + '*');
                             }
                             return settings;
                         },
