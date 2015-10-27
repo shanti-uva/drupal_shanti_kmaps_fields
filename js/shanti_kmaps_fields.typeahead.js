@@ -39,8 +39,7 @@
                         prepare: function (query, settings) { //http://stackoverflow.com/questions/18688891/typeahead-js-include-dynamic-variable-in-remote-url
                             var val = $input.val();
                             if (val) {
-                                settings.url += preq + encodeURIComponent(val.toLowerCase().replace(/\s/g, '\\ '));
-                                //settings.url += preq + encodeURIComponent(val.replace(/\s/g, '\\ ') + '*');
+                                settings.url += preq + encodeURIComponent(val.toLowerCase().replace(/[\s\u0f0b\u0f0d]+/g, '\\ '));
                             }
                             return settings;
                         },
