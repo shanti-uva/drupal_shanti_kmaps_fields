@@ -10,7 +10,7 @@
                 var domain = widget_settings.domain;
                 var limit = widget_settings.term_limit == 0 ? 999 : widget_settings.term_limit;
                 var separator = ' - ';
-                var field = 'name_tok';
+                var field = 'name_autocomplete';
                 var preq = '&q=' + field + ':';
                 var filters = [];
                 if (admin_settings.shanti_kmaps_admin_solr_filter_query) {
