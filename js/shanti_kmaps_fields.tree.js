@@ -19,6 +19,7 @@
                 var my_field = $(this).attr('id').replace('_result_box', '');
                 var picked_already = $.parseJSON(S[my_field].picked_already);
                 picked[my_field] = {}; // Init picklist for this field
+                dictionary[my_field] = {}; // Init dictionary for this field
                 for (kmap_id in picked_already) {
                     var item = picked_already[kmap_id];
                     picked[my_field][kmap_id] = item;
@@ -72,7 +73,6 @@
                 var kmap_id = extractKMapID(kmap_header);
                 if ($(this).hasClass('picked') && $(this).hasClass(kmap_id)) {
                     $('.selected-kmap.' + kmap_id).stop().css("background-color", "#FFFF9C").animate({backgroundColor: "#FFFFFF"}, 1500);
-                    ;
                 } else {
                     picked[my_field][kmap_id] = dictionary[my_field][kmap_id]; // TRAP ERROR
                     addPickedItem(resultBox, kmap_id, dictionary[my_field][kmap_id]);
