@@ -496,7 +496,7 @@ function shanti_kmaps_fields_field_widget_info()
     return $info;
 }
 
-<<<<<<< HEAD
+/*
     // Add CSS and JS to the form
     $element['#attached']['js'][]   = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.tree.js";
     $element['#attached']['css'][]  = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
@@ -518,7 +518,8 @@ function shanti_kmaps_fields_field_widget_info()
         
   }
   return $element;
-=======
+*/
+
 function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element)
 {
 
@@ -579,7 +580,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             'data' => array('shanti_kmaps_fields' => $js_settings),
             'type' => 'setting',
         );
-    } else if ($instance['widget']['type'] == 'kmap_typeahead_picker') {
+    } 
+    else if ($instance['widget']['type'] == 'kmap_typeahead_picker') {
         $domain = $field['settings']['kmap_domain'];
         $server = _shanti_kmaps_fields_get_kmaps_server($domain);
         $element += array(
@@ -634,7 +636,6 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         );
     }
     return $element;
->>>>>>> manu-2055
 }
 
 function _shanti_kmaps_fields_get_json($items)
