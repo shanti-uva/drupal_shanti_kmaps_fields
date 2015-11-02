@@ -8,6 +8,7 @@
                 var widget_settings = settings.shanti_kmaps_fields[my_field];
                 var index = admin_settings.shanti_kmaps_admin_server_solr_terms;
                 var domain = widget_settings.domain;
+                var ancestor_field = (domain == 'subjects') ? 'ancestor_ids_default' : 'ancestor_ids_pol.admin.hier';
                 var limit = widget_settings.term_limit == 0 ? 999 : widget_settings.term_limit;
                 var separator = ' - ';
                 var field = 'name_autocomplete';
@@ -17,7 +18,7 @@
                     filters.push(admin_settings.shanti_kmaps_admin_solr_filter_query);
                 }
                 if (widget_settings.root_kmapid) {
-                    filters.push('ancestor_ids_default:' + widget_settings.root_kmapid);
+                    filters.push(ancestor_field + ':' + widget_settings.root_kmapid);
                 }
                 var params = {
                     'wt': 'json',
