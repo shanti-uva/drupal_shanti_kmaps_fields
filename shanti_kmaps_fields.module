@@ -679,8 +679,8 @@ function shanti_kmaps_fields_node_delete($node)
 function _shanti_kmaps_fields_add_kmaps_to_node($node)
 {
     if (isset($node->kmap_data) && $node->kmap_data) {
-        $lang = $node->language;
         foreach ($node->kmap_data as $field_name => $data) {
+            $lang = field_language('node', $node, $field_name);
             $node->{$field_name}[$lang] = array(); // What is this?
             foreach ($data as $fid => $item) {
 
