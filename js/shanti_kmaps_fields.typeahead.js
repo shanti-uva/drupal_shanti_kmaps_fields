@@ -24,7 +24,7 @@
                     'wt': 'json',
                     'indent': true,
                     'fq': filters.concat(['tree:' + domain]),
-                    'fl': 'id,header,ancestors',
+                    'fl': 'id,header,ancestors,' + ancestor_field,
                     'rows': limit,
                     'hl': true,
                     'hl.fl': field,
@@ -50,7 +50,9 @@
                                     id: doc.id,
                                     header: doc.header,
                                     ancestors: doc.ancestors,
-                                    anstring: doc.ancestors.slice(0).reverse().join(separator),
+                                    anstring: widget_settings.root_kmapid ?
+                                        doc.ancestors.slice(doc[ancestor_field].indexOf(parseInt(widget_settings.root_kmapid))).reverse().join(separator) :
+                                        doc.ancestors.slice(0).reverse().join(separator),
                                     value: json.highlighting[doc.id][field][0] //take first highlight
                                 };
                             });
