@@ -223,9 +223,11 @@
         var pickedElement = $("<div/>").addClass('selected-kmap ' + kmap_id).appendTo(containerElement);
         var deleteButton = $("<span class='icon shanticon-close2'></span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
         var elementLabel = $("<span>" + item.header + " " + kmap_id + "</span>").addClass('kmap_label').appendTo(pickedElement);
-        var kmapIDint = $("<span>" + item.id + "</span>").addClass('kmap_id_int').addClass('datastore').appendTo(pickedElement);
-        var kmapPath = $("<span>" + item.path + "</span>").addClass('kmap_path').addClass('datastore').appendTo(pickedElement);
-        var kmapHeader = $("<span>" + item.header + "</span>").addClass('kmap_header').addClass('datastore').appendTo(pickedElement);
+        pickedElement.attr({
+            'data-kmap-id-int': item.id,
+            'data-kmap-path': item.path,
+            'data-kmap-header': item.header,
+        });
         Drupal.attachBehaviors(pickedElement);
     }
 
