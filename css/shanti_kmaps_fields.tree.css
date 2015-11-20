@@ -37,3 +37,36 @@
 .datastore {
 	display:none;
 }
+
+
+/* TAKEN FROM SARVAKA */
+
+.selected-kmap {
+  color: #555;
+  font-size: 0.93em;
+  font-family: 'museo-sans-500', helvetica, arial, sans-serif;
+  border: none;
+  padding: 0.3rem 0 0.3rem 0.8rem;
+  background-color: transparent;
+}
+
+.selected-kmap:hover {
+  color: #555;
+  background-color: transparent;
+}
+
+.selected-kmap .shanticon-close2:before {
+  color: #888;
+  position: relative;
+  /* top: 0.15rem; */
+  font-size: 1.12em;
+  cursor:pointer;
+  /* content: '\E60F'; */
+  content: '\274C';
+  font-family:'shanticon';
+}
+
+.selected-kmap:hover .shanticon-close2:before {
+  color: red;
+}
+
