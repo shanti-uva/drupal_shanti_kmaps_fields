@@ -59,10 +59,12 @@
   color: #888;
   position: relative;
   /* top: 0.15rem; */
-  font-size: 1.12em;
+  /* font-size: 1.12em; */
+  top: 0.05rem;
+  font-size: 1.5em;
   cursor:pointer;
   /* content: '\E60F'; */
-  content: '\274C';
+  content: '\2297';
   font-family:'shanticon';
 }
 
