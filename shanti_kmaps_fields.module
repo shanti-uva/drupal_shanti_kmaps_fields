@@ -678,31 +678,30 @@ function shanti_kmaps_fields_node_delete($node)
 // This function assumes that we are the only ones using kmap_data as key attached to node
 function _shanti_kmaps_fields_add_kmaps_to_node($node)
 {
-    if (isset($node->kmap_data) && $node->kmap_data) {
-        foreach ($node->kmap_data as $field_name => $data) {
-            $lang = field_language('node', $node, $field_name);
-            $node->{$field_name}[$lang] = array(); // What is this?
-            foreach ($data as $fid => $item) {
-
-                // Get the ancestors and put in RAW
-                $kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'], $item['id']);
-                $raw_string = '<' . implode('> <', $kmapids) . '>'; // CREATE RAW FUNCTION
-                $raw_string = preg_replace('/(subjects|places)-/', '', $raw_string); // Kludge
-
-                $node->{$field_name}[$lang][] = array( // These are the real deltas
-                    'raw' => $raw_string,
-                    'id' => $item['id'],
-                    'header' => $item['header'],
-                    'path' => $item['path'],
-                    'domain' => $item['domain'],
-                );
-            }
-        }
+  if (!empty($node->kmap_data)) {
+    foreach ($node->kmap_data as $field_name => $data) {
+      if (empty($data)) continue;
+      $lang = field_language('node', $node, $field_name);
+      $node->{$field_name}[$lang] = array(); // What is this?
+      foreach ($data as $fid => $item) {
+        // Get the ancestors and put in RAW
+        $kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'], $item['id']);
+        $raw_string = '<' . implode('> <', $kmapids) . '>'; // CREATE RAW FUNCTION
+        $raw_string = preg_replace('/(subjects|places)-/', '', $raw_string); // Kludge
+        $node->{$field_name}[$lang][] = array( // These are the real deltas
+            'raw' => $raw_string,
+            'id' => $item['id'],
+            'header' => $item['header'],
+            'path' => $item['path'],
+            'domain' => $item['domain'],
+        );
+      }
     }
-    field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise
-    entity_get_controller('node')->resetCache(array($node->nid)); // This is needed to get most recent ids
-    _shanti_kmaps_fields_push_solr_doc($node->nid);
-    return $node;
+  }
+  field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise
+  entity_get_controller('node')->resetCache(array($node->nid)); // This is needed to get most recent ids
+  _shanti_kmaps_fields_push_solr_doc($node->nid);
+  return $node;
 }
 
 function _shanti_kmaps_fields_push_solr_doc($nid)
