@@ -682,7 +682,7 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node)
     foreach ($node->kmap_data as $field_name => $data) {
       if (empty($data)) continue;
       $lang = field_language('node', $node, $field_name);
-      $node->{$field_name}[$lang] = array(); // What is this?
+      $node->{$field_name}[$lang] = array(); // What do this? Are you creating the field?
       foreach ($data as $fid => $item) {
         // Get the ancestors and put in RAW
         $kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'], $item['id']);
@@ -698,7 +698,7 @@ function _shanti_kmaps_fields_add_kmaps_to_node($node)
       }
     }
   }
-  field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise
+  field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise BUT NOT field_attach_insert?
   entity_get_controller('node')->resetCache(array($node->nid)); // This is needed to get most recent ids
   _shanti_kmaps_fields_push_solr_doc($node->nid);
   return $node;
