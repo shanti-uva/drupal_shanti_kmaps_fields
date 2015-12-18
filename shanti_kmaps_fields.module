@@ -613,7 +613,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         );
 
         // Add CSS and JS to the form
-        $element['#attached']['js'][] = array('data' => 'https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js', 'type' => 'external');
+        $element['#attached']['libraries_load'][] = array('typeahead');
         $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.typeahead.js";
         $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.tree.js";
         $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.typeahead.css";
