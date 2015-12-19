@@ -85,13 +85,13 @@
                 function (ev, sel) {
                     var my_field = $(this).attr('id').replace('_search_term', '');
                     var resultBox = $('#' + my_field + '_result_box');
-                    var domain_id = sel.id.split('-'); //split subjects-123
+                    var domain_id = sel.doc.id.split('-'); //split subjects-123
                     var kmap_id = 'F' + domain_id[1];
                     var item = {
                         id: domain_id[1],
                         domain: domain_id[0],
-                        header: sel.header,
-                        path: '{{' + sel.ancestors.join('}}{{') + '}}'
+                        header: sel.doc.header,
+                        path: '{{' + sel.doc.ancestors.join('}}{{') + '}}'
                     };
                     if (!picked[my_field][kmap_id]) {
                         picked[my_field][kmap_id] = item;
