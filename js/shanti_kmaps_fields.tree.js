@@ -14,7 +14,7 @@
             S = settings.shanti_kmaps_fields;
 
             // Event handler 0: On first load, go through each instance of the field and update its picklist
-            $('.kmap_result_box').once(function () {
+            $('.kmap_result_box').once('picklist', function () {
                 var resultBox = $(this);
                 var my_field = $(this).attr('id').replace('_result_box', '');
                 var picked_already = $.parseJSON(S[my_field].picked_already);
@@ -45,7 +45,7 @@
                             var kmap_id = 'F' + R.id;
                             var path = ancestorsToPath(R.ancestors);
                             updateDictionary(kmap_id, R.id, R.header, path, my_field);
-                            addAncestorsToDictionary(R.ancestors, my_field)
+                            addAncestorsToDictionary(R.ancestors, my_field);
                             parsePath(R.ancestors, my_field); // populates ancestor_tree
                         }
                         // Need also to see if any of the new items are in the pick list ...

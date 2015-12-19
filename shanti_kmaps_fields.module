@@ -469,7 +469,7 @@ function shanti_kmaps_fields_field_widget_info()
       ),
     );
     */
-    $info['kmap_tree_picker '] = array(
+    $info['kmap_tree_picker'] = array(
         'label' => t("Tree"),
         'field types' => array('shanti_kmaps_fields_default'),
         'settings' => array(),
@@ -525,7 +525,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
 
     $field_id = $field['field_name']; // . '_' . $delta; // DON'T NEED DELTAS, NOT MULTI-VALUE
 
-    if ($instance['widget']['type'] == 'kmap_tree_picker ') {
+    if ($instance['widget']['type'] == 'kmap_tree_picker') {
         $domain = $field['settings']['kmap_domain'];
         $server = _shanti_kmaps_fields_get_kmaps_server($domain);
         $element += array(
