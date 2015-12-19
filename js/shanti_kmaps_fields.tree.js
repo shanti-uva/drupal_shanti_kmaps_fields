@@ -14,7 +14,7 @@
             S = settings.shanti_kmaps_fields;
 
             // Event handler 0: On first load, go through each instance of the field and update its picklist
-            $('.kmap_result_box').once('picklist', function () {
+            $('.kmap_result_box').once(function () {
                 var resultBox = $(this);
                 var my_field = $(this).attr('id').replace('_result_box', '');
                 var picked_already = $.parseJSON(S[my_field].picked_already);
