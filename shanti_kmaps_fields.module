@@ -562,7 +562,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         );
 
         // Add CSS and JS to the form
-        $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.tree.js";
+        $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
         $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
 
         // Pass settings to the JS
@@ -615,8 +615,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         // Add CSS and JS to the form
         $element['#attached']['libraries_load'][] = array('typeahead');
         $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
-        $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.typeahead.js";
-        $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.tree.js";
+        $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
         $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.typeahead.css";
         $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
 

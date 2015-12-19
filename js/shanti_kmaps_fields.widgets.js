@@ -80,27 +80,6 @@
                 }
             });
 
-            //Event handler for picking item from typeahead
-            $('.field-widget-kmap-typeahead-picker').once('kmaps-pick').find('.kmap_search_term').bind('typeahead:select',
-                function (ev, sel) {
-                    var my_field = $(this).attr('id').replace('_search_term', '');
-                    var resultBox = $('#' + my_field + '_result_box');
-                    var domain_id = sel.doc.id.split('-'); //split subjects-123
-                    var kmap_id = 'F' + domain_id[1];
-                    var item = {
-                        id: domain_id[1],
-                        domain: domain_id[0],
-                        header: sel.doc.header,
-                        path: '{{' + sel.doc.ancestors.join('}}{{') + '}}'
-                    };
-                    if (!picked[my_field][kmap_id]) {
-                        picked[my_field][kmap_id] = item;
-                        addPickedItem(resultBox, kmap_id, item);
-                        $(this).typeahead('val', ''); //clear search field
-                    }
-                }
-            );
-
             // Event handler 3: When selected items are deleted, remove them and reset the item in the pick tree
             $('.kmap_result_box .delete-me').once('kmaps-fields').on('click', function (e) {
                 var my_field = $(this).closest('.kmap_result_box').attr('id').replace('_result_box', '');
@@ -135,6 +114,41 @@
                 return;
             });
 
+            // Turn inputs into typeahead pickers if required
+            $('.field-widget-kmap-typeahead-picker').once('kmaps-search').find('.kmap_search_term').each(function () {
+                var my_field = $(this).attr('id').replace('_search_term', '');
+                var admin_settings = settings.shanti_kmaps_admin;
+                var widget_settings = settings.shanti_kmaps_fields[my_field];
+
+                $(this).kmapsTypeahead({
+                    term_index: admin_settings.shanti_kmaps_admin_server_solr_terms,
+                    domain: widget_settings.domain,
+                    root_kmapid: widget_settings.root_kmapid ? widget_settings.root_kmapid : '',
+                    max_terms: widget_settings.term_limit == 0 ? 999 : widget_settings.term_limit,
+                    fq: admin_settings.shanti_kmaps_admin_solr_filter_query ? admin_settings.shanti_kmaps_admin_solr_filter_query : ''
+                });
+            });
+
+            //Event handler for picking item from typeahead
+            $('.field-widget-kmap-typeahead-picker').once('kmaps-pick').find('.kmap_search_term').bind('typeahead:select',
+                function (ev, sel) {
+                    var my_field = $(this).attr('id').replace('_search_term', '');
+                    var resultBox = $('#' + my_field + '_result_box');
+                    var domain_id = sel.doc.id.split('-'); //split subjects-123
+                    var kmap_id = 'F' + domain_id[1];
+                    var item = {
+                        id: domain_id[1],
+                        domain: domain_id[0],
+                        header: sel.doc.header,
+                        path: '{{' + sel.doc.ancestors.join('}}{{') + '}}'
+                    };
+                    if (!picked[my_field][kmap_id]) {
+                        picked[my_field][kmap_id] = item;
+                        addPickedItem(resultBox, kmap_id, item);
+                        $(this).typeahead('val', ''); //clear search field
+                    }
+                }
+            );
         },
 
         detach: function (context, settings) {
