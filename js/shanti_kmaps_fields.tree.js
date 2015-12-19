@@ -45,7 +45,7 @@
                             var kmap_id = 'F' + R.id;
                             var path = ancestorsToPath(R.ancestors);
                             updateDictionary(kmap_id, R.id, R.header, path, my_field);
-                            addAncestorsToDictionary(R.ancestors, my_field)
+                            addAncestorsToDictionary(R.ancestors, my_field);
                             parsePath(R.ancestors, my_field); // populates ancestor_tree
                         }
                         // Need also to see if any of the new items are in the pick list ...
