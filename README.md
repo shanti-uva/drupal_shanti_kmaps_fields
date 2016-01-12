@@ -2,6 +2,17 @@
 
 A field for adding KMap IDs from the KMaps API to Drupal assets and updating the KMaps Index.
 
+## Dependencies
+
+All widgets depend on [SHANTI KMaps Admin](https://github.com/shanti-uva/drupal_shanti_kmaps_admin]).
+
+The autocomplete widget also requires:
+* [Typeahead](https://github.com/shanti-uva/drupal_kmaps_modules).
+* [SHANTI KMaps Libraries](https://github.com/shanti-uva/drupal_shanti_kmaps_libraries).
+
+Note that SHANTI KMaps Libraries requires pulling plugins into the sites/all/libraries directory.
+
+
 ## How To Use This Module
 
 1. Install and enable as you would any Drupal module.
