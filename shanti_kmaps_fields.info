@@ -7,7 +7,7 @@ configure = admin/config/content/shanti_kmaps_fields
 
 dependencies[] = jquery_update
 dependencies[] = shanti_kmaps_admin
-dependencies[] = typeahead
+dependencies[] = shanti_kmaps_typeahead
 
 files[] = shanti_kmaps_fields.module
 files[] = shanti_kmaps_fields.install
