@@ -428,7 +428,7 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance)
         $form['kmap_term_limit'] = array(
             '#type' => 'textfield',
             '#title' => t('KMap Term Limit'),
-            '#description' =>   t('The maximum number of matched terms to return from a KMap search. Higher limits may lead to slower search. Enter 0 for no limit.'),
+            '#description' => t('The maximum number of matched terms to return from a KMap search. Higher limits may lead to slower search. Enter 0 for no limit.'),
             '#required' => TRUE,
             '#default_value' => $settings['kmap_term_limit'],
             '#element_validate' => array('element_validate_integer'),
@@ -458,17 +458,6 @@ function shanti_kmaps_fields_field_validate($obj_type, $object, $field, $instanc
 function shanti_kmaps_fields_field_widget_info()
 {
     $info = array();
-    /*
-    $info['kmap_default_widget'] = array(
-      'label'         => t('Autocomplete'),
-      'field types'   => array('shanti_kmaps_fields_default'),
-      'settings'      => array(),
-      'behaviors'     => array(
-        'multiple values' => TRUE,
-        'default value'   => FIELD_BEHAVIOR_DEFAULT,
-      ),
-    );
-    */
     $info['kmap_tree_picker'] = array(
         'label' => t("Tree"),
         'field types' => array('shanti_kmaps_fields_default'),
@@ -483,6 +472,18 @@ function shanti_kmaps_fields_field_widget_info()
     );
     $info['kmap_typeahead_picker'] = array(
         'label' => t("Autocomplete"),
+        'field types' => array('shanti_kmaps_fields_default'),
+        'settings' => array(),
+        'behaviors' => array(
+            'multiple values' => FALSE,
+            // THIS IS SO THAT USERS DON'T ADD MORE THAN ONE WIDGET
+            // However, the "Number of Values" field in the form must be set to "Unlimited" in the field settings form
+            // for the field to actually accept multiple values in the database
+            'default value' => FIELD_BEHAVIOR_DEFAULT,
+        ),
+    );
+    $info['kmap_typeahead_tree_picker'] = array(
+        'label' => t("Autocomplete tree"),
         'field types' => array('shanti_kmaps_fields_default'),
         'settings' => array(),
         'behaviors' => array(
@@ -524,117 +525,128 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
 {
 
     $field_id = $field['field_name']; // . '_' . $delta; // DON'T NEED DELTAS, NOT MULTI-VALUE
+    $domain = $field['settings']['kmap_domain'];
 
-    if ($instance['widget']['type'] == 'kmap_tree_picker') {
-        $domain = $field['settings']['kmap_domain'];
-        $server = _shanti_kmaps_fields_get_kmaps_server($domain);
-        $element += array(
-            '#type' => 'fieldset',
-            '#collapsible' => TRUE,
-            '#collapsed' => FALSE,
-            '#tree' => FALSE,
-            '#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
-            '#attributes' => array('id' => $field_id . '_fieldset'),
-        );
-        $element["{$field_id}_search_term"] = array(
-            '#title' => t('Search for ' . $domain),
-            '#type' => 'textfield',
-            '#description' => "<p>Enter a search term for the KMap $domain server and press tab to see the results.</p>",
-            '#size' => 30,
-            '#default_value' => '',
-            '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term')),
-            '#field_suffix' => "<button type='button' id='{$field_id}_search_button' name='{$field_id}_search_button' class='kmap_search_button' value=''>SEARCH</button>",
-        );
-        $element["{$field_id}_pick_tree"] = array(
-            '#type' => 'container',
-            '#attributes' => array('id' => $field_id . '_pick_tree', 'class' => array('kmap_pick_tree')),
-        );
-        $element["{$field_id}_result_box"] = array(
-            '#type' => 'container',
-            '#attributes' => array('id' => $field_id . '_result_box', 'class' => array('kmap_result_box')),
-        );
-        $element["{$field_id}_hidden_box"] = array(
-            '#title' => '',
-            '#type' => 'textarea',
-            '#prefix' => '<div class="datastore">',
-            '#attributes' => array('id' => $field_id . '_hidden_box'),
-            '#suffix' => '</div>',
-        );
+    //general field properties
+    $element += array(
+        '#type' => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed' => FALSE,
+        '#tree' => FALSE,
+        '#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
+        '#attributes' => array('id' => $field_id . '_fieldset'),
+    );
+    $element["{$field_id}_search_term"] = array(
+        '#weight' => 0,
+        '#title' => t('Search for ' . $domain),
+        '#type' => 'textfield',
+        '#default_value' => '',
+        '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term')),
+    );
+    $element["{$field_id}_result_box"] = array(
+        '#weight' => 20,
+        '#type' => 'container',
+        '#attributes' => array('id' => $field_id . '_result_box', 'class' => array('kmap_result_box')),
+    );
+    $element["{$field_id}_hidden_box"] = array(
+        '#weight' => 30,
+        '#title' => '',
+        '#type' => 'textarea',
+        '#prefix' => '<div class="datastore">',
+        '#attributes' => array('id' => $field_id . '_hidden_box'),
+        '#suffix' => '</div>',
+    );
 
-        // Add CSS and JS to the form
-        $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
-        $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
+    //widget-specific field properties
+    switch ($instance['widget']['type']) {
+        case 'kmap_tree_picker':
+            $element["{$field_id}_search_term"] += array(
+                '#size' => 30,
+                '#description' => "<p>Enter a search term for the KMap $domain server and press tab to see the results.</p>",
+                '#field_suffix' => "<button type='button' id='{$field_id}_search_button' name='{$field_id}_search_button' class='kmap_search_button' value=''>SEARCH</button>",
+            );
+            $element["{$field_id}_pick_tree"] = array(
+                '#weight' => 10,
+                '#type' => 'container',
+                '#attributes' => array('id' => $field_id . '_pick_tree', 'class' => array('kmap_pick_tree')),
+            );
 
-        // Pass settings to the JS
-        $js_settings = array(
-            $field_id => array(
-                'field_name' => $field['field_name'],
-                'domain' => $domain,
-                'term_limit' => $instance['settings']['kmap_term_limit'],
-                'kmap_url' => url("shanti_kmaps_fields/kmaps_list/$domain/"),
-                'picked_already' => _shanti_kmaps_fields_get_json($items),
-                'root_kmapid' => $instance['settings']['search_root_kmapid'],
-            ),
-        );
-        $element['#attached']['js'][] = array(
-            'data' => array('shanti_kmaps_fields' => $js_settings),
-            'type' => 'setting',
-        );
-    } 
-    else if ($instance['widget']['type'] == 'kmap_typeahead_picker') {
-        $domain = $field['settings']['kmap_domain'];
-        $server = _shanti_kmaps_fields_get_kmaps_server($domain);
-        $element += array(
-            '#type' => 'fieldset',
-            '#collapsible' => TRUE,
-            '#collapsed' => FALSE,
-            '#tree' => FALSE,
-            '#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
-            '#attributes' => array('id' => $field_id . '_fieldset'),
-        );
-        $element["{$field_id}_search_term"] = array(
-            '#title' => t('Search for ' . $domain),
-            '#type' => 'textfield',
-            '#description' => "<p>Start typing to search for a term from KMap $domain server. Click on a term to select it.</p>",
-            '#size' => 60,
-            '#default_value' => '',
-            '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term')),
-        );
-        $element["{$field_id}_result_box"] = array(
-            '#type' => 'container',
-            '#attributes' => array('id' => $field_id . '_result_box', 'class' => array('kmap_result_box')),
-        );
-        $element["{$field_id}_hidden_box"] = array(
-            '#title' => '',
-            '#type' => 'textarea',
-            '#prefix' => '<div class="datastore">',
-            '#attributes' => array('id' => $field_id . '_hidden_box'),
-            '#suffix' => '</div>',
-        );
+            // Add CSS and JS to the form
+            $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
+            $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
+            break;
+        case 'kmap_typeahead_picker':
+            $element["{$field_id}_search_term"] += array(
+                '#size' => 60,
+                '#description' => "<p>Start typing to search for a term from KMap $domain server. Click on a term to select it.</p>",
+            );
 
-        // Add CSS and JS to the form
-        $element['#attached']['libraries_load'][] = array('typeahead');
-        $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
-        $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
-        $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.typeahead.css";
-        $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
+            // Add CSS and JS to the form
+            $element['#attached']['libraries_load'][] = array('typeahead');
+            $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
+            $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
+            $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.typeahead.css";
+            $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
+            break;
+        case 'kmap_typeahead_tree_picker':
+            $element["{$field_id}_search_term"] += array(
+                '#size' => 60,
+                '#description' => "<p>Browse the tree, or start typing to search for a term from KMap $domain server. Click on a term in the tree to select it.</p>",
+            );
+            $element["{$field_id}_menu_wrapper"] = array(
+                '#weight' => 10,
+                '#type' => '#markup',
+                '#prefix' => "<div id='{$field_id}_menu_wrapper' class='menu_wrapper'>",
+                '#suffix' => "</div>",
+            );
+            $element["{$field_id}_typeahead_tree"] = array(
+                '#weight' => 15,
+                '#type' => '#markup',
+                '#prefix' => "<div id='{$field_id}_typeahead_tree' class='typeahead_tree'>",
+                '#suffix' => "</div>",
+            );
 
-        // Pass settings to the JS
-        $js_settings = array(
-            $field_id => array(
-                'field_name' => $field['field_name'],
-                'domain' => $domain,
-                'term_limit' => $instance['settings']['kmap_term_limit'],
-                'kmap_url' => url("shanti_kmaps_fields/kmaps_list/$domain/"),
-                'picked_already' => _shanti_kmaps_fields_get_json($items),
-                'root_kmapid' => $instance['settings']['search_root_kmapid'],
-            ),
-        );
-        $element['#attached']['js'][] = array(
-            'data' => array('shanti_kmaps_fields' => $js_settings),
-            'type' => 'setting',
-        );
-    }
+            // Add CSS and JS to the form;
+            //$element['#attached']['libraries_load'][] = array('ajaxsolr');
+            // error_log("loading json2: " . print_r(libraries_load('json2'),true));
+            //libraries_load('json2');
+            // Need to add debugging (the returned object from libraries_load is the only error logging you ever get)
+            //error_log("loading fancytree: " . print_r(libraries_load('fancytree','source'),true));
+            //libraries_load('fancytree','source');
+            //error_log("loading ajaxsolr: " . print_r(libraries_load('ajaxsolr'), true));
+            //libraries_load('ajaxsolr');
+
+            //typeahead libraries
+            $element['#attached']['libraries_load'][] = array('typeahead');
+            $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
+
+            //tree libraries
+            $element['#attached']['libraries_load'][] = array('json2');
+            $element['#attached']['libraries_load'][] = array('fancytree', 'source');
+            $element['#attached']['libraries_load'][] = array('shanti_kmaps_tree');
+
+            $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
+            $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.typeahead.css";
+            $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.typeahead-tree.css";
+            break;
+    };
+
+    // Pass settings to the JS
+    $js_settings = array(
+        $field_id => array(
+            'field_name' => $field['field_name'],
+            'domain' => $domain,
+            'term_limit' => $instance['settings']['kmap_term_limit'],
+            'kmap_url' => url("shanti_kmaps_fields/kmaps_list/$domain/"),
+            'picked_already' => _shanti_kmaps_fields_get_json($items),
+            'root_kmapid' => $instance['settings']['search_root_kmapid'],
+        ),
+    );
+    $element['#attached']['js'][] = array(
+        'data' => array('shanti_kmaps_fields' => $js_settings),
+        'type' => 'setting',
+    );
+
     return $element;
 }
 
@@ -678,30 +690,30 @@ function shanti_kmaps_fields_node_delete($node)
 // This function assumes that we are the only ones using kmap_data as key attached to node
 function _shanti_kmaps_fields_add_kmaps_to_node($node)
 {
-  if (!empty($node->kmap_data)) {
-    foreach ($node->kmap_data as $field_name => $data) {
-      if (empty($data)) continue;
-      $lang = field_language('node', $node, $field_name);
-      $node->{$field_name}[$lang] = array(); // What do this? Are you creating the field?
-      foreach ($data as $fid => $item) {
-        // Get the ancestors and put in RAW
-        $kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'], $item['id']);
-        $raw_string = '<' . implode('> <', $kmapids) . '>'; // CREATE RAW FUNCTION
-        $raw_string = preg_replace('/(subjects|places)-/', '', $raw_string); // Kludge
-        $node->{$field_name}[$lang][] = array( // These are the real deltas
-            'raw' => $raw_string,
-            'id' => $item['id'],
-            'header' => $item['header'],
-            'path' => $item['path'],
-            'domain' => $item['domain'],
-        );
-      }
+    if (!empty($node->kmap_data)) {
+        foreach ($node->kmap_data as $field_name => $data) {
+            if (empty($data)) continue;
+            $lang = field_language('node', $node, $field_name);
+            $node->{$field_name}[$lang] = array(); // What do this? Are you creating the field?
+            foreach ($data as $fid => $item) {
+                // Get the ancestors and put in RAW
+                $kmapids = _shanti_kmaps_fields_get_related_kmap_terms($item['domain'], $item['id']);
+                $raw_string = '<' . implode('> <', $kmapids) . '>'; // CREATE RAW FUNCTION
+                $raw_string = preg_replace('/(subjects|places)-/', '', $raw_string); // Kludge
+                $node->{$field_name}[$lang][] = array( // These are the real deltas
+                    'raw' => $raw_string,
+                    'id' => $item['id'],
+                    'header' => $item['header'],
+                    'path' => $item['path'],
+                    'domain' => $item['domain'],
+                );
+            }
+        }
     }
-  }
-  field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise BUT NOT field_attach_insert?
-  entity_get_controller('node')->resetCache(array($node->nid)); // This is needed to get most recent ids
-  _shanti_kmaps_fields_push_solr_doc($node->nid);
-  return $node;
+    field_attach_update('node', $node); // This is crucial -- data not saved to field for node otherwise BUT NOT field_attach_insert?
+    entity_get_controller('node')->resetCache(array($node->nid)); // This is needed to get most recent ids
+    _shanti_kmaps_fields_push_solr_doc($node->nid);
+    return $node;
 }
 
 function _shanti_kmaps_fields_push_solr_doc($nid)
@@ -781,7 +793,8 @@ function shanti_kmaps_fields_get_terms_for_kmapid($kmap_domain, $kmap_id)
 /**
  * Just get the title for a kmaps from its ID
  */
-function shanti_kmaps_fields_get_title_by_id($domain = 'subjects', $kmap_id) {
+function shanti_kmaps_fields_get_title_by_id($domain = 'subjects', $kmap_id)
+{
     $server = 'http://' . $domain . '.kmaps.virginia.edu';
     $kma = new KMapsAPI($domain, $server);
     $kma->setKMapID($kmap_id);

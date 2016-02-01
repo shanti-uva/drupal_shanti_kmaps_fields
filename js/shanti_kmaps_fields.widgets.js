@@ -149,6 +149,41 @@
                     }
                 }
             );
+
+            // Turn inputs into typeahead_tree pickers if required
+            $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-search').find('.kmap_search_term').each(function () {
+                var $typeahead = $(this);
+                var my_field = $typeahead.attr('id').replace('_search_term', '');
+                var $tree = $('#' + my_field + '_typeahead_tree');
+                var admin = settings.shanti_kmaps_admin;
+                var widget = settings.shanti_kmaps_fields[my_field];
+                var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
+                var base_url = widget.domain == 'subjects' ? admin.shanti_kmaps_admin_server_subjects : admin.shanti_kmaps_admin_server_places;
+                $tree.kmapsTree({
+                    termindex_root: admin.shanti_kmaps_admin_server_solr_terms,
+                    kmindex_root: admin.shanti_kmaps_admin_server_solr,
+                    type: widget.domain,
+                    root_kmapid: root_kmapid,
+                    baseUrl: base_url
+                });
+                $typeahead.kmapsTypeahead({
+                    menu: $('#' + my_field + '_menu_wrapper'),
+                    term_index: admin.shanti_kmaps_admin_server_solr_terms,
+                    domain: widget.domain,
+                    root_kmapid: root_kmapid,
+                    max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                    fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
+                    fields: 'ancestor_id_path'
+                }).kmapsTypeahead('onSuggest', function (suggestions) {
+                    $tree.kmapsTree('showPaths',
+                        $.map(suggestions, function (val) {
+                            return '/' + val['doc']['ancestor_id_path'];
+                        }),
+                        function () {
+                        }
+                    );
+                });
+            });
         },
 
         detach: function (context, settings) {
