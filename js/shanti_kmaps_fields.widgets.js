@@ -29,7 +29,7 @@
             });
 
             // Event handler 1: Fetch search results and build a "pick tree"
-            $('.kmap_search_button').on('click', function (e) {
+            $('.kmap_search_button').once('kmaps-fields').on('click', function (e) {
                 var my_field = $(this).attr('id').replace('_search_button', '');
                 var pickTree = $('#' + my_field + '_pick_tree');
                 var search_term = $('#' + my_field + '_search_term').val();
@@ -66,7 +66,7 @@
 
             // Event handler 2: When kmap items are selected from the pick tree, cross them out
             // and populate the result box
-            $('.kmap_pick_tree .kmap-item').on('click', function (e) {
+            $('.kmap_pick_tree .kmap-item').once('kmaps-field').on('click', function (e) {
                 var my_field = $(this).closest('.kmap_pick_tree').attr('id').replace('_pick_tree', '');
                 var resultBox = $('#' + my_field + '_result_box');
                 var kmap_header = $(this).html();

@@ -8,9 +8,9 @@ All widgets depend on [SHANTI KMaps Admin](https://github.com/shanti-uva/drupal_
 
 The autocomplete widget also requires:
 * [Typeahead](https://github.com/shanti-uva/drupal_kmaps_modules)
-* [SHANTI KMaps Libraries](https://github.com/shanti-uva/drupal_shanti_kmaps_libraries)
+* [SHANTI KMaps Typeahead](https://github.com/shanti-uva/drupal_kmaps_modules)
 
-Note that SHANTI KMaps Libraries requires pulling additional repositories into your sites/all/libraries directory.
+Note that this requires pulling additional repositories into your sites/all/libraries directory.
 
 
 ## How To Use This Module
