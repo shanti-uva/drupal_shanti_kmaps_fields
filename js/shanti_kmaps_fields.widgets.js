@@ -175,6 +175,7 @@
                     fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
                     fields: 'ancestor_id_path'
                 }).kmapsTypeahead('onSuggest', function (suggestions) {
+                    console.log(suggestions);
                     $tree.kmapsTree('showPaths',
                         $.map(suggestions, function (val) {
                             return '/' + val['doc']['ancestor_id_path'];
