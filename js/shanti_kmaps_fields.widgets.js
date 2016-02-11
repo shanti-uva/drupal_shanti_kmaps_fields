@@ -119,11 +119,12 @@
                 var my_field = $(this).attr('id').replace('_search_term', '');
                 var admin_settings = settings.shanti_kmaps_admin;
                 var widget_settings = settings.shanti_kmaps_fields[my_field];
+                var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
 
                 $(this).kmapsTypeahead({
                     term_index: admin_settings.shanti_kmaps_admin_server_solr_terms,
                     domain: widget_settings.domain,
-                    root_kmapid: widget_settings.root_kmapid ? widget_settings.root_kmapid : '',
+                    root_kmapid: root_kmapid,
                     max_terms: widget_settings.term_limit == 0 ? 999 : widget_settings.term_limit,
                     fq: admin_settings.shanti_kmaps_admin_solr_filter_query ? admin_settings.shanti_kmaps_admin_solr_filter_query : ''
                 });
@@ -172,6 +173,10 @@
                     domain: widget.domain,
                     root_kmapid: root_kmapid,
                     max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                    min_chars: 0,
+                    empty_query: '*:*',
+                    empty_sort: 'level_i ASC',
+                    empty_limit: 100,
                     fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
                     fields: 'ancestor_id_path'
                 }).kmapsTypeahead('onSuggest', function (suggestions) {
