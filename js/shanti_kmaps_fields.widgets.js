@@ -90,8 +90,7 @@
                 //  if (!confirm("This term "+kmap_id+" is not in the currently selected tree; if you delete it, you'll need to search for it again. Are you sure you want to delete it?")) return;
                 //}
                 delete picked[my_field][kmap_id];
-                var pickTreeElement = $('#' + my_field + '_pick_tree .kmap-item.' + kmap_id);
-                pickTreeElement.removeClass('picked');
+                $('#' + my_field + '_pick_tree, #' + my_field + '_typeahead_tree').find('.kmap-item.' + kmap_id + ', #ajax-id-' + kmap_id.substring(1)).removeClass('picked');
                 pickedElement.remove();
             });
 
@@ -177,8 +176,24 @@
                         }
                     );
                 });
-            });
+                $tree.on('useractivate', function(ev, data) {
+                    var event = data.event;
 
+                    var origEvent = (event.originalEvent) ? event.originalEvent.type : "none";
+                    var keyCode = "";
+                    if (event.keyCode) {
+                        keyCode = "(" + event.keyCode + ")";
+                    }
+                    if (event.type === "fancytreeactivate" && origEvent === "click") {
+                        pickTypeaheadTreeTerm($typeahead, $.extend(data, {'domain': widget.domain}));
+                    } else if (event.type === "fancytreekeydown" && origEvent === "keydown") {
+                        if (event.keyCode == 9 || event.keyCode == 13) { //TAB or ENTER pressed
+                            pickTypeaheadTreeTerm($typeahead, $.extend(data, {'domain': widget.domain}));
+                        }
+                    }
+                });
+
+            });
 
             //typeahead_tree bindings
             $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-tree').find('.kmap_search_term').bind('typeahead:cursorchange',
@@ -283,6 +298,24 @@
         }
     }
 
+    function pickTypeaheadTreeTerm($typeahead, data) {
+        var my_field = $typeahead.attr('id').replace('_search_term', '');
+        var resultBox = $('#' + my_field + '_result_box');
+        var id = data.key, kmap_id = 'F' + id;
+        var item = {
+            id: data.key,
+            domain: data.domain,
+            header: data.title,
+            path: '{{' + data.path.substring(1).split('/').join('}}{{') + '}}'
+        };
+        if (!picked[my_field][kmap_id]) {
+            picked[my_field][kmap_id] = item;
+            addPickedItem(resultBox, kmap_id, item);
+            $('#ajax-id-' + item.id, $('#' + my_field + '_typeahead_tree')).addClass('picked');
+            $typeahead.typeahead('val', ''); //clear search field
+        }
+    }
+
     function pickSuggestion($typeahead, suggestion) {
         var my_field = $typeahead.attr('id').replace('_search_term', '');
         var resultBox = $('#' + my_field + '_result_box');
@@ -296,6 +329,7 @@
         if (!picked[my_field][kmap_id]) {
             picked[my_field][kmap_id] = item;
             addPickedItem(resultBox, kmap_id, item);
+            $('#ajax-id-' + item.id, $('#' + my_field + '_typeahead_tree')).addClass('picked');
             $typeahead.typeahead('val', ''); //clear search fiel
         }
     }

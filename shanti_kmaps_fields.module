@@ -593,7 +593,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#size' => 60,
                 '#description' => "<p>Browse the tree, or start typing to search for a term from KMap $domain server. "
                                     . "Use the arrow keys to navigate through the results. "
-                                    . "Press TAB, ENTER, or click on the term in the tree to add it to the list.</p>",
+                                    . "Press TAB, ENTER, or click on a term in the tree to add it to the list.</p>",
             );
             $element["{$field_id}_menu_wrapper"] = array(
                 '#weight' => 10,
