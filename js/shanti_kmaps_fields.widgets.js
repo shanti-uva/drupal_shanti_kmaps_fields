@@ -171,7 +171,11 @@
                             return '/' + val['doc']['ancestor_id_path'];
                         }),
                         function () {
-                            // this does not have the desired effect
+                            // mark already picked items
+                            /*for (kmap_id in picked[my_field]) {
+                                $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
+                            }*/
+                            // scroll to top
                             $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
                         }
                     );
