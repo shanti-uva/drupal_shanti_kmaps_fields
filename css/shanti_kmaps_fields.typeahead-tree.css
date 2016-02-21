@@ -3,3 +3,15 @@
 .field-widget-kmap-typeahead-tree-picker .menu_wrapper {
     display: none;
 }
+
+.field-widget-kmap-typeahead-tree-picker .typeahead_tree {
+    clear: both;
+    background: #eee;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.field-widget-kmap-typeahead-tree-picker .fancytree-container {
+    max-height: 350px;
+    overflow: scroll;
+}

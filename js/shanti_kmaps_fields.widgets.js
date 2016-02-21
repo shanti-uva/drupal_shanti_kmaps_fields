@@ -130,6 +130,13 @@
                 });
             });
 
+            //Event handler for typeahead picking
+            $('.field-widget-kmap-typeahead-picker').once('kmaps-pick').find('.kmap_search_term').bind('typeahead:select',
+                function (ev, sel) {
+                    pickSuggestion($(this), sel)
+                }
+            );
+
             // Turn inputs into typeahead_tree pickers if required
             $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-search').find('.kmap_search_term').each(function () {
                 var $typeahead = $(this);
@@ -145,13 +152,6 @@
                     type: widget.domain,
                     root_kmapid: root_kmapid,
                     baseUrl: base_url
-                }).find('.fancytree-container').css({
-                    'min-height': '350px',
-                    'max-height': '350px',
-                    'overflow': 'scroll',
-                    'padding': '5px',
-                    'margin-bottom': '5px',
-                    'background': '#EEE'
                 }); //.bind("fancytreeclick", function (event, data) { });
                 $typeahead.kmapsTypeahead({
                     menu: $('#' + my_field + '_menu_wrapper'),
@@ -164,8 +164,7 @@
                     //empty_query: 'id:' + widget.domain + '-' + root_kmapid,
                     //empty_sort: 'level_i ASC',
                     empty_limit: 10,
-                    fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
-                    fields: 'ancestor_id_path'
+                    fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                 }).kmapsTypeahead('onSuggest', function (suggestions) {
                     //console.log(suggestions);
                     $tree.kmapsTree('showPaths',
@@ -173,10 +172,13 @@
                             return '/' + val['doc']['ancestor_id_path'];
                         }),
                         function () {
+                            // this does not have the desired effect
+                            $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
                         }
                     );
                 });
             });
+
 
             //typeahead_tree bindings
             $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-tree').find('.kmap_search_term').bind('typeahead:cursorchange',
@@ -191,8 +193,8 @@
                 }
             );
 
-            //Event handler for picking item from typeahead and typeahead_tree
-            $('.field-widget-kmap-typeahead-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-pick').find('.kmap_search_term').bind('typeahead:select',
+            //Event handler for typeahead_tree picking
+            $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-pick').find('.kmap_search_term').bind('typeahead:select',
                 function (ev, sel) {
                     pickSuggestion($(this), sel);
                 }
@@ -294,7 +296,7 @@
         if (!picked[my_field][kmap_id]) {
             picked[my_field][kmap_id] = item;
             addPickedItem(resultBox, kmap_id, item);
-            $typeahead.typeahead('val', ''); //clear search field
+            $typeahead.typeahead('val', ''); //clear search fiel
         }
     }
 

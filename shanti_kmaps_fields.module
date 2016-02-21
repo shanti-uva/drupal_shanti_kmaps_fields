@@ -591,7 +591,9 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         case 'kmap_typeahead_tree_picker':
             $element["{$field_id}_search_term"] += array(
                 '#size' => 60,
-                '#description' => "<p>Browse the tree, or start typing to search for a term from KMap $domain server. Click on a term in the tree to select it.</p>",
+                '#description' => "<p>Browse the tree, or start typing to search for a term from KMap $domain server. "
+                                    . "Use the arrow keys to navigate through the results. "
+                                    . "Press TAB, ENTER, or click on the term in the tree to add it to the list.</p>",
             );
             $element["{$field_id}_menu_wrapper"] = array(
                 '#weight' => 10,
@@ -600,7 +602,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_typeahead_tree"] = array(
-                '#weight' => 15,
+                '#weight' => 25,
                 '#type' => '#markup',
                 '#prefix' => "<div id='{$field_id}_typeahead_tree' class='typeahead_tree'>",
                 '#suffix' => "</div>",
