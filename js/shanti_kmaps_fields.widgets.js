@@ -139,6 +139,7 @@
             // Turn inputs into typeahead_tree pickers if required
             $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-search').find('.kmap_search_term').each(function () {
                 var $typeahead = $(this);
+                var search_term = '';
                 var my_field = $typeahead.attr('id').replace('_search_term', '');
                 var $tree = $('#' + my_field + '_typeahead_tree');
                 var admin = settings.shanti_kmaps_admin;
@@ -151,7 +152,7 @@
                     type: widget.domain,
                     root_kmapid: root_kmapid,
                     baseUrl: base_url
-                }); //.bind("fancytreeclick", function (event, data) { });
+                });
                 $typeahead.kmapsTypeahead({
                     menu: $('#' + my_field + '_menu_wrapper'),
                     term_index: admin.shanti_kmaps_admin_server_solr_terms,
@@ -159,66 +160,61 @@
                     root_kmapid: root_kmapid,
                     max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
                     min_chars: 1,
-                    empty_query: 'level_i:2',
+                    //empty_query: 'level_i:2',
                     //empty_query: 'id:' + widget.domain + '-' + root_kmapid,
                     //empty_sort: 'level_i ASC',
                     empty_limit: 10,
                     fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
-                }).kmapsTypeahead('onSuggest', function (suggestions) {
-                    //console.log(suggestions);
-                    $tree.kmapsTree('showPaths',
-                        $.map(suggestions, function (val) {
-                            return '/' + val['doc']['ancestor_id_path'];
-                        }),
-                        function () {
-                            // mark already picked items
-                            /*for (kmap_id in picked[my_field]) {
-                                $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
-                            }*/
-                            // scroll to top
-                            $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
+                }).kmapsTypeahead('onSuggest',
+                    function (suggestions) {
+                        $tree.kmapsTree('showPaths',
+                            $.map(suggestions, function (val) {
+                                return '/' + val['doc']['ancestor_id_path'];
+                            }),
+                            function () {
+                                // mark already picked items - do it more efficiently?
+                                for (kmap_id in picked[my_field]) {
+                                    $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
+                                }
+                                // scroll to top - doesn't work
+                                $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
+                            }
+                        );
+                    }
+                ).bind('typeahead:asyncrequest',
+                    function () {
+                        search_term = $typeahead.typeahead('val'); //get search term
+                    }
+                ).bind('typeahead:select',
+                    function (ev, sel) {
+                        pickSuggestion($typeahead, sel);
+                        $typeahead.typeahead('val', search_term); //reset search term
+                    }
+                ).bind('typeahead:cursorchange',
+                    function (ev, suggestion) {
+                        if (typeof suggestion != 'undefined') {
+                            var tree = $tree.fancytree('getTree');
+                            var key = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
+                            tree.activateKey(key);
+                            tree.getNodeByKey(key).scrollIntoView();
                         }
-                    );
-                });
-                $tree.on('useractivate', function(ev, data) {
+                    }
+                );
+                $tree.on('useractivate', function (ev, data) {
                     var event = data.event;
 
                     var origEvent = (event.originalEvent) ? event.originalEvent.type : "none";
-                    var keyCode = "";
-                    if (event.keyCode) {
-                        keyCode = "(" + event.keyCode + ")";
-                    }
                     if (event.type === "fancytreeactivate" && origEvent === "click") {
                         pickTypeaheadTreeTerm($typeahead, $.extend(data, {'domain': widget.domain}));
+                        $typeahead.typeahead('val', search_term); //reset search term
                     } else if (event.type === "fancytreekeydown" && origEvent === "keydown") {
                         if (event.keyCode == 9 || event.keyCode == 13) { //TAB or ENTER pressed
                             pickTypeaheadTreeTerm($typeahead, $.extend(data, {'domain': widget.domain}));
+                            $typeahead.typeahead('val', search_term); //reset search term
                         }
                     }
                 });
-
             });
-
-            //typeahead_tree bindings
-            $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-tree').find('.kmap_search_term').bind('typeahead:cursorchange',
-                function (ev, suggestion) {
-                    if (typeof suggestion != 'undefined') {
-                        var my_field = $(this).attr('id').replace('_search_term', '');
-                        var tree = $('#' + my_field + '_typeahead_tree').fancytree('getTree');
-                        var key = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
-                        tree.activateKey(key);
-                        tree.getNodeByKey(key).scrollIntoView();
-                    }
-                }
-            );
-
-            //Event handler for typeahead_tree picking
-            $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-pick').find('.kmap_search_term').bind('typeahead:select',
-                function (ev, sel) {
-                    pickSuggestion($(this), sel);
-                }
-            );
-
         },
 
         detach: function (context, settings) {
