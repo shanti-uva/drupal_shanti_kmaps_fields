@@ -90,7 +90,7 @@
                 //  if (!confirm("This term "+kmap_id+" is not in the currently selected tree; if you delete it, you'll need to search for it again. Are you sure you want to delete it?")) return;
                 //}
                 delete picked[my_field][kmap_id];
-                $('#' + my_field + '_pick_tree, #' + my_field + '_typeahead_tree').find('.kmap-item.' + kmap_id + ', #ajax-id-' + kmap_id.substring(1)).removeClass('picked');
+                $('#' + my_field + '_pick_tree, #' + my_field + '_lazy_tree').find('.kmap-item.' + kmap_id + ', #ajax-id-' + kmap_id.substring(1)).removeClass('picked');
                 pickedElement.remove();
             });
 
@@ -114,13 +114,14 @@
             });
 
             // Turn inputs into typeahead pickers if required
-            $('.field-widget-kmap-typeahead-picker').once('kmaps-search').find('.kmap_search_term').each(function () {
-                var my_field = $(this).attr('id').replace('_search_term', '');
+            $('.field-widget-kmap-typeahead-picker').once('kmaps-fields').each(function () {
+                var $typeahead = $('.kmap_search_term', this);
+                var my_field = $typeahead.attr('id').replace('_search_term', '');
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
 
-                $(this).kmapsTypeahead({
+                $typeahead.kmapsTypeahead({
                     term_index: admin.shanti_kmaps_admin_server_solr_terms,
                     domain: widget.domain,
                     root_kmapid: root_kmapid,
@@ -130,90 +131,99 @@
             });
 
             //Event handler for typeahead picking
-            $('.field-widget-kmap-typeahead-picker').once('kmaps-pick').find('.kmap_search_term').bind('typeahead:select',
+            $('.kmap_search_term', '.field-widget-kmap-typeahead-picker').once('kmaps-pick').bind('typeahead:select',
                 function (ev, sel) {
-                    pickSuggestion($(this), sel)
+                    var my_field = $(this).attr('id').replace('_search_term', '');
+                    pickTypeaheadSuggestion(my_field, sel);
+                    $(this).typeahead('val', ''); //clear search field
                 }
             );
 
             // Turn inputs into typeahead_tree pickers if required
-            $('.field-widget-kmap-typeahead-tree-picker').once('kmaps-search').find('.kmap_search_term').each(function () {
-                var $typeahead = $(this);
-                var search_term = '';
+            $('.field-widget-kmap-lazy-tree-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-fields').each(function() {
+                var $typeahead = $('.kmap_search_term', this);
+                var search = $typeahead.hasClass('kmap_no_search') ? false : true;
+                var search_key = '';
+
                 var my_field = $typeahead.attr('id').replace('_search_term', '');
-                var $tree = $('#' + my_field + '_typeahead_tree');
+                var $tree = $('#' + my_field + '_lazy_tree');
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
                 var base_url = widget.domain == 'subjects' ? admin.shanti_kmaps_admin_server_subjects : admin.shanti_kmaps_admin_server_places;
+
                 $tree.kmapsTree({
                     termindex_root: admin.shanti_kmaps_admin_server_solr_terms,
                     kmindex_root: admin.shanti_kmaps_admin_server_solr,
                     type: widget.domain,
                     root_kmapid: root_kmapid,
                     baseUrl: base_url
-                });
-                $typeahead.kmapsTypeahead({
-                    menu: $('#' + my_field + '_menu_wrapper'),
-                    term_index: admin.shanti_kmaps_admin_server_solr_terms,
-                    domain: widget.domain,
-                    root_kmapid: root_kmapid,
-                    max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
-                    min_chars: 1,
-                    //empty_query: 'level_i:2',
-                    //empty_query: 'id:' + widget.domain + '-' + root_kmapid,
-                    //empty_sort: 'level_i ASC',
-                    empty_limit: 10,
-                    fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
-                }).kmapsTypeahead('onSuggest',
-                    function (suggestions) {
-                        $tree.kmapsTree('showPaths',
-                            $.map(suggestions, function (val) {
-                                return '/' + val['doc']['ancestor_id_path'];
-                            }),
-                            function () {
-                                // mark already picked items - do it more efficiently?
-                                for (kmap_id in picked[my_field]) {
-                                    $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
-                                }
-                                // scroll to top - doesn't work
-                                $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
-                            }
-                        );
-                    }
-                ).bind('typeahead:asyncrequest',
-                    function () {
-                        search_term = $typeahead.typeahead('val'); //get search term
-                    }
-                ).bind('typeahead:select',
-                    function (ev, sel) {
-                        pickSuggestion($typeahead, sel);
-                        $typeahead.typeahead('val', search_term); //reset search term
-                    }
-                ).bind('typeahead:cursorchange',
-                    function (ev, suggestion) {
-                        if (typeof suggestion != 'undefined') {
-                            var tree = $tree.fancytree('getTree');
-                            var key = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
-                            tree.activateKey(key);
-                            tree.getNodeByKey(key).scrollIntoView();
-                        }
-                    }
-                );
-                $tree.on('useractivate', function (ev, data) {
+                }).on('useractivate', function (ev, data) {
                     var event = data.event;
 
                     var origEvent = (event.originalEvent) ? event.originalEvent.type : "none";
                     if (event.type === "fancytreeactivate" && origEvent === "click") {
-                        pickTypeaheadTreeTerm($typeahead, $.extend(data, {'domain': widget.domain}));
-                        $typeahead.typeahead('val', search_term); //reset search term
+                        pickLazyTreeTerm(my_field, $.extend(data, {'domain': widget.domain}));
+                        if (search) $typeahead.typeahead('val', search_key); //reset search term
                     } else if (event.type === "fancytreekeydown" && origEvent === "keydown") {
                         if (event.keyCode == 9 || event.keyCode == 13) { //TAB or ENTER pressed
-                            pickTypeaheadTreeTerm($typeahead, $.extend(data, {'domain': widget.domain}));
-                            $typeahead.typeahead('val', search_term); //reset search term
+                            pickLazyTreeTerm(my_field, $.extend(data, {'domain': widget.domain}));
+                            if (search) $typeahead.typeahead('val', search_key); //reset search term
                         }
                     }
                 });
+
+                if (search) {
+                    $typeahead.kmapsTypeahead({
+                        menu: $('#' + my_field + '_menu_wrapper'),
+                        term_index: admin.shanti_kmaps_admin_server_solr_terms,
+                        domain: widget.domain,
+                        root_kmapid: root_kmapid,
+                        max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                        min_chars: 1,
+                        //empty_query: 'level_i:2',
+                        //empty_query: 'id:' + widget.domain + '-' + root_kmapid,
+                        //empty_sort: 'level_i ASC',
+                        empty_limit: 10,
+                        fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
+                    }).kmapsTypeahead('onSuggest',
+                        function (suggestions) {
+                            $tree.kmapsTree('showPaths',
+                                $.map(suggestions, function (val) {
+                                    return '/' + val['doc']['ancestor_id_path'];
+                                }),
+                                function () {
+                                    // mark already picked items - do it more efficiently?
+                                    for (var kmap_id in picked[my_field]) {
+                                        $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
+                                    }
+                                    // scroll to top - doesn't work
+                                    $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
+                                }
+                            );
+                        }
+                    ).bind('typeahead:asyncrequest',
+                        function () {
+                            search_key = $typeahead.typeahead('val'); //get search term
+                        }
+                    ).bind('typeahead:select',
+                        function (ev, suggestion) {
+                            pickTypeaheadSuggestion(my_field, suggestion);
+                            var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
+                            $('#ajax-id-' + id, $('#' + my_field + '_lazy_tree')).addClass('picked');
+                            $typeahead.typeahead('val', search_key); //reset search term
+                        }
+                    ).bind('typeahead:cursorchange',
+                        function (ev, suggestion) {
+                            if (typeof suggestion != 'undefined') {
+                                var tree = $tree.fancytree('getTree');
+                                var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
+                                tree.activateKey(id);
+                                tree.getNodeByKey(id).scrollIntoView();
+                            }
+                        }
+                    );
+                }
             });
         },
 
@@ -298,8 +308,7 @@
         }
     }
 
-    function pickTypeaheadTreeTerm($typeahead, data) {
-        var my_field = $typeahead.attr('id').replace('_search_term', '');
+    function pickLazyTreeTerm(my_field, data) {
         var resultBox = $('#' + my_field + '_result_box');
         var id = data.key, kmap_id = 'F' + id;
         var item = {
@@ -311,13 +320,11 @@
         if (!picked[my_field][kmap_id]) {
             picked[my_field][kmap_id] = item;
             addPickedItem(resultBox, kmap_id, item);
-            $('#ajax-id-' + item.id, $('#' + my_field + '_typeahead_tree')).addClass('picked');
-            $typeahead.typeahead('val', ''); //clear search field
+            $('#ajax-id-' + item.id, $('#' + my_field + '_lazy_tree')).addClass('picked');
         }
     }
 
-    function pickSuggestion($typeahead, suggestion) {
-        var my_field = $typeahead.attr('id').replace('_search_term', '');
+    function pickTypeaheadSuggestion(my_field, suggestion) {
         var resultBox = $('#' + my_field + '_result_box');
         var split = suggestion.doc.id.split('-'), domain = split[0], id = split[1], kmap_id = 'F' + id; //split subjects-123
         var item = {
@@ -329,8 +336,6 @@
         if (!picked[my_field][kmap_id]) {
             picked[my_field][kmap_id] = item;
             addPickedItem(resultBox, kmap_id, item);
-            $('#ajax-id-' + item.id, $('#' + my_field + '_typeahead_tree')).addClass('picked');
-            $typeahead.typeahead('val', ''); //clear search fiel
         }
     }
 
