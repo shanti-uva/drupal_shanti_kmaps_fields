@@ -188,19 +188,24 @@
                         fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                     }).kmapsTypeahead('onSuggest',
                         function (suggestions) {
-                            $tree.kmapsTree('showPaths',
-                                $.map(suggestions, function (val) {
-                                    return '/' + val['doc']['ancestor_id_path'];
-                                }),
-                                function () {
-                                    // mark already picked items - do it more efficiently?
-                                    for (var kmap_id in picked[my_field]) {
-                                        $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
+                            if (suggestions.length == 0) {
+                                //alert('no results!');
+                            }
+                            else {
+                                $tree.kmapsTree('showPaths',
+                                    $.map(suggestions, function (val) {
+                                        return '/' + val['doc']['ancestor_id_path'];
+                                    }),
+                                    function () {
+                                        // mark already picked items - do it more efficiently?
+                                        for (var kmap_id in picked[my_field]) {
+                                            $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
+                                        }
+                                        // scroll to top - doesn't work
+                                        $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
                                     }
-                                    // scroll to top - doesn't work
-                                    $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
-                                }
-                            );
+                                );
+                            }
                         }
                     ).bind('typeahead:asyncrequest',
                         function () {
