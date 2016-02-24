@@ -1,7 +1,15 @@
 /* SHANTI KMaps Fields Lazy Tree CSS */
 
-.field-widget-kmap-typeahead-tree-picker .menu_wrapper {
-    display: none;
+.field-widget-kmap-typeahead-tree-picker .menu_wrapper { clear: both; }
+
+/* hide menu including messages */
+/* .field-widget-kmap-typeahead-tree-picker .menu_wrapper { display: none; } */
+
+/* hide suggestions but preserve messages */
+.field-widget-kmap-typeahead-tree-picker .menu_wrapper .kmaps-tt-suggestion { display: none; }
+
+.field-widget-kmap-typeahead-picker .kmaps-tt-message, .field-widget-kmap-typeahead-tree-picker .kmaps-tt-message {
+    color: #5b68ce;
 }
 
 .kmap_lazy_tree {

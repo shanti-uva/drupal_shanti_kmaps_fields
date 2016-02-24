@@ -615,6 +615,11 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#size' => 60,
                 '#description' => "<p>Start typing to search for a term from KMap $domain server. Click on a term to select it.</p>",
             );
+            $element["{$field_id}_search_message"] = array(
+                '#weight' => 5,
+                '#prefix' => "<div id='{$field_id}_search_message' class='kmap_search_message'>",
+                '#suffix' => "</div>",
+            );
 
             // Add CSS and JS to the form
             $element['#attached']['libraries_load'][] = array('typeahead');
@@ -634,8 +639,13 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                                     . "Use the arrow keys to navigate through the results. "
                                     . "Press TAB, ENTER, or click on a term in the tree to add it to the list.</p>",
             );
+            $element["{$field_id}_search_message"] = array(
+                '#weight' => 5,
+                '#prefix' => "<div id='{$field_id}_search_message' class='kmap_search_message'>",
+                '#suffix' => "</div>",
+            );
             $element["{$field_id}_menu_wrapper"] = array(
-                '#weight' => 10,
+                '#weight' => 22,
                 '#prefix' => "<div id='{$field_id}_menu_wrapper' class='menu_wrapper'>",
                 '#suffix' => "</div>",
             );

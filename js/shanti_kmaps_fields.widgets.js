@@ -185,11 +185,14 @@
                         //empty_query: 'id:' + widget.domain + '-' + root_kmapid,
                         //empty_sort: 'level_i ASC',
                         empty_limit: 10,
-                        fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
+                        fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
+                        no_results_msg: 'Showing the whole tree.'
                     }).kmapsTypeahead('onSuggest',
                         function (suggestions) {
                             if (suggestions.length == 0) {
-                                //alert('no results!');
+                                $tree.kmapsTree('reset', function() {
+                                    $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
+                                });
                             }
                             else {
                                 $tree.kmapsTree('showPaths',
@@ -225,6 +228,15 @@
                                 var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
                                 tree.activateKey(id);
                                 tree.getNodeByKey(id).scrollIntoView();
+                            }
+                        }
+                    ).on('input',
+                        function () {
+                            if (this.value == '') {
+                                search_key = '';
+                                $tree.kmapsTree('reset', function() {
+                                    $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
+                                });
                             }
                         }
                     );
