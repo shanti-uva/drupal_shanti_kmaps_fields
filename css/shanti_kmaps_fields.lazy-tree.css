@@ -8,9 +8,7 @@
 /* hide suggestions but preserve messages */
 .field-widget-kmap-typeahead-tree-picker .menu_wrapper .kmaps-tt-suggestion { display: none; }
 
-.field-widget-kmap-typeahead-picker .kmaps-tt-message, .field-widget-kmap-typeahead-tree-picker .kmaps-tt-message {
-    color: #5b68ce;
-}
+/* .field-widget-kmap-typeahead-picker .kmaps-tt-message, .field-widget-kmap-typeahead-tree-picker .kmaps-tt-message { color: #5b68ce; } */
 
 .kmap_lazy_tree {
     clear: both;

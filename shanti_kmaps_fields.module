@@ -567,10 +567,9 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         case 'kmap_tree_picker':
             $element["{$field_id}_search_term"] = array(
                 '#weight' => 0,
-                '#title' => t('Search for ' . $domain),
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term')),
+                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . $domain),
                 '#size' => 30,
                 '#description' => "<p>Enter a search term for the KMap $domain server and press tab to see the results.</p>",
                 '#field_suffix' => "<button type='button' id='{$field_id}_search_button' name='{$field_id}_search_button' class='kmap_search_button' value=''>SEARCH</button>",
@@ -608,17 +607,11 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         case 'kmap_typeahead_picker':
             $element["{$field_id}_search_term"] = array(
                 '#weight' => 0,
-                '#title' => t('Search for ' . $domain),
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term')),
+                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . $domain),
                 '#size' => 60,
                 '#description' => "<p>Start typing to search for a term from KMap $domain server. Click on a term to select it.</p>",
-            );
-            $element["{$field_id}_search_message"] = array(
-                '#weight' => 5,
-                '#prefix' => "<div id='{$field_id}_search_message' class='kmap_search_message'>",
-                '#suffix' => "</div>",
             );
 
             // Add CSS and JS to the form
@@ -630,10 +623,9 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         case 'kmap_typeahead_tree_picker':
             $element["{$field_id}_search_term"] = array(
                 '#weight' => 0,
-                '#title' => t('Search for ' . $domain),
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term')),
+                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . $domain),
                 '#size' => 60,
                 '#description' => "<p>Browse the tree, or start typing to search for a term from KMap $domain server. "
                                     . "Use the arrow keys to navigate through the results. "
@@ -696,6 +688,18 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     );
 
     return $element;
+}
+
+function shanti_kmaps_fields_button_inner($markup, $element)
+{
+    $find = "<span>" . $element['#value'] . "</span>";
+    $replace = $element['#inner'];
+    $markup = str_replace($find, $replace, $markup);
+    return $markup;
+}
+
+function shanti_kmaps_fields_find_replace($markup, $element) {
+    return str_replace($element['#find'], $element['#replace'], $markup);
 }
 
 function _shanti_kmaps_fields_get_json($items)
