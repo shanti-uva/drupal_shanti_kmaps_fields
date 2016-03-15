@@ -126,7 +126,7 @@
                     domain: widget.domain,
                     root_kmapid: root_kmapid,
                     max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
-                    fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
+                    filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                 });
             });
 
@@ -150,13 +150,13 @@
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
+                var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
                 var base_url = widget.domain == 'subjects' ? admin.shanti_kmaps_admin_server_subjects : admin.shanti_kmaps_admin_server_places;
-
                 $tree.kmapsTree({
                     termindex_root: admin.shanti_kmaps_admin_server_solr_terms,
                     kmindex_root: admin.shanti_kmaps_admin_server_solr,
                     type: widget.domain,
-                    root_kmapid: root_kmapid,
+                    root_kmap_path: root_kmap_path,
                     baseUrl: base_url
                 }).on('useractivate', function (ev, data) {
                     var event = data.event;
@@ -185,7 +185,7 @@
                         //empty_query: 'id:' + widget.domain + '-' + root_kmapid,
                         //empty_sort: 'level_i ASC',
                         empty_limit: 10,
-                        fq: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
+                        filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
                         no_results_msg: 'Showing the whole tree.'
                     }).kmapsTypeahead('onSuggest',
                         function (suggestions) {
