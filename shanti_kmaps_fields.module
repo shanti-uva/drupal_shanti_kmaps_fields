@@ -365,7 +365,13 @@ function shanti_kmaps_fields_field_info()
         'label' => t('KMap Term'),
         'description' => t('A KMap Term for integrating content into the Mandala ecology.'),
         'settings' => array('kmap_domain' => 'subjects'),
-        'instance_settings' => array('search_view' => NULL, 'search_root_kmapid' => NULL, 'search_root_kmap_path' => NULL, 'kmap_term_limit' => 100),
+        'instance_settings' => array(
+            'search_view' => NULL,
+            'search_root_kmapid' => NULL,
+            'search_root_kmap_path' => NULL,
+            'kmap_term_limit' => 100,
+            'search_filters' => NULL,
+        ),
         'default_widget' => 'kmap_tree_picker',
         'default_formatter' => 'kmap_default_formatter',
         'property_type' => 'text',
@@ -429,7 +435,6 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance)
             '#type' => 'hidden',
             '#required' => FALSE,
         );
-        //could move to hook_field_widget_settings_form if not useful for kmap_tree_picker
         $form['kmap_term_limit'] = array(
             '#type' => 'textfield',
             '#title' => t('KMap Term Limit'),
@@ -438,24 +443,33 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance)
             '#default_value' => $settings['kmap_term_limit'],
             '#element_validate' => array('element_validate_integer'),
         );
+        $form['search_filters'] = array(
+            '#type' => 'checkboxes',
+            '#title' => t('Search Filters'),
+            '#description' => t('Select any widgets that you would like to use to filter your search. This may make it easier to find KMap terms.'),
+            '#options' => array(
+                'feature_types' => t('Feature types'),
+            ),
+            '#required' => FALSE,
+            '#default_value' => $settings['search_filters'],
+        );
     }
     return $form;
 }
 
-function shanti_kmaps_fields_kmap_id_validate($element, &$form_state) {
+function shanti_kmaps_fields_kmap_id_validate($element, &$form_state)
+{
     $domain = $form_state['values']['field']['settings']['kmap_domain'];
     $rootid = $form_state['values']['instance']['settings']['search_root_kmapid'];
     if ($rootid) {
-        $path = shanti_kmaps_admin_get_term_path($domain.'-'.$rootid);
+        $path = shanti_kmaps_admin_get_term_path($domain . '-' . $rootid);
         if (!$path) {
             form_set_error($element, t("The {$domain} ID that you entered could not be found in the KMaps Solr Server Terms Index."));
             $form_state['rebuild'] = TRUE;
-        }
-        else { // set search_root_kmap_path
+        } else { // set search_root_kmap_path
             $form_state['values']['instance']['settings']['search_root_kmap_path'] = $path;
         }
-    }
-    else { // empty search_root_kmap_path
+    } else { // empty search_root_kmap_path
         $form_state['values']['instance']['settings']['search_root_kmap_path'] = $form_state['values']['instance']['settings']['search_root_kmapid'];
     }
 }
@@ -497,19 +511,6 @@ function shanti_kmaps_fields_field_widget_info()
     $info['kmap_lazy_tree_picker'] = array(
         'weight' => 2,
         'label' => t("Lazy tree"),
-        'field types' => array('shanti_kmaps_fields_default'),
-        'settings' => array(),
-        'behaviors' => array(
-            'multiple values' => FALSE,
-            // THIS IS SO THAT USERS DON'T ADD MORE THAN ONE WIDGET
-            // However, the "Number of Values" field in the form must be set to "Unlimited" in the field settings form
-            // for the field to actually accept multiple values in the database
-            'default value' => FIELD_BEHAVIOR_DEFAULT,
-        ),
-    );
-    $info['kmap_lazy_tree_filter_picker'] = array(
-        'weight' => 4,
-        'label' => t("Lazy tree with filters"),
         'field types' => array('shanti_kmaps_fields_default'),
         'settings' => array(),
         'behaviors' => array(
@@ -625,10 +626,15 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
             break;
         case 'kmap_lazy_tree_picker':
+            $element["{$field_id}_search_header"] = array(
+                '#weight' => -20,
+                '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
+                '#markup' => "<p>Browse the tree to find a term. Click on it or press ENTER to add it to the list.</p>",
+                '#suffix' => "</div>",
+            );
             $element["{$field_id}_search_term"] = array(
                 '#weight' => 0,
                 '#prefix' => "<div id='{$field_id}_search_term' class='kmap_search_term kmap_no_search'>",
-                '#markup' => "<p>Browse the tree to find a term. Click on it or press ENTER to add it to the list.</p>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_lazy_tree"] = array(
@@ -636,44 +642,6 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#prefix' => "<div id='{$field_id}_lazy_tree' class='kmap_lazy_tree'>",
                 '#suffix' => "</div>",
             );
-            //tree libraries
-            $element['#attached']['libraries_load'][] = array('json2');
-            $element['#attached']['libraries_load'][] = array('fancytree', 'source');
-            $element['#attached']['libraries_load'][] = array('shanti_kmaps_tree');
-
-            $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
-            $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.lazy-tree.css";
-            break;
-        case 'kmap_lazy_tree_filter_picker':
-            $element["{$field_id}_search_term"] = array(
-                '#weight' => 0,
-                '#prefix' => "<div id='{$field_id}_search_term' class='kmap_search_term kmap_no_search'>",
-                '#markup' => "<p>Browse the tree to find a term. Click on it or press ENTER to add it to the list.</p>",
-                '#suffix' => "</div>",
-            );
-            $element["{$field_id}_filter_box"] = array(
-                '#weight' => 5,
-                '#type' => 'container',
-                '#attributes' => array('id' => $field_id . '_filter_box', 'class' => array('kmap_filter_box')),
-            );
-            $element["{$field_id}_search_filter"] = array(
-                '#weight' => 10,
-                '#type' => 'textfield',
-                '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_filter', 'class' => array('kmap_search_filter'), 'placeholder' => 'Filter by subject'), // 'subject' shouldn't be hard-coded here
-                '#size' => 60,
-                '#description' => "<p>Select a term to add as a filter to your search.</p>",
-            );
-            $element["{$field_id}_lazy_tree"] = array(
-                '#weight' => 25,
-                '#prefix' => "<div id='{$field_id}_lazy_tree' class='kmap_lazy_tree'>",
-                '#suffix' => "</div>",
-            );
-
-            //typeahead libraries
-            $element['#attached']['libraries_load'][] = array('typeahead');
-            $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
-
             //tree libraries
             $element['#attached']['libraries_load'][] = array('json2');
             $element['#attached']['libraries_load'][] = array('fancytree', 'source');
@@ -683,13 +651,18 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.lazy-tree.css";
             break;
         case 'kmap_typeahead_picker':
+            $element["{$field_id}_search_header"] = array(
+                '#weight' => -20,
+                '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
+                '#markup' => "<p>Start typing to search for a term from KMap $domain server. Click on a term to select it.</p>",
+                '#suffix' => "</div>",
+            );
             $element["{$field_id}_search_term"] = array(
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
                 '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . $domain),
                 '#size' => 60,
-                '#description' => "<p>Start typing to search for a term from KMap $domain server. Click on a term to select it.</p>",
             );
 
             // Add CSS and JS to the form
@@ -699,15 +672,20 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
             break;
         case 'kmap_typeahead_tree_picker':
+            $element["{$field_id}_search_header"] = array(
+                '#weight' => -20,
+                '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
+                '#markup' => "<p>Browse the tree, or start typing to search for a term from KMap $domain server. "
+                    . "Use the arrow keys to navigate through the results. "
+                    . "Press TAB, ENTER, or click on a term in the tree to add it to the list.</p>",
+                '#suffix' => "</div>",
+            );
             $element["{$field_id}_search_term"] = array(
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
                 '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . $domain),
                 '#size' => 60,
-                '#description' => "<p>Browse the tree, or start typing to search for a term from KMap $domain server. "
-                                    . "Use the arrow keys to navigate through the results. "
-                                    . "Press TAB, ENTER, or click on a term in the tree to add it to the list.</p>",
             );
             $element["{$field_id}_search_message"] = array(
                 '#weight' => 5,
@@ -749,6 +727,29 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             break;
     };
 
+    foreach ($instance['settings']['search_filters'] as $filter => $val) {
+        if ($val) {
+            $element["{$field_id}_filter_box"] = array(
+                '#weight' => -10,
+                '#type' => 'container',
+                '#attributes' => array('id' => $field_id . '_filter_box', 'class' => array('kmap_filter_box')),
+            );
+            $element["{$field_id}_search_filter"] = array(
+                '#weight' => -5,
+                '#type' => 'textfield',
+                '#default_value' => '',
+                '#attributes' => array('id' => $field_id . '_search_filter', 'class' => array('kmap_search_filter'), 'placeholder' => 'Filter by subject'), // 'subject' shouldn't be hard-coded here
+                '#size' => 60,
+                '#description' => "<p>Select a term to add as a filter to your search.</p>",
+            );
+
+            //typeahead libraries
+            $element['#attached']['libraries_load'][] = array('typeahead');
+            $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
+            break;
+        }
+    }
+
     // Pass settings to the JS
     $js_settings = array(
         $field_id => array(
@@ -777,7 +778,8 @@ function shanti_kmaps_fields_button_inner($markup, $element)
     return $markup;
 }
 
-function shanti_kmaps_fields_find_replace($markup, $element) {
+function shanti_kmaps_fields_find_replace($markup, $element)
+{
     return str_replace($element['#find'], $element['#replace'], $markup);
 }
 

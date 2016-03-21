@@ -141,7 +141,7 @@
             );
 
             // Turn inputs into typeahead_tree pickers if required
-            $('.field-widget-kmap-lazy-tree-picker, .field-widget-kmap-lazy-tree-filter-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-fields').each(function() {
+            $('.field-widget-kmap-lazy-tree-picker, .field-widget-kmap-lazy-tree-filter-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-fields').each(function () {
                 var $typeahead = $('.kmap_search_term', this);
                 var search = $typeahead.hasClass('kmap_no_search') ? false : true;
                 var search_key = '';
@@ -192,7 +192,7 @@
                     }).kmapsTypeahead('onSuggest',
                         function (suggestions) {
                             if (suggestions.length == 0) {
-                                $tree.kmapsTree('reset', function() {
+                                $tree.kmapsTree('reset', function () {
                                     $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
                                 });
                             }
@@ -236,34 +236,37 @@
                         function () {
                             if (this.value == '') {
                                 search_key = '';
-                                $tree.kmapsTree('reset', function() {
+                                $tree.kmapsTree('reset', function () {
                                     $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
                                 });
                             }
                         }
                     );
                 }
+            });
 
-                var $filter = $('.kmap_search_filter', this);
-                if ($filter.length > 0) { // lazy tree filtering
-                    var filterBox = $('.kmap_filter_box', this);
-                    $filter.kmapsTypeahead({
-                        term_index: admin.shanti_kmaps_admin_server_solr_terms,
-                        domain: 'subjects', // default: Filter by subject
-                        root_kmapid: 20, // default: Geographical features
-                        ancestors: 'off',
-                        prefetch_facets: 'on',
-                        prefetch_field: 'feature_types_xfacet',
-                        prefetch_filters: ['tree:' + widget.domain, 'ancestor_id_path:' + root_kmap_path],
-                        max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
-                        filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
-                    }).bind('typeahead:select',
-                        function (ev, suggestion) {
-                            pickTypeaheadFilter(my_field, suggestion);
-                            $filter.typeahead('val', ''); // empty search field
-                        }
-                    );
-                }
+            $('.kmap_search_filter').once('kmaps-fields').each(function () {
+                var $filter = $(this);
+                var my_field = $filter.attr('id').replace('_search_filter', '');
+                var admin = settings.shanti_kmaps_admin;
+                var widget = settings.shanti_kmaps_fields[my_field];
+                var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
+                $filter.kmapsTypeahead({
+                    term_index: admin.shanti_kmaps_admin_server_solr_terms,
+                    domain: 'subjects', // default: Filter by subject
+                    root_kmapid: 20, // default: Geographical features
+                    ancestors: 'off',
+                    prefetch_facets: 'on',
+                    prefetch_field: 'feature_types_xfacet',
+                    prefetch_filters: ['tree:' + widget.domain, 'ancestor_id_path:' + root_kmap_path],
+                    max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                    filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
+                }).bind('typeahead:select',
+                    function (ev, suggestion) {
+                        pickTypeaheadFilter(my_field, suggestion);
+                        $filter.typeahead('val', ''); // empty search field
+                    }
+                );
             });
 
             $('.kmap_filter_box').once(function () {
