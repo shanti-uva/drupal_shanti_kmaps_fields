@@ -3,6 +3,7 @@
 // Local "globals"
     var dictionary = {};
     var picked = {};
+    var filtered = {};
     var ancestor_tree = {};
     var S = {}; // Settings passed
     var submit_count = 0;
@@ -140,7 +141,7 @@
             );
 
             // Turn inputs into typeahead_tree pickers if required
-            $('.field-widget-kmap-lazy-tree-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-fields').each(function() {
+            $('.field-widget-kmap-lazy-tree-picker, .field-widget-kmap-lazy-tree-filter-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-fields').each(function() {
                 var $typeahead = $('.kmap_search_term', this);
                 var search = $typeahead.hasClass('kmap_no_search') ? false : true;
                 var search_key = '';
@@ -152,6 +153,7 @@
                 var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
                 var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
                 var base_url = widget.domain == 'subjects' ? admin.shanti_kmaps_admin_server_subjects : admin.shanti_kmaps_admin_server_places;
+
                 $tree.kmapsTree({
                     termindex_root: admin.shanti_kmaps_admin_server_solr_terms,
                     kmindex_root: admin.shanti_kmaps_admin_server_solr,
@@ -241,6 +243,40 @@
                         }
                     );
                 }
+
+                var $filter = $('.kmap_search_filter', this);
+                if ($filter.length > 0) { // lazy tree filtering
+                    var filterBox = $('.kmap_filter_box', this);
+                    $filter.kmapsTypeahead({
+                        term_index: admin.shanti_kmaps_admin_server_solr_terms,
+                        domain: 'subjects', // default: Filter by subject
+                        root_kmapid: 20, // default: Geographical features
+                        ancestors: 'off',
+                        prefetch_facets: 'on',
+                        prefetch_field: 'feature_types_xfacet',
+                        prefetch_filters: ['tree:' + widget.domain, 'ancestor_id_path:' + root_kmap_path],
+                        max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                        filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
+                    }).bind('typeahead:select',
+                        function (ev, suggestion) {
+                            pickTypeaheadFilter(my_field, suggestion);
+                            $filter.typeahead('val', ''); // empty search field
+                        }
+                    );
+                }
+            });
+
+            $('.kmap_filter_box').once(function () {
+                var my_field = $(this).attr('id').replace('_filter_box', '');
+                filtered[my_field] = {}; // Init filters for this field
+            });
+
+            $('.kmap_filter_box .delete-me').once('kmaps-fields').on('click', function (e) {
+                var my_field = $(this).closest('.kmap_filter_box').attr('id').replace('_filter_box', '');
+                var filterElement = $(this).parent();
+                var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
+                delete filtered[my_field][kmap_id];
+                filterElement.remove();
             });
         },
 
@@ -356,7 +392,22 @@
         }
     }
 
-// Function to create items in the picklist
+    function pickTypeaheadFilter(my_field, suggestion) {
+        var filterBox = $('#' + my_field + '_filter_box');
+        var kmap_id = 'F' + suggestion.id;
+        var item = {
+            domain: 'subjects', // default
+            id: suggestion.id,
+            header: suggestion.value,
+            path: '{{' + suggestion.id + '}}'
+        };
+        if (!filtered[my_field][kmap_id]) {
+            filtered[my_field][kmap_id] = item;
+            addPickedItem(filterBox, kmap_id, item);
+        }
+    }
+
+// Function to create items in a picklist
     function addPickedItem(containerElement, kmap_id, item) {
         var pickedElement = $("<div/>").addClass('selected-kmap ' + kmap_id).appendTo(containerElement);
         var deleteButton = $("<span class='icon shanticon-close2'></span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);

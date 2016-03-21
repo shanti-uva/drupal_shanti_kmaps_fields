@@ -482,6 +482,7 @@ function shanti_kmaps_fields_field_widget_info()
 {
     $info = array();
     $info['kmap_tree_picker'] = array(
+        'weight' => 0,
         'label' => t("Tree"),
         'field types' => array('shanti_kmaps_fields_default'),
         'settings' => array(),
@@ -494,6 +495,7 @@ function shanti_kmaps_fields_field_widget_info()
         ),
     );
     $info['kmap_lazy_tree_picker'] = array(
+        'weight' => 2,
         'label' => t("Lazy tree"),
         'field types' => array('shanti_kmaps_fields_default'),
         'settings' => array(),
@@ -505,7 +507,21 @@ function shanti_kmaps_fields_field_widget_info()
             'default value' => FIELD_BEHAVIOR_DEFAULT,
         ),
     );
+    $info['kmap_lazy_tree_filter_picker'] = array(
+        'weight' => 4,
+        'label' => t("Lazy tree with filters"),
+        'field types' => array('shanti_kmaps_fields_default'),
+        'settings' => array(),
+        'behaviors' => array(
+            'multiple values' => FALSE,
+            // THIS IS SO THAT USERS DON'T ADD MORE THAN ONE WIDGET
+            // However, the "Number of Values" field in the form must be set to "Unlimited" in the field settings form
+            // for the field to actually accept multiple values in the database
+            'default value' => FIELD_BEHAVIOR_DEFAULT,
+        ),
+    );
     $info['kmap_typeahead_picker'] = array(
+        'weight' => 6,
         'label' => t("Autocomplete"),
         'field types' => array('shanti_kmaps_fields_default'),
         'settings' => array(),
@@ -518,6 +534,7 @@ function shanti_kmaps_fields_field_widget_info()
         ),
     );
     $info['kmap_typeahead_tree_picker'] = array(
+        'weight' => 8,
         'label' => t("Autocomplete tree"),
         'field types' => array('shanti_kmaps_fields_default'),
         'settings' => array(),
@@ -619,6 +636,44 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#prefix' => "<div id='{$field_id}_lazy_tree' class='kmap_lazy_tree'>",
                 '#suffix' => "</div>",
             );
+            //tree libraries
+            $element['#attached']['libraries_load'][] = array('json2');
+            $element['#attached']['libraries_load'][] = array('fancytree', 'source');
+            $element['#attached']['libraries_load'][] = array('shanti_kmaps_tree');
+
+            $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
+            $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.lazy-tree.css";
+            break;
+        case 'kmap_lazy_tree_filter_picker':
+            $element["{$field_id}_search_term"] = array(
+                '#weight' => 0,
+                '#prefix' => "<div id='{$field_id}_search_term' class='kmap_search_term kmap_no_search'>",
+                '#markup' => "<p>Browse the tree to find a term. Click on it or press ENTER to add it to the list.</p>",
+                '#suffix' => "</div>",
+            );
+            $element["{$field_id}_filter_box"] = array(
+                '#weight' => 5,
+                '#type' => 'container',
+                '#attributes' => array('id' => $field_id . '_filter_box', 'class' => array('kmap_filter_box')),
+            );
+            $element["{$field_id}_search_filter"] = array(
+                '#weight' => 10,
+                '#type' => 'textfield',
+                '#default_value' => '',
+                '#attributes' => array('id' => $field_id . '_search_filter', 'class' => array('kmap_search_filter'), 'placeholder' => 'Filter by subject'), // 'subject' shouldn't be hard-coded here
+                '#size' => 60,
+                '#description' => "<p>Select a term to add as a filter to your search.</p>",
+            );
+            $element["{$field_id}_lazy_tree"] = array(
+                '#weight' => 25,
+                '#prefix' => "<div id='{$field_id}_lazy_tree' class='kmap_lazy_tree'>",
+                '#suffix' => "</div>",
+            );
+
+            //typeahead libraries
+            $element['#attached']['libraries_load'][] = array('typeahead');
+            $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
+
             //tree libraries
             $element['#attached']['libraries_load'][] = array('json2');
             $element['#attached']['libraries_load'][] = array('fancytree', 'source');

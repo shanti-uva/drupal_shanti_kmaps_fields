@@ -37,3 +37,7 @@
 .kmap_lazy_tree span.fancytree-focused .fancytree-title {
     outline: none;
 }
+
+.kmap_search_filter {
+    clear: both;
+}
