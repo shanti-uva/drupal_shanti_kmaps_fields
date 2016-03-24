@@ -245,9 +245,26 @@
                 }
             });
 
+            $('.kmap_filter_box').once(function () {
+                var my_field = $(this).attr('id').replace('_filter_box', '');
+                filtered[my_field] = {}; // Init filters for this field
+            });
+
+            $('.kmap_filter_box .delete-me').once('kmaps-fields').on('click', function (e) {
+                var my_field = $(this).closest('.kmap_filter_box').attr('id').replace('_filter_box', '');
+                var filterElement = $(this).parent();
+                var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
+                var $typeahead = $('#' + my_field + '_search_term');
+                removeDisjunctiveFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                delete filtered[my_field][kmap_id];
+                filterElement.remove();
+                addDisjunctiveFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+            });
+
             $('.kmap_search_filter').once('kmaps-fields').each(function () {
                 var $filter = $(this);
                 var my_field = $filter.attr('id').replace('_search_filter', '');
+                var $typeahead = $('#' + my_field + '_search_term');
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
@@ -263,23 +280,12 @@
                     filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                 }).bind('typeahead:select',
                     function (ev, suggestion) {
-                        pickTypeaheadFilter(my_field, suggestion);
                         $filter.typeahead('val', ''); // empty search field
+                        removeDisjunctiveFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                        pickTypeaheadFilter(my_field, suggestion);
+                        addDisjunctiveFilter($typeahead, 'feature_type_ids', filtered[my_field]);
                     }
                 );
-            });
-
-            $('.kmap_filter_box').once(function () {
-                var my_field = $(this).attr('id').replace('_filter_box', '');
-                filtered[my_field] = {}; // Init filters for this field
-            });
-
-            $('.kmap_filter_box .delete-me').once('kmaps-fields').on('click', function (e) {
-                var my_field = $(this).closest('.kmap_filter_box').attr('id').replace('_filter_box', '');
-                var filterElement = $(this).parent();
-                var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
-                delete filtered[my_field][kmap_id];
-                filterElement.remove();
             });
         },
 
@@ -407,6 +413,30 @@
         if (!filtered[my_field][kmap_id]) {
             filtered[my_field][kmap_id] = item;
             addPickedItem(filterBox, kmap_id, item);
+        }
+    }
+
+    function addDisjunctiveFilter($typeahead, solrField, pickList) {
+        var fq = getDisjunctiveFilter(solrField, pickList);
+        if (fq != null) {
+            $typeahead.kmapsTypeahead('addFilters', [fq]);
+        }
+    }
+
+    function removeDisjunctiveFilter($typeahead, solrField, pickList) {
+        var fq = getDisjunctiveFilter(solrField, pickList);
+        if (fq != null) {
+            $typeahead.kmapsTypeahead('removeFilters', [fq]);
+        }
+    }
+
+    function getDisjunctiveFilter(solrField, pickList) {
+        var disjunction = Object.keys(pickList).join(' OR ').replace(/F/g, ''); // remove 'F' prefix from numeric ids
+        if (disjunction) {
+            return solrField + ':(' + disjunction + ')';
+        }
+        else {
+            return null;
         }
     }
 
