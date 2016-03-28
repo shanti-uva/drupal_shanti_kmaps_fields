@@ -255,10 +255,17 @@
                 var filterElement = $(this).parent();
                 var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
                 var $typeahead = $('#' + my_field + '_search_term');
-                removeDisjunctiveFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                var $filter = $('#' + my_field + '_search_filter');
+                removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                $filter.kmapsTypeahead('resetPrefetch');
                 delete filtered[my_field][kmap_id];
                 filterElement.remove();
-                addDisjunctiveFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                //addFilter($typeahead, 'feature_type_ids', filtered[my_field], 'OR');
+                var fq = getFilter('feature_type_ids', filtered[my_field], 'OR');
+                if (fq != null) {
+                    $typeahead.kmapsTypeahead('addFilters', [fq]);
+                    $filter.kmapsTypeahead('refacetPrefetch', fq);
+                }
             });
 
             $('.kmap_search_filter').once('kmaps-fields').each(function () {
@@ -273,6 +280,7 @@
                     domain: 'subjects', // default: Filter by subject
                     root_kmapid: 20, // default: Geographical features
                     ancestors: 'off',
+                    min_chars: 0,
                     prefetch_facets: 'on',
                     prefetch_field: 'feature_types_xfacet',
                     prefetch_filters: ['tree:' + widget.domain, 'ancestor_id_path:' + root_kmap_path],
@@ -281,9 +289,16 @@
                 }).bind('typeahead:select',
                     function (ev, suggestion) {
                         $filter.typeahead('val', ''); // empty search field
-                        removeDisjunctiveFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                        removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                        $filter.kmapsTypeahead('resetPrefetch');
                         pickTypeaheadFilter(my_field, suggestion);
-                        addDisjunctiveFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                        //addFilter($typeahead, 'feature_type_ids', filtered[my_field], 'OR');
+                        var mode = suggestion.refacet ? 'AND' : 'OR';
+                        var fq = getFilter('feature_type_ids', filtered[my_field], mode);
+                        if (fq != null) {
+                            $typeahead.kmapsTypeahead('addFilters', [fq]);
+                            $filter.kmapsTypeahead('refacetPrefetch', fq);
+                        }
                     }
                 );
             });
@@ -416,24 +431,25 @@
         }
     }
 
-    function addDisjunctiveFilter($typeahead, solrField, pickList) {
-        var fq = getDisjunctiveFilter(solrField, pickList);
+    function addFilter($typeahead, solrField, pickList, mode) {
+        var fq = getFilter(solrField, pickList, mode);
         if (fq != null) {
             $typeahead.kmapsTypeahead('addFilters', [fq]);
         }
     }
 
-    function removeDisjunctiveFilter($typeahead, solrField, pickList) {
-        var fq = getDisjunctiveFilter(solrField, pickList);
+    function removeFilter($typeahead, solrField, pickList) {
+        // to be safe, remove both 'OR' and 'AND'
+        var fq = getFilter(solrField, pickList, 'OR');
         if (fq != null) {
-            $typeahead.kmapsTypeahead('removeFilters', [fq]);
+            $typeahead.kmapsTypeahead('removeFilters', [fq, getFilter(solrField, pickList, 'AND')]);
         }
     }
 
-    function getDisjunctiveFilter(solrField, pickList) {
-        var disjunction = Object.keys(pickList).join(' OR ').replace(/F/g, ''); // remove 'F' prefix from numeric ids
-        if (disjunction) {
-            return solrField + ':(' + disjunction + ')';
+    function getFilter(solrField, pickList, mode) {
+        var filter = Object.keys(pickList).join(' ' + mode + ' ').replace(/F/g, ''); // remove 'F' prefix from numeric ids
+        if (filter) {
+            return solrField + ':(' + filter + ')';
         }
         else {
             return null;
