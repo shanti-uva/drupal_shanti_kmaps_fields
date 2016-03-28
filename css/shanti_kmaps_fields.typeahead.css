@@ -1,0 +1,7 @@
+.kmap_search_filter {
+    clear: both;
+}
+.kmaps-tt-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}

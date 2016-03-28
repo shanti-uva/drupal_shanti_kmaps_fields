@@ -288,16 +288,29 @@
                     filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                 }).bind('typeahead:select',
                     function (ev, suggestion) {
-                        $filter.typeahead('val', ''); // empty search field
-                        removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
-                        $filter.kmapsTypeahead('resetPrefetch');
-                        pickTypeaheadFilter(my_field, suggestion);
-                        //addFilter($typeahead, 'feature_type_ids', filtered[my_field], 'OR');
-                        var mode = suggestion.refacet ? 'AND' : 'OR';
-                        var fq = getFilter('feature_type_ids', filtered[my_field], mode);
-                        if (fq != null) {
-                            $typeahead.kmapsTypeahead('addFilters', [fq]);
-                            $filter.kmapsTypeahead('refacetPrefetch', fq);
+                        if (suggestion.count > 0) { // can't select zero-result filters
+                            $filter.typeahead('val', ''); // empty search field
+                            removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                            $filter.kmapsTypeahead('resetPrefetch');
+                            pickTypeaheadFilter(my_field, suggestion);
+                            //addFilter($typeahead, 'feature_type_ids', filtered[my_field], 'OR');
+                            var mode = suggestion.refacet ? 'AND' : 'OR';
+                            var fq = getFilter('feature_type_ids', filtered[my_field], mode);
+                            if (fq != null) {
+                                $typeahead.kmapsTypeahead('addFilters', [fq]);
+                                $filter.kmapsTypeahead('refacetPrefetch', fq);
+                            }
+                        }
+                    }
+                ).bind('typeahead:cursorchange',
+                    function (ev, suggestion) {
+                        if (suggestion === undefined) {
+                            $filter.parent().find('.kmaps-tt-menu').scrollTop(0);
+                        }
+                        else if (suggestion.count == 0) { // skip over zero-result suggestions
+                            $filter.typeahead('moveCursor', +1);
+                            /*var $menu = $filter.parent().find('.kmaps-tt-menu');
+                            //$('.selectable-facet:first', $menu).addClass('kmaps-tt-cursor');*/
                         }
                     }
                 );
