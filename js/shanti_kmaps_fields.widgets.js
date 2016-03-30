@@ -27,6 +27,7 @@
                     updateDictionary(kmap_id, item.id, item.header, item.path, my_field);
                     addPickedItem(resultBox, kmap_id, item);
                 }
+                trackTypeaheadSelected($('#' + my_field + '_search_term'), picked[my_field]);
             });
 
             // Event handler 1: Fetch search results and build a "pick tree"
@@ -92,6 +93,7 @@
                 //}
                 delete picked[my_field][kmap_id];
                 $('#' + my_field + '_pick_tree, #' + my_field + '_lazy_tree').find('.kmap-item.' + kmap_id + ', #ajax-id-' + kmap_id.substring(1)).removeClass('picked');
+                trackTypeaheadSelected($('#' + my_field + '_search_term'), picked[my_field]);
                 pickedElement.remove();
             });
 
@@ -121,12 +123,12 @@
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
-
                 $typeahead.kmapsTypeahead({
                     term_index: admin.shanti_kmaps_admin_server_solr_terms,
                     domain: widget.domain,
                     root_kmapid: root_kmapid,
                     max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                    selected: 'class',
                     filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                 });
             });
@@ -136,6 +138,7 @@
                 function (ev, sel) {
                     var my_field = $(this).attr('id').replace('_search_term', '');
                     pickTypeaheadSuggestion(my_field, sel);
+                    trackTypeaheadSelected($('#' + my_field + '_search_term'), picked[my_field]);
                     $(this).typeahead('val', ''); //clear search field
                 }
             );
@@ -166,11 +169,17 @@
                     var origEvent = (event.originalEvent) ? event.originalEvent.type : "none";
                     if (event.type === "fancytreeactivate" && origEvent === "click") {
                         pickLazyTreeTerm(my_field, $.extend(data, {'domain': widget.domain}));
-                        if (search) $typeahead.typeahead('val', search_key); //reset search term
+                        if (search) {
+                            trackTypeaheadSelected($typeahead, picked[my_field]);
+                            $typeahead.typeahead('val', search_key);
+                        } //reset search term
                     } else if (event.type === "fancytreekeydown" && origEvent === "keydown") {
                         if (event.keyCode == 9 || event.keyCode == 13) { //TAB or ENTER pressed
                             pickLazyTreeTerm(my_field, $.extend(data, {'domain': widget.domain}));
-                            if (search) $typeahead.typeahead('val', search_key); //reset search term
+                            if (search) {
+                                trackTypeaheadSelected($typeahead, picked[my_field]);
+                                $typeahead.typeahead('val', search_key);
+                            } //reset search term
                         }
                     }
                 });
@@ -219,6 +228,7 @@
                     ).bind('typeahead:select',
                         function (ev, suggestion) {
                             pickTypeaheadSuggestion(my_field, suggestion);
+                            trackTypeaheadSelected($typeahead, picked[my_field]);
                             var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
                             $('#ajax-id-' + id, $('#' + my_field + '_lazy_tree')).addClass('picked');
                             $typeahead.typeahead('val', search_key); //reset search term
@@ -259,8 +269,8 @@
                 removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
                 $filter.kmapsTypeahead('resetPrefetch');
                 delete filtered[my_field][kmap_id];
+                trackTypeaheadSelected($filter, filtered[my_field]);
                 filterElement.remove();
-                //addFilter($typeahead, 'feature_type_ids', filtered[my_field], 'OR');
                 var fq = getFilter('feature_type_ids', filtered[my_field], 'OR');
                 if (fq != null) {
                     $typeahead.kmapsTypeahead('addFilters', [fq]);
@@ -281,6 +291,7 @@
                     root_kmapid: 20, // default: Geographical features
                     ancestors: 'off',
                     min_chars: 0,
+                    selected: 'class',
                     prefetch_facets: 'on',
                     prefetch_field: 'feature_types_xfacet',
                     prefetch_filters: ['tree:' + widget.domain, 'ancestor_id_path:' + root_kmap_path],
@@ -288,12 +299,12 @@
                     filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                 }).bind('typeahead:select',
                     function (ev, suggestion) {
-                        if (suggestion.count > 0) { // can't select zero-result filters
+                        if (suggestion.count > 0) { // should not be able to select zero-result filters
                             $filter.typeahead('val', ''); // empty search field
                             removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
                             $filter.kmapsTypeahead('resetPrefetch');
                             pickTypeaheadFilter(my_field, suggestion);
-                            //addFilter($typeahead, 'feature_type_ids', filtered[my_field], 'OR');
+                            trackTypeaheadSelected($filter, filtered[my_field]);
                             var mode = suggestion.refacet ? 'AND' : 'OR';
                             var fq = getFilter('feature_type_ids', filtered[my_field], mode);
                             if (fq != null) {
@@ -306,11 +317,6 @@
                     function (ev, suggestion) {
                         if (suggestion === undefined) {
                             $filter.parent().find('.kmaps-tt-menu').scrollTop(0);
-                        }
-                        else if (suggestion.count == 0) { // skip over zero-result suggestions
-                            $filter.typeahead('moveCursor', +1);
-                            /*var $menu = $filter.parent().find('.kmaps-tt-menu');
-                            //$('.selectable-facet:first', $menu).addClass('kmaps-tt-cursor');*/
                         }
                     }
                 );
@@ -441,6 +447,16 @@
         if (!filtered[my_field][kmap_id]) {
             filtered[my_field][kmap_id] = item;
             addPickedItem(filterBox, kmap_id, item);
+        }
+    }
+
+    function trackTypeaheadSelected($typeahead, pickList) {
+        if ($typeahead.length !== 0) {
+            $typeahead.kmapsTypeahead('trackSelected', Object.keys(pickList).map(
+                function (val) {
+                    return pickList[val].id;
+                })
+            );
         }
     }
 
