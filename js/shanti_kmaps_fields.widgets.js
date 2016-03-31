@@ -291,9 +291,9 @@
                     root_kmapid: 20, // default: Geographical features
                     ancestors: 'off',
                     min_chars: 0,
-                    selected: 'class',
+                    selected: 'omit',
                     prefetch_facets: 'on',
-                    prefetch_field: 'feature_types_xfacet',
+                    prefetch_field: 'feature_types',
                     prefetch_filters: ['tree:' + widget.domain, 'ancestor_id_path:' + root_kmap_path],
                     max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
                     filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
