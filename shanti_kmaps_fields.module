@@ -448,7 +448,7 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance)
             '#title' => t('Search Filters'),
             '#description' => t('Select any widgets that you would like to use to filter your search. This may make it easier to find KMap terms.'),
             '#options' => array(
-                'feature_types' => t('Feature types'),
+                'feature_types' => t('Feature Types'),
             ),
             '#required' => FALSE,
             '#default_value' => $settings['search_filters'],
@@ -740,7 +740,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#weight' => -5,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_filter', 'class' => array('kmap_search_filter'), 'placeholder' => 'Filter by subject'), // 'subject' shouldn't be hard-coded here
+                '#attributes' => array('id' => $field_id . '_search_filter', 'class' => array('kmap_search_filter'), 'placeholder' => 'Filter by Feature Type'), // 'Feature Type' shouldn't be hard-coded here
                 '#size' => 60,
                 '#description' => "<p>Select a term to add as a filter to your search.</p>",
             );
