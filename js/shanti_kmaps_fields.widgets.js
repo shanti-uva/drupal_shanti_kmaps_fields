@@ -266,12 +266,14 @@
                 var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
                 var $typeahead = $('#' + my_field + '_search_term');
                 var $filter = $('#' + my_field + '_search_filter');
+                var mode = $(this).hasClass('kmaps-conjunctive-filter') ? 'AND' : 'OR';
                 removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                $(this).toggleClass('kmaps-conjunctive-filters', mode == 'AND');
                 $filter.kmapsTypeahead('resetPrefetch');
                 delete filtered[my_field][kmap_id];
                 trackTypeaheadSelected($filter, filtered[my_field]);
                 filterElement.remove();
-                var fq = getFilter('feature_type_ids', filtered[my_field], 'OR');
+                var fq = getFilter('feature_type_ids', filtered[my_field], mode);
                 if (fq != null) {
                     $typeahead.kmapsTypeahead('addFilters', [fq]);
                     $filter.kmapsTypeahead('refacetPrefetch', fq);
@@ -282,6 +284,7 @@
                 var $filter = $(this);
                 var my_field = $filter.attr('id').replace('_search_filter', '');
                 var $typeahead = $('#' + my_field + '_search_term');
+                var $filter_box = $('#' + my_field + '_filter_box');
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
@@ -303,9 +306,10 @@
                             $filter.typeahead('val', ''); // empty search field
                             removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
                             $filter.kmapsTypeahead('resetPrefetch');
-                            pickTypeaheadFilter(my_field, suggestion);
-                            trackTypeaheadSelected($filter, filtered[my_field]);
                             var mode = suggestion.refacet ? 'AND' : 'OR';
+                            pickTypeaheadFilter(my_field, suggestion);
+                            $filter_box.toggleClass('kmaps-conjunctive-filters', mode == 'AND');
+                            trackTypeaheadSelected($filter, filtered[my_field]);
                             var fq = getFilter('feature_type_ids', filtered[my_field], mode);
                             if (fq != null) {
                                 $typeahead.kmapsTypeahead('addFilters', [fq]);
