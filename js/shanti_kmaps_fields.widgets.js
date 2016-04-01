@@ -139,12 +139,12 @@
                     var my_field = $(this).attr('id').replace('_search_term', '');
                     pickTypeaheadSuggestion(my_field, sel);
                     trackTypeaheadSelected($('#' + my_field + '_search_term'), picked[my_field]);
-                    $(this).typeahead('val', ''); //clear search field
+                    $(this).kmapsTypeahead('setValue', ''); //clear search field
                 }
             );
 
             // Turn inputs into typeahead_tree pickers if required
-            $('.field-widget-kmap-lazy-tree-picker, .field-widget-kmap-lazy-tree-filter-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-fields').each(function () {
+            $('.field-widget-kmap-lazy-tree-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-fields').each(function () {
                 var $typeahead = $('.kmap_search_term', this);
                 var search = $typeahead.hasClass('kmap_no_search') ? false : true;
                 var search_key = '';
@@ -171,14 +171,14 @@
                         pickLazyTreeTerm(my_field, $.extend(data, {'domain': widget.domain}));
                         if (search) {
                             trackTypeaheadSelected($typeahead, picked[my_field]);
-                            $typeahead.typeahead('val', search_key);
+                            $typeahead.kmapsTypeahead('setValue', search_key);
                         } //reset search term
                     } else if (event.type === "fancytreekeydown" && origEvent === "keydown") {
                         if (event.keyCode == 9 || event.keyCode == 13) { //TAB or ENTER pressed
                             pickLazyTreeTerm(my_field, $.extend(data, {'domain': widget.domain}));
                             if (search) {
                                 trackTypeaheadSelected($typeahead, picked[my_field]);
-                                $typeahead.typeahead('val', search_key);
+                                $typeahead.kmapsTypeahead('setValue', search_key);
                             } //reset search term
                         }
                     }
@@ -231,7 +231,7 @@
                             trackTypeaheadSelected($typeahead, picked[my_field]);
                             var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
                             $('#ajax-id-' + id, $('#' + my_field + '_lazy_tree')).addClass('picked');
-                            $typeahead.typeahead('val', search_key); //reset search term
+                            $typeahead.kmapsTypeahead('setValue', search_key); //reset search term
                         }
                     ).bind('typeahead:cursorchange',
                         function (ev, suggestion) {
@@ -303,7 +303,7 @@
                 }).bind('typeahead:select',
                     function (ev, suggestion) {
                         if (suggestion.count > 0) { // should not be able to select zero-result filters
-                            $filter.typeahead('val', ''); // empty search field
+                            $filter.kmapsTypeahead('setValue', ''); // empty search field
                             removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
                             $filter.kmapsTypeahead('resetPrefetch');
                             var mode = suggestion.refacet ? 'AND' : 'OR';

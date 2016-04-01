@@ -19,7 +19,7 @@
 
 .kmap_lazy_tree .fancytree-container {
     max-height: 350px;
-    overflow: scroll;
+    overflow-y: auto;
 }
 
 .kmap_lazy_tree .picked {
