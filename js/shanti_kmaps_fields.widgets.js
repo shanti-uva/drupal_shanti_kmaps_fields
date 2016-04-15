@@ -172,6 +172,7 @@
                     var origEvent = (event.originalEvent) ? event.originalEvent.type : "none";
                     if (event.type === "fancytreeactivate" && origEvent === "click") {
                         pickLazyTreeTerm(my_field, $.extend(data, {'domain': widget.domain}));
+                        $tree.fancytree('getTree').activateKey(false);
                         if (search) {
                             trackTypeaheadSelected($typeahead, picked[my_field]);
                             $typeahead.kmapsTypeahead('setValue', search_key);
@@ -179,6 +180,7 @@
                     } else if (event.type === "fancytreekeydown" && origEvent === "keydown") {
                         if (event.keyCode == 9 || event.keyCode == 13) { //TAB or ENTER pressed
                             pickLazyTreeTerm(my_field, $.extend(data, {'domain': widget.domain}));
+                            $tree.fancytree('getTree').activateKey(false);
                             if (search) {
                                 trackTypeaheadSelected($typeahead, picked[my_field]);
                                 $typeahead.kmapsTypeahead('setValue', search_key);
@@ -201,9 +203,9 @@
                         no_results_msg: 'Showing the whole tree.'
                     }).kmapsTypeahead('onSuggest',
                         function (suggestions) {
-                            if (suggestions.length == 0) {
+                            if (suggestions.length == 0) { // if there were default suggestions, then this wouldn't be right
                                 $tree.kmapsTree('reset', function () {
-                                    $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
+                                    markPickedOnTree(my_field, $tree);
                                 });
                             }
                             else {
@@ -212,12 +214,7 @@
                                         return '/' + val['doc']['ancestor_id_path'];
                                     }),
                                     function () {
-                                        // mark already picked items - do it more efficiently?
-                                        for (var kmap_id in picked[my_field]) {
-                                            $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
-                                        }
-                                        // scroll to top - doesn't work
-                                        $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
+                                        markPickedOnTree(my_field, $tree);
                                     }
                                 );
                             }
@@ -230,6 +227,7 @@
                         function (ev, suggestion) {
                             pickTypeaheadSuggestion(my_field, suggestion);
                             trackTypeaheadSelected($typeahead, picked[my_field]);
+                            $tree.fancytree('getTree').activateKey(false);
                             var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
                             $('#ajax-id-' + id, $('#' + my_field + '_lazy_tree')).addClass('picked');
                             $typeahead.kmapsTypeahead('setValue', search_key); //reset search term
@@ -237,10 +235,9 @@
                     ).bind('typeahead:cursorchange',
                         function (ev, suggestion) {
                             if (typeof suggestion != 'undefined') {
-                                var tree = $tree.fancytree('getTree');
                                 var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
+                                var tree = $tree.fancytree('getTree');
                                 tree.activateKey(id);
-                                tree.getNodeByKey(id).scrollIntoView();
                             }
                         }
                     ).on('input',
@@ -248,7 +245,7 @@
                             if (this.value == '') {
                                 search_key = '';
                                 $tree.kmapsTree('reset', function () {
-                                    $tree.fancytree('getTree').getNodeByKey(root_kmapid).scrollIntoView(true);
+                                    markPickedOnTree(my_field, $tree);
                                 });
                             }
                         }
@@ -322,12 +319,6 @@
                                 $filter.kmapsTypeahead('refacetPrefetch', fq);
                             }
                             $filter.kmapsTypeahead('setValue', search_key);
-                        }
-                    }
-                ).bind('typeahead:cursorchange',
-                    function (ev, suggestion) {
-                        if (suggestion === undefined) {
-                            $filter.parent().find('.kmaps-tt-menu').scrollTop(0);
                         }
                     }
                 );
@@ -412,6 +403,14 @@
             var kmap_id = 'F' + a.id;
             var path = ancestorsToPath(copy);
             updateDictionary(kmap_id, a.id, a.header, path, cur_field);
+        }
+    }
+
+    function markPickedOnTree(my_field, $tree) {
+        $tree.fancytree('getTree').activateKey(false);
+        // mark already picked items
+        for (var kmap_id in picked[my_field]) {
+            $('#ajax-id-' + kmap_id.substring(1), $tree).addClass('picked');
         }
     }
 

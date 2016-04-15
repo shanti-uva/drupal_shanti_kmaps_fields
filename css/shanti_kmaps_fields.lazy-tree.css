@@ -19,10 +19,6 @@
     padding: 5px;
     margin-bottom: 5px;
 }
-.kmap_lazy_tree .fancytree-container {
-    max-height: 350px;
-    overflow-y: auto;
-}
 .kmap_lazy_tree .picked {
     color:gray;
     text-decoration:line-through;
