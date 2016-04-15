@@ -6,6 +6,13 @@
 .field-widget-kmap-typeahead-tree-picker .menu_wrapper .kmaps-tt-suggestion {
     display: none;
 }
+.field-widget-kmap-typeahead-tree-picker .kmaps-tt-header,
+.field-widget-kmap-typeahead-tree-picker .kmaps-tt-message {
+    background-color: #eee;
+    font-weight: bold;
+    border-top: 2px solid #ddd;
+    border-bottom: 1px solid #ddd;
+ }
 .kmap_lazy_tree {
     clear: both;
     background: #eee;
