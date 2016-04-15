@@ -199,6 +199,7 @@
                         root_kmapid: root_kmapid,
                         max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
                         min_chars: 1,
+                        selected: 'class',
                         //empty_query: 'level_i:2',
                         //empty_query: 'id:' + widget.domain + '-' + root_kmapid,
                         //empty_sort: 'level_i ASC',
