@@ -88,11 +88,7 @@
                 var resultBox = $('#' + my_field + '_result_box');
                 var pickedElement = $(this).parent();
                 var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
-                //if (typeof $('#'+my_field+'_pick_tree .kmap-item.'+kmap_id).val() == 'undefined') { // TRUTH FAILS
-                //  if (!confirm("This term "+kmap_id+" is not in the currently selected tree; if you delete it, you'll need to search for it again. Are you sure you want to delete it?")) return;
-                //}
                 delete picked[my_field][kmap_id];
-                // typeahead stuff
                 var $typeahead = $('#' + my_field + '_search_term');
                 if ($typeahead.parent().hasClass('twitter-typeahead')) {
                     var search_key = $typeahead.typeahead('val');
@@ -200,9 +196,6 @@
                         max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
                         min_chars: 1,
                         selected: 'class',
-                        //empty_query: 'level_i:2',
-                        //empty_query: 'id:' + widget.domain + '-' + root_kmapid,
-                        //empty_sort: 'level_i ASC',
                         empty_limit: 10,
                         filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
                         no_results_msg: 'Showing the whole tree.'
