@@ -265,13 +265,15 @@
                 var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
                 var $typeahead = $('#' + my_field + '_search_term');
                 var $filter = $('#' + my_field + '_search_filter');
+                var filter_type = $filter.attr('data-search-filter'); //feature_type or associated_subject
+                var filter_field = filter_type + "_ids";
                 var search_key = $filter.typeahead('val'); //get search term
-                removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                removeFilter($typeahead, filter_field, filtered[my_field]);
                 $filter.kmapsTypeahead('resetPrefetch');
                 delete filtered[my_field][kmap_id];
                 trackTypeaheadSelected($filter, filtered[my_field]);
                 $filter_el.remove();
-                var fq = getFilter('feature_type_ids', filtered[my_field], $filter_box.hasClass('kmaps-conjunctive-filters') ? 'AND' : 'OR');
+                var fq = getFilter(filter_field, filtered[my_field], $filter_box.hasClass('kmaps-conjunctive-filters') ? 'AND' : 'OR');
                 if (fq != null) {
                     $typeahead.kmapsTypeahead('addFilters', [fq]);
                     $filter.kmapsTypeahead('refacetPrefetch', fq);
@@ -281,6 +283,8 @@
 
             $('.kmap_search_filter').once('kmaps-fields').each(function () {
                 var $filter = $(this);
+                var filter_type = $filter.attr('data-search-filter'); //feature_type or associated_subject
+                var filter_field = filter_type + "_ids";
                 var my_field = $filter.attr('id').replace('_search_filter', '');
                 var search_key = '';
                 var $typeahead = $('#' + my_field + '_search_term');
@@ -296,7 +300,7 @@
                     min_chars: 0,
                     selected: 'omit',
                     prefetch_facets: 'on',
-                    prefetch_field: 'feature_types',
+                    prefetch_field: filter_type + 's', //feature_types or associated_subjects
                     prefetch_filters: ['tree:' + widget.domain, 'ancestor_id_path:' + root_kmap_path],
                     max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
                     filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
@@ -307,13 +311,13 @@
                 ).bind('typeahead:select',
                     function (ev, suggestion) {
                         if (suggestion.count > 0) { // should not be able to select zero-result filters
-                            removeFilter($typeahead, 'feature_type_ids', filtered[my_field]);
+                            removeFilter($typeahead, filter_field, filtered[my_field]);
                             $filter.kmapsTypeahead('resetPrefetch');
                             var mode = suggestion.refacet ? 'AND' : 'OR';
                             pickTypeaheadFilter(my_field, suggestion);
                             $filter_box.toggleClass('kmaps-conjunctive-filters', mode == 'AND');
                             trackTypeaheadSelected($filter, filtered[my_field]);
-                            var fq = getFilter('feature_type_ids', filtered[my_field], mode);
+                            var fq = getFilter(filter_field, filtered[my_field], mode);
                             if (fq != null) {
                                 $typeahead.kmapsTypeahead('addFilters', [fq]);
                                 $filter.kmapsTypeahead('refacetPrefetch', fq);

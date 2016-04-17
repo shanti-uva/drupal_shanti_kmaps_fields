@@ -2,6 +2,16 @@
 
 define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module', 'shanti_kmaps_fields'));
 
+function shanti_kmaps_fields_filter_options() {
+    static $filter_options;
+    if (!$filter_options) {
+        $filter_options = array(
+            'feature_type' => t('Feature Type'),
+        );
+    }
+    return $filter_options;
+}
+
 function shanti_kmaps_fields_menu()
 {
     return array(
@@ -447,9 +457,7 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance)
             '#type' => 'checkboxes',
             '#title' => t('Search Filters'),
             '#description' => t('Select any widgets that you would like to use to filter your search. This may make it easier to find KMap terms.'),
-            '#options' => array(
-                'feature_types' => t('Feature Types'),
-            ),
+            '#options' => shanti_kmaps_fields_filter_options(),
             '#required' => FALSE,
             '#default_value' => $settings['search_filters'],
         );
@@ -729,18 +737,20 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             break;
     };
 
+    $filter_options = shanti_kmaps_fields_filter_options();
     foreach ($instance['settings']['search_filters'] as $filter => $val) {
         if ($val) {
+            $display = $filter_options[$val];
             $element["{$field_id}_filter_box"] = array(
                 '#weight' => -10,
                 '#type' => 'container',
-                '#attributes' => array('id' => $field_id . '_filter_box', 'class' => array('kmap_filter_box')),
+                '#attributes' => array('id' => $field_id . '_filter_box', 'class' => array('kmap_filter_box', $filter, $val)),
             );
             $element["{$field_id}_search_filter"] = array(
                 '#weight' => -5,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_filter', 'class' => array('kmap_search_filter'), 'placeholder' => 'Filter by Feature Type'), // 'Feature Type' shouldn't be hard-coded here
+                '#attributes' => array('id' => $field_id . '_search_filter', 'class' => array('kmap_search_filter'), 'data-search-filter' => $val, 'placeholder' => 'Filter by ' .$display),
                 '#size' => 60,
                 '#description' => "<p>Select a term to add as a filter to your search.</p>",
             );
