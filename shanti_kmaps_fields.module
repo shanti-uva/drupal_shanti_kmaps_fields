@@ -2,10 +2,12 @@
 
 define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module', 'shanti_kmaps_fields'));
 
-function shanti_kmaps_fields_filter_options() {
+function shanti_kmaps_fields_filter_options()
+{
     static $filter_options;
     if (!$filter_options) {
         $filter_options = array(
+            'associated_subject' => t('Associated Subject'),
             'feature_type' => t('Feature Type'),
         );
     }
@@ -737,29 +739,41 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             break;
     };
 
+    $filtered = FALSE;
     $filter_options = shanti_kmaps_fields_filter_options();
     foreach ($instance['settings']['search_filters'] as $filter => $val) {
         if ($val) {
+            $filtered = TRUE;
             $display = $filter_options[$val];
-            $element["{$field_id}_filter_box"] = array(
+            $filter = "{$field_id}_filter_{$val}";
+            $element[$filter] = array(
                 '#weight' => -10,
                 '#type' => 'container',
-                '#attributes' => array('id' => $field_id . '_filter_box', 'class' => array('kmap_filter_box', $filter, $val)),
+                '#attributes' => array('id' => $filter, 'class' => array('kmap_filter'), 'data-search-filter' => $val),
             );
-            $element["{$field_id}_search_filter"] = array(
+            $element[$filter]["{$field_id}_filter_box_{$val}"] = array(
+                '#weight' => -10,
+                '#type' => 'container',
+                '#attributes' => array('id' => $field_id . '_filter_box_' . $val, 'class' => array('kmap_filter_box'), 'data-search-filter' => $val),
+            );
+            $element[$filter]["{$field_id}_filter_box_{$val}"] = array(
+                '#weight' => -10,
+                '#type' => 'container',
+                '#attributes' => array('id' => $field_id . '_filter_box_' . $val, 'class' => array('kmap_filter_box'), 'data-search-filter' => $val),
+            );
+            $element[$filter]["{$field_id}_search_filter_{$val}"] = array(
                 '#weight' => -5,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_filter', 'class' => array('kmap_search_filter'), 'data-search-filter' => $val, 'placeholder' => 'Filter by ' .$display),
+                '#attributes' => array('id' => $field_id . '_search_filter_' . $val, 'class' => array('kmap_search_filter'), 'data-search-filter' => $val, 'placeholder' => 'Filter by ' . $display),
                 '#size' => 60,
                 '#description' => "<p>Select a term to add as a filter to your search.</p>",
             );
-
-            //typeahead libraries
-            $element['#attached']['libraries_load'][] = array('typeahead');
-            $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
-            break;
         }
+    }
+    if ($filtered) { // typeahead libraries
+        $element['#attached']['libraries_load'][] = array('typeahead');
+        $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
     }
 
     // Pass settings to the JS
