@@ -7,8 +7,8 @@ function shanti_kmaps_fields_filter_options()
     static $filter_options;
     if (!$filter_options) {
         $filter_options = array(
-            'associated_subject' => t('Associated Subject'),
             'feature_type' => t('Feature Type'),
+            'associated_subject' => t('Associated Subject'),
         );
     }
     return $filter_options;
