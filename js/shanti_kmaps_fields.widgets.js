@@ -521,7 +521,7 @@
         pickedElement.attr({
             'data-kmap-id-int': item.id,
             'data-kmap-path': item.path,
-            'data-kmap-header': item.header,
+            'data-kmap-header': item.header
         });
         Drupal.attachBehaviors(pickedElement);
     }
