@@ -94,7 +94,7 @@
                     var search_key = $typeahead.typeahead('val');
                     $('#' + my_field + '_pick_tree, #' + my_field + '_lazy_tree').find('.kmap-item.' + kmap_id + ', #ajax-id-' + kmap_id.substring(1)).removeClass('picked');
                     trackTypeaheadSelected($typeahead, picked[my_field]);
-                    $typeahead.kmapsTypeahead('setValue', search_key);
+                    $typeahead.kmapsTypeahead('setValue', search_key, true);
                 }
                 pickedElement.remove();
             });
@@ -145,7 +145,7 @@
                     function (ev, sel) {
                         pickTypeaheadSuggestion(my_field, sel);
                         trackTypeaheadSelected($typeahead, picked[my_field]);
-                        $typeahead.kmapsTypeahead('setValue', search_key); // set search field back to what it was
+                        $typeahead.kmapsTypeahead('setValue', search_key, true); // set search field back to what it was
                     }
                 );
             });
@@ -179,7 +179,7 @@
                         $tree.fancytree('getTree').activateKey(false);
                         if (search) {
                             trackTypeaheadSelected($typeahead, picked[my_field]);
-                            $typeahead.kmapsTypeahead('setValue', search_key);
+                            $typeahead.kmapsTypeahead('setValue', search_key, true);
                         } //reset search term
                     } else if (event.type === "fancytreekeydown" && origEvent === "keydown") {
                         if (event.keyCode == 9 || event.keyCode == 13) { //TAB or ENTER pressed
@@ -187,7 +187,7 @@
                             $tree.fancytree('getTree').activateKey(false);
                             if (search) {
                                 trackTypeaheadSelected($typeahead, picked[my_field]);
-                                $typeahead.kmapsTypeahead('setValue', search_key);
+                                $typeahead.kmapsTypeahead('setValue', search_key, true);
                             } //reset search term
                         }
                     }
@@ -234,7 +234,7 @@
                             $tree.fancytree('getTree').activateKey(false);
                             var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
                             $('#ajax-id-' + id, $('#' + my_field + '_lazy_tree')).addClass('picked');
-                            $typeahead.kmapsTypeahead('setValue', search_key); //reset search term
+                            $typeahead.kmapsTypeahead('setValue', search_key, true); //reset search term
                         }
                     ).bind('typeahead:cursorchange',
                         function (ev, suggestion) {
@@ -284,13 +284,13 @@
                 var other_filters = widget.filters.slice(0);
                 other_filters.splice(widget.filters.indexOf(filter_type), 1);
                 var fq = getFilters(filter_field, filtered[my_field][filter_type], $filter_box.hasClass('kmaps-conjunctive-filters') ? 'AND' : 'OR');
-                $typeahead.kmapsTypeahead('addFilters', fq);
+                $typeahead.kmapsTypeahead('addFilters', fq).kmapsTypeahead('setValue', $typeahead.typeahead('val'), false);
                 for (var i=0; i<other_filters.length; i++) {
                     var $other = $('#' + my_field + '_search_filter_' + other_filters[i]);
                     $other.kmapsTypeahead('refetchPrefetch', fq);
                 }
                 $filter.kmapsTypeahead('refacetPrefetch', fq);
-                $filter.kmapsTypeahead('setValue', search_key);
+                $filter.kmapsTypeahead('setValue', search_key, true);
             });
 
             $('.kmap_search_filter').once('kmaps-fields').each(function () {
@@ -330,13 +330,13 @@
                             $filter_box.toggleClass('kmaps-conjunctive-filters', mode == 'AND');
                             trackTypeaheadSelected($filter, filtered[my_field][filter_type]);
                             var fq = getFilters(filter_field, filtered[my_field][filter_type], mode);
-                            $typeahead.kmapsTypeahead('addFilters', fq);
+                            $typeahead.kmapsTypeahead('addFilters', fq).kmapsTypeahead('setValue', $typeahead.typeahead('val'), false);
                             for (var i=0; i<other_filters.length; i++) {
                                 var $other = $('#' + my_field + '_search_filter_' + other_filters[i]);
                                 $other.kmapsTypeahead('refetchPrefetch', fq);
                             }
                             $filter.kmapsTypeahead('refacetPrefetch', fq);
-                            $filter.kmapsTypeahead('setValue', search_key);
+                            $filter.kmapsTypeahead('setValue', search_key, true);
                         }
                     }
                 );
