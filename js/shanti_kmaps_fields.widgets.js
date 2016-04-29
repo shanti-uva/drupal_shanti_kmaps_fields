@@ -131,6 +131,10 @@
                     domain: widget.domain,
                     root_kmapid: root_kmapid,
                     max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                    min_chars: 0,
+                    empty_query: '*:*',
+                    empty_limit: widget.term_limit == 0 ? 50 : widget.term_limit,
+                    empty_sort: 'header ASC',
                     selected: 'class',
                     filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                 }).bind('typeahead:asyncrequest',
@@ -272,16 +276,20 @@
                 var filter_field = filter_type + "_ids";
                 var search_key = $filter.typeahead('val'); //get search term
                 var $typeahead = $('#' + my_field + '_search_term');
-                removeFilter($typeahead, filter_field, filtered[my_field][filter_type]);
-                $filter.kmapsTypeahead('resetPrefetch');
+                removeFilters($typeahead, filter_field, filtered[my_field][filter_type]);
                 delete filtered[my_field][filter_type][kmap_id];
                 trackTypeaheadSelected($filter, filtered[my_field][filter_type]);
                 $filter_el.remove();
-                var fq = getFilter(filter_field, filtered[my_field][filter_type], $filter_box.hasClass('kmaps-conjunctive-filters') ? 'AND' : 'OR');
-                if (fq != null) {
-                    $typeahead.kmapsTypeahead('addFilters', [fq]);
-                    $filter.kmapsTypeahead('refacetPrefetch', fq);
+                var widget = settings.shanti_kmaps_fields[my_field];
+                var other_filters = widget.filters.slice(0);
+                other_filters.splice(widget.filters.indexOf(filter_type), 1);
+                var fq = getFilters(filter_field, filtered[my_field][filter_type], $filter_box.hasClass('kmaps-conjunctive-filters') ? 'AND' : 'OR');
+                $typeahead.kmapsTypeahead('addFilters', fq);
+                for (var i=0; i<other_filters.length; i++) {
+                    var $other = $('#' + my_field + '_search_filter_' + other_filters[i]);
+                    $other.kmapsTypeahead('refetchPrefetch', fq);
                 }
+                $filter.kmapsTypeahead('refacetPrefetch', fq);
                 $filter.kmapsTypeahead('setValue', search_key);
             });
 
@@ -296,6 +304,8 @@
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
+                var other_filters = widget.filters.slice(0);
+                other_filters.splice(widget.filters.indexOf(filter_type), 1);
                 $filter.kmapsTypeahead({
                     term_index: admin.shanti_kmaps_admin_server_solr_terms,
                     domain: 'subjects', // always Filter by Subject
@@ -314,17 +324,18 @@
                 ).bind('typeahead:select',
                     function (ev, suggestion) {
                         if (suggestion.count > 0) { // should not be able to select zero-result filters
-                            removeFilter($typeahead, filter_field, filtered[my_field][filter_type]);
-                            $filter.kmapsTypeahead('resetPrefetch');
+                            removeFilters($typeahead, filter_field, filtered[my_field][filter_type]);
                             var mode = suggestion.refacet ? 'AND' : 'OR';
                             pickTypeaheadFilter(my_field, filter_type, suggestion);
                             $filter_box.toggleClass('kmaps-conjunctive-filters', mode == 'AND');
                             trackTypeaheadSelected($filter, filtered[my_field][filter_type]);
-                            var fq = getFilter(filter_field, filtered[my_field][filter_type], mode);
-                            if (fq != null) {
-                                $typeahead.kmapsTypeahead('addFilters', [fq]);
-                                $filter.kmapsTypeahead('refacetPrefetch', fq);
+                            var fq = getFilters(filter_field, filtered[my_field][filter_type], mode);
+                            $typeahead.kmapsTypeahead('addFilters', fq);
+                            for (var i=0; i<other_filters.length; i++) {
+                                var $other = $('#' + my_field + '_search_filter_' + other_filters[i]);
+                                $other.kmapsTypeahead('refetchPrefetch', fq);
                             }
+                            $filter.kmapsTypeahead('refacetPrefetch', fq);
                             $filter.kmapsTypeahead('setValue', search_key);
                         }
                     }
@@ -477,28 +488,21 @@
         }
     }
 
-    function addFilter($typeahead, solrField, pickList, mode) {
-        var fq = getFilter(solrField, pickList, mode);
-        if (fq != null) {
-            $typeahead.kmapsTypeahead('addFilters', [fq]);
-        }
-    }
-
-    function removeFilter($typeahead, solrField, pickList) {
+    function removeFilters($typeahead, solrField, pickList) {
         // to be safe, remove both 'OR' and 'AND'
-        var fq = getFilter(solrField, pickList, 'OR');
-        if (fq != null) {
-            $typeahead.kmapsTypeahead('removeFilters', [fq, getFilter(solrField, pickList, 'AND')]);
+        var fq = getFilters(solrField, pickList, 'OR');
+        if (fq.length > 0) {
+            $typeahead.kmapsTypeahead('removeFilters', fq.concat(getFilters(solrField, pickList, 'AND')));
         }
     }
 
-    function getFilter(solrField, pickList, mode) {
+    function getFilters(solrField, pickList, mode) {
         var filter = Object.keys(pickList).join(' ' + mode + ' ').replace(/F/g, ''); // remove 'F' prefix from numeric ids
         if (filter) {
-            return solrField + ':(' + filter + ')';
+            return [solrField + ':(' + filter + ')'];
         }
         else {
-            return null;
+            return [];
         }
     }
 

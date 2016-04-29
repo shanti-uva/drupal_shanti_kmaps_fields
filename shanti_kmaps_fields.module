@@ -739,11 +739,11 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             break;
     };
 
-    $filtered = FALSE;
+    $filters = array();
     $filter_options = shanti_kmaps_fields_filter_options();
     foreach ($instance['settings']['search_filters'] as $filter => $val) {
         if ($val) {
-            $filtered = TRUE;
+            $filters[] = $val;
             $display = $filter_options[$val];
             $filter = "{$field_id}_filter_{$val}";
             $element[$filter] = array(
@@ -771,7 +771,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             );
         }
     }
-    if ($filtered) { // typeahead libraries
+    if (count($filters) > 0) { // typeahead libraries
         $element['#attached']['libraries_load'][] = array('typeahead');
         $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
     }
@@ -786,6 +786,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             'picked_already' => _shanti_kmaps_fields_get_json($items),
             'root_kmapid' => $instance['settings']['search_root_kmapid'],
             'root_kmap_path' => $instance['settings']['search_root_kmap_path'],
+            'filters' => $filters,
         ),
     );
     $element['#attached']['js'][] = array(
