@@ -280,15 +280,9 @@
                 delete filtered[my_field][filter_type][kmap_id];
                 trackTypeaheadSelected($filter, filtered[my_field][filter_type]);
                 $filter_el.remove();
-                var widget = settings.shanti_kmaps_fields[my_field];
-                var other_filters = widget.filters.slice(0);
-                other_filters.splice(widget.filters.indexOf(filter_type), 1);
                 var fq = getFilters(filter_field, filtered[my_field][filter_type], $filter_box.hasClass('kmaps-conjunctive-filters') ? 'AND' : 'OR');
                 $typeahead.kmapsTypeahead('addFilters', fq).kmapsTypeahead('setValue', $typeahead.typeahead('val'), false);
-                for (var i=0; i<other_filters.length; i++) {
-                    var $other = $('#' + my_field + '_search_filter_' + other_filters[i]);
-                    $other.kmapsTypeahead('refetchPrefetch', fq);
-                }
+                syncFilters(my_field, filter_type, settings.shanti_kmaps_fields[my_field].filters, fq);
                 $filter.kmapsTypeahead('refacetPrefetch', fq);
                 $filter.kmapsTypeahead('setValue', search_key, true);
             });
@@ -304,8 +298,6 @@
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
-                var other_filters = widget.filters.slice(0);
-                other_filters.splice(widget.filters.indexOf(filter_type), 1);
                 $filter.kmapsTypeahead({
                     term_index: admin.shanti_kmaps_admin_server_solr_terms,
                     domain: 'subjects', // always Filter by Subject
@@ -331,10 +323,7 @@
                             trackTypeaheadSelected($filter, filtered[my_field][filter_type]);
                             var fq = getFilters(filter_field, filtered[my_field][filter_type], mode);
                             $typeahead.kmapsTypeahead('addFilters', fq).kmapsTypeahead('setValue', $typeahead.typeahead('val'), false);
-                            for (var i=0; i<other_filters.length; i++) {
-                                var $other = $('#' + my_field + '_search_filter_' + other_filters[i]);
-                                $other.kmapsTypeahead('refetchPrefetch', fq);
-                            }
+                            syncFilters(my_field, filter_type, widget.filters, fq);
                             $filter.kmapsTypeahead('refacetPrefetch', fq);
                             $filter.kmapsTypeahead('setValue', search_key, true);
                         }
@@ -503,6 +492,17 @@
         }
         else {
             return [];
+        }
+    }
+
+    function syncFilters(my_field, my_filter, filters, fq) {
+        for (var i=0; i<filters.length; i++) {
+            if (my_filter !== filters[i]) {
+                var $filter = $('#' + my_field + '_search_filter_' + filters[i]);
+                $filter.kmapsTypeahead('refetchPrefetch', fq, function () {
+                    $filter.kmapsTypeahead('setValue', $filter.typeahead('val'), false);
+                });
+            }
         }
     }
 
