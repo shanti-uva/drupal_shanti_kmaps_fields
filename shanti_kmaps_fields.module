@@ -664,7 +664,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element["{$field_id}_search_header"] = array(
                 '#weight' => -20,
                 '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
-                '#markup' => "<p>Click within text input and/or begin typing to search for a term. Click on a term to select it.</p>",
+                '#markup' => "<p>Click within text input and/or begin typing to search for a term.</p>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_search_term"] = array(
@@ -673,7 +673,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#default_value' => '',
                 '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . ucfirst($domain)),
                 '#size' => 60,
-                '#description' => "<p>Select " .ucfirst($domain). " to classify your content.</p>",
+                '#description' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
             );
 
             // Add CSS and JS to the form
