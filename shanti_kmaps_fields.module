@@ -600,7 +600,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         '#attributes' => array('id' => $field_id . '_fieldset'),
     );
     $element["{$field_id}_result_box"] = array(
-        '#weight' => 20,
+        '#weight' => -5,
         '#type' => 'container',
         '#attributes' => array('id' => $field_id . '_result_box', 'class' => array('kmap_result_box')),
     );
@@ -664,15 +664,16 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element["{$field_id}_search_header"] = array(
                 '#weight' => -20,
                 '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
-                '#markup' => "<p>Start typing to search for a term from KMap $domain server. Click on a term to select it.</p>",
+                '#markup' => "<p>Click within text input and/or begin typing to search for a term. Click on a term to select it.</p>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_search_term"] = array(
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . $domain),
+                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . ucfirst($domain)),
                 '#size' => 60,
+                '#description' => "<p>Select " .ucfirst($domain). " to classify your content.</p>",
             );
 
             // Add CSS and JS to the form
@@ -695,8 +696,9 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . $domain),
+                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . ucfirst($domain)),
                 '#size' => 60,
+                '#description' => "<p>Select " .ucfirst($domain). " to classify your content.</p>",
             );
             $element["{$field_id}_search_message"] = array(
                 '#weight' => 5,
@@ -756,18 +758,13 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#type' => 'container',
                 '#attributes' => array('id' => $field_id . '_filter_box_' . $val, 'class' => array('kmap_filter_box'), 'data-search-filter' => $val),
             );
-            $element[$filter]["{$field_id}_filter_box_{$val}"] = array(
-                '#weight' => -10,
-                '#type' => 'container',
-                '#attributes' => array('id' => $field_id . '_filter_box_' . $val, 'class' => array('kmap_filter_box'), 'data-search-filter' => $val),
-            );
             $element[$filter]["{$field_id}_search_filter_{$val}"] = array(
                 '#weight' => -5,
                 '#type' => 'textfield',
                 '#default_value' => '',
                 '#attributes' => array('id' => $field_id . '_search_filter_' . $val, 'class' => array('kmap_search_filter'), 'data-search-filter' => $val, 'placeholder' => 'Filter by ' . $display),
                 '#size' => 60,
-                '#description' => "<p>Select a term to add as a filter to your search.</p>",
+                '#description' => "<p>Select " .ucfirst($display). "s to add as filters to your KMaps ".ucfirst($domain). " search.</p>",
             );
         }
     }
