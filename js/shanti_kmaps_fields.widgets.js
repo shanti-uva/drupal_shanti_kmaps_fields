@@ -126,12 +126,14 @@
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
+                var max_terms = widget.term_limit == 0 ? 999 : widget.term_limit;
                 $typeahead.kmapsTypeahead({
                     term_index: admin.shanti_kmaps_admin_server_solr_terms,
                     domain: widget.domain,
                     root_kmapid: root_kmapid,
-                    max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                    max_terms: max_terms,
                     min_chars: 0,
+                    pager: 'on',
                     empty_query: '*:*',
                     empty_limit: widget.term_limit == 0 ? 50 : widget.term_limit,
                     empty_sort: 'header ASC',
@@ -145,7 +147,7 @@
                     function (ev, sel) {
                         pickTypeaheadSuggestion(my_field, sel);
                         trackTypeaheadSelected($typeahead, picked[my_field]);
-                        $typeahead.kmapsTypeahead('setValue', search_key, true); // set search field back to what it was
+                        $typeahead.kmapsTypeahead('setValue', search_key, true, max_terms * Math.floor(sel.index/max_terms)); // set search field back to what it was, including the start
                     }
                 );
             });
@@ -194,12 +196,13 @@
                 });
 
                 if (search) {
+                    var max_terms = widget.term_limit == 0 ? 999 : widget.term_limit;
                     $typeahead.kmapsTypeahead({
                         menu: $('#' + my_field + '_menu_wrapper'),
                         term_index: admin.shanti_kmaps_admin_server_solr_terms,
                         domain: widget.domain,
                         root_kmapid: root_kmapid,
-                        max_terms: widget.term_limit == 0 ? 999 : widget.term_limit,
+                        max_terms: max_terms,
                         min_chars: 1,
                         selected: 'class',
                         empty_limit: 10,
@@ -234,7 +237,7 @@
                             $tree.fancytree('getTree').activateKey(false);
                             var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
                             $('#ajax-id-' + id, $('#' + my_field + '_lazy_tree')).addClass('picked');
-                            $typeahead.kmapsTypeahead('setValue', search_key, true); //reset search term
+                            $typeahead.kmapsTypeahead('setValue', search_key, true, max_terms * Math.floor(suggestion.index/max_terms)); //reset search term
                         }
                     ).bind('typeahead:cursorchange',
                         function (ev, suggestion) {
