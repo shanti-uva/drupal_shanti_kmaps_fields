@@ -27,7 +27,10 @@
                     updateDictionary(kmap_id, item.id, item.header, item.path, my_field);
                     addPickedItem(resultBox, kmap_id, item);
                 }
-                trackTypeaheadSelected($('#' + my_field + '_search_term'), picked[my_field]);
+                $input = $('#' + my_field + '_search_term');
+                if ($input.parent().hasClass('twitter-typeahead')) {
+                    trackTypeaheadSelected($input, picked[my_field]);
+                };
             });
 
             // Event handler 1: Fetch search results and build a "pick tree"
