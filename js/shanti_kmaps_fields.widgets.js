@@ -30,7 +30,7 @@
                 $input = $('#' + my_field + '_search_term');
                 if ($input.parent().hasClass('twitter-typeahead')) {
                     trackTypeaheadSelected($input, picked[my_field]);
-                };
+                }
             });
 
             // Event handler 1: Fetch search results and build a "pick tree"
