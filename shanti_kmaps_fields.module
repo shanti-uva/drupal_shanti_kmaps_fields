@@ -664,7 +664,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element["{$field_id}_search_header"] = array(
                 '#weight' => -20,
                 '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
-                '#markup' => "<p>Click within text input and/or begin typing to search for a term.</p>",
+                '#markup' => "<p>NOTE: Click within a text input below and/or begin typing to search for a term from the dynamic menu.</p>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_search_term"] = array(
