@@ -208,7 +208,6 @@
                         max_terms: max_terms,
                         min_chars: 1,
                         selected: 'class',
-                        empty_limit: 10,
                         filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : '',
                         no_results_msg: 'Showing the whole tree.'
                     }).kmapsTypeahead('onSuggest',
