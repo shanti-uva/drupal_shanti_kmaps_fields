@@ -586,7 +586,6 @@ function shanti_kmaps_fields_field_widget_info()
 
 function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element)
 {
-
     $field_id = $field['field_name']; // . '_' . $delta; // DON'T NEED DELTAS, NOT MULTI-VALUE
     $domain = $field['settings']['kmap_domain'];
 
@@ -667,13 +666,24 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#markup' => "<p>NOTE: Click within a text input below and/or begin typing to search for a term from the dynamic menu.</p>",
                 '#suffix' => "</div>",
             );
-            $element["{$field_id}_search_term"] = array(
+            $element["typeahead_wrapper"] = array(
+                '#weight' => -10,
+                '#type' => 'container',
+                '#attributes' => array('class' => array('kmap_search')),
+            );
+            $element["typeahead_wrapper"]["{$field_id}_description"] = array(
+                '#weight' => -5,
+                '#prefix' => "<div class='description'>",
+                '#markup' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
+                '#suffix' => "</div>",
+            );
+            $element["typeahead_wrapper"]["{$field_id}_search_term"] = array(
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
                 '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . ucfirst($domain)),
                 '#size' => 60,
-                '#description' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
+                // '#description' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
             );
 
             // Add CSS and JS to the form
@@ -753,18 +763,24 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#type' => 'container',
                 '#attributes' => array('id' => $filter, 'class' => array('kmap_filter'), 'data-search-filter' => $val),
             );
-            $element[$filter]["{$field_id}_filter_box_{$val}"] = array(
-                '#weight' => -10,
-                '#type' => 'container',
-                '#attributes' => array('id' => $field_id . '_filter_box_' . $val, 'class' => array('kmap_filter_box'), 'data-search-filter' => $val),
+            $element[$filter]["description"] = array(
+                '#weight' => -5,
+                '#prefix' => "<div class='description'>",
+                '#markup' => "<p>Select " .ucfirst($display). "s to filter ".ucfirst($domain). " below.</p>",
+                '#suffix' => "</div>",
             );
             $element[$filter]["{$field_id}_search_filter_{$val}"] = array(
-                '#weight' => -5,
+                '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
                 '#attributes' => array('id' => $field_id . '_search_filter_' . $val, 'class' => array('kmap_search_filter'), 'data-search-filter' => $val, 'placeholder' => 'Filter by ' . $display),
                 '#size' => 60,
-                '#description' => "<p>Select " .ucfirst($display). "s to add as filters to your KMaps ".ucfirst($domain). " search.</p>",
+                // '#description' => "<p>Select " .ucfirst($display). "s to filter ".ucfirst($domain). " below.</p>",
+            );
+            $element[$filter]["{$field_id}_filter_box_{$val}"] = array(
+                '#weight' => 5,
+                '#type' => 'container',
+                '#attributes' => array('id' => $field_id . '_filter_box_' . $val, 'class' => array('kmap_filter_box'), 'data-search-filter' => $val),
             );
         }
     }

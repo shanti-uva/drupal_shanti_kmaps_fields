@@ -484,8 +484,8 @@
 // Function to create items in a picklist
     function addPickedItem(containerElement, kmap_id, item) {
         var pickedElement = $("<div/>").addClass('selected-kmap ' + kmap_id).appendTo(containerElement);
-        var deleteButton = $("<span class='icon shanticon-close2'></span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement);
-        var elementLabel = $("<span>" + item.header + " " + kmap_id + "</span>").addClass('kmap_label').appendTo(pickedElement);
+        $("<span class='icon shanticon-close2'></span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement); // delete button
+        $("<span>" + item.header + " " + kmap_id + "</span>").addClass('kmap_label').appendTo(pickedElement); // element label
         pickedElement.attr({
             'data-kmap-id-int': item.id,
             'data-kmap-path': item.path,

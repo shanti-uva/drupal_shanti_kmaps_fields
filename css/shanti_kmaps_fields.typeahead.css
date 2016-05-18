@@ -8,6 +8,6 @@
     display: inline-block;
     width: 2.8em;
 }
-.kmap_search_filter {
+.kmap_search, .kmap_filter { /* }, .kmap_search_filter { */
     clear: both;
 }
