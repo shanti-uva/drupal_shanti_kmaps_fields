@@ -663,7 +663,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element["{$field_id}_search_header"] = array(
                 '#weight' => -20,
                 '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
-                '#markup' => "<p>NOTE: Click within a text input below and/or begin typing to search for a term from the dynamic menu.</p>",
+                '#markup' => "<p><span>Keyword Selection:</span> Click within a text input below and/or begin typing to search for a term.</p>",
                 '#suffix' => "</div>",
             );
             $element["typeahead_wrapper"] = array(
@@ -674,7 +674,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element["typeahead_wrapper"]["{$field_id}_description"] = array(
                 '#weight' => -5,
                 '#prefix' => "<div class='description'>",
-                '#markup' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
+                '#markup' => '<label><span>Search:</span> Select KMaps ' .ucfirst($domain). '</label>',
+                // '#markup' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
                 '#suffix' => "</div>",
             );
             $element["typeahead_wrapper"]["{$field_id}_search_term"] = array(
@@ -766,7 +767,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element[$filter]["description"] = array(
                 '#weight' => -5,
                 '#prefix' => "<div class='description'>",
-                '#markup' => "<p>Select " .ucfirst($display). "s to filter ".ucfirst($domain). " below.</p>",
+                '#markup' => '<label><span>Filter:</span> Select KMaps ' .ucfirst($domain). '</label>',
+                // '#markup' => "<p>Select " .ucfirst($display). "s to filter ".ucfirst($domain). " below.</p>",
                 '#suffix' => "</div>",
             );
             $element[$filter]["{$field_id}_search_filter_{$val}"] = array(
