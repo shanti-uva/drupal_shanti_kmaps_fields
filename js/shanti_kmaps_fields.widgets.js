@@ -97,7 +97,7 @@
                     var search_key = $typeahead.typeahead('val');
                     $('#' + my_field + '_pick_tree, #' + my_field + '_lazy_tree').find('.kmap-item.' + kmap_id + ', #ajax-id-' + kmap_id.substring(1)).removeClass('picked');
                     KMapsUtil.trackTypeaheadSelected($typeahead, picked[my_field]);
-                    $typeahead.kmapsTypeahead('setValue', search_key, true);
+                    $typeahead.kmapsTypeahead('setValue', search_key, false); // 'false' prevents dropdown from automatically opening
                 }
                 pickedElement.remove();
             });
@@ -150,7 +150,8 @@
                     function (ev, sel) {
                         pickTypeaheadSuggestion(my_field, sel);
                         KMapsUtil.trackTypeaheadSelected($typeahead, picked[my_field]);
-                        $typeahead.kmapsTypeahead('setValue', search_key, true, max_terms * Math.floor(sel.index/max_terms)); // set search field back to what it was, including the start
+                        // 'false' prevents dropdown from automatically opening
+                        $typeahead.kmapsTypeahead('setValue', search_key, false, max_terms * Math.floor(sel.index/max_terms)); // set search field back to what it was, including the start
                     }
                 );
             });
@@ -294,7 +295,7 @@
                     $('#' + my_field + '_search_filter_' + other_types[i]).kmapsTypeahead('refetchPrefetch', fq);
                 }
                 $filter.kmapsTypeahead('refacetPrefetch', fq);
-                $filter.kmapsTypeahead('setValue', search_key, true);
+                $filter.kmapsTypeahead('setValue', search_key, false); // 'false' prevents dropdown from re-opening
             });
 
             $('.kmap_search_filter').once('kmaps-fields').each(function () {
@@ -339,7 +340,7 @@
                                 $('#' + my_field + '_search_filter_' + other_types[i]).kmapsTypeahead('refetchPrefetch', fq);
                             }
                             $filter.kmapsTypeahead('refacetPrefetch', fq);
-                            $filter.kmapsTypeahead('setValue', search_key, true);
+                            $filter.kmapsTypeahead('setValue', search_key, false); // 'false' prevents dropdown from automatically opening
                         }
                     }
                 );
