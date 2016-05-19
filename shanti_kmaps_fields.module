@@ -673,10 +673,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             );
             $element["typeahead_wrapper"]["{$field_id}_description"] = array(
                 '#weight' => -5,
-                '#prefix' => "<div class='description'>",
                 '#markup' => '<label><span>Search:</span> Select KMaps ' .ucfirst($domain). '</label>',
                 // '#markup' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
-                '#suffix' => "</div>",
             );
             $element["typeahead_wrapper"]["{$field_id}_search_term"] = array(
                 '#weight' => 0,
@@ -766,10 +764,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             );
             $element[$filter]["description"] = array(
                 '#weight' => -5,
-                '#prefix' => "<div class='description'>",
-                '#markup' => '<label><span>Filter:</span> Select KMaps ' .ucfirst($domain). '</label>',
+                '#markup' => '<label><span>Filter:</span> Select ' .ucfirst($display). 's</label>',
                 // '#markup' => "<p>Select " .ucfirst($display). "s to filter ".ucfirst($domain). " below.</p>",
-                '#suffix' => "</div>",
             );
             $element[$filter]["{$field_id}_search_filter_{$val}"] = array(
                 '#weight' => 0,
