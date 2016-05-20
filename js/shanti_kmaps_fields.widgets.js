@@ -15,7 +15,7 @@
             S = settings.shanti_kmaps_fields;
 
             // Event handler 0: On first load, go through each instance of the field and update its picklist
-            $('.kmap_result_box').once(function () {
+            $('.kmap_result_box').once('kmaps-fields').each(function () {
                 var resultBox = $(this);
                 var my_field = $(this).attr('id').replace('_result_box', '');
                 var picked_already = $.parseJSON(S[my_field].picked_already);
@@ -263,7 +263,7 @@
                 }
             });
 
-            $('.kmap_filter_box').once(function () {
+            $('.kmap_filter_box').once('kmaps-fields').each(function () {
                 var filter_type = $(this).attr('data-search-filter');
                 var my_field = $(this).attr('id').replace('_filter_box_' + filter_type, '');
                 if (!filtered[my_field]) {
