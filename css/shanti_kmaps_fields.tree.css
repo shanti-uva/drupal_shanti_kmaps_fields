@@ -1,5 +1,9 @@
 /* SHANTI KMaps Fields Tree CSS */
 
+.kmap-tree-picker {
+	clear: both;
+}
+
 .delete-me, .kmap-item {
 	cursor:pointer;
 }

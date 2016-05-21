@@ -15,9 +15,9 @@
             S = settings.shanti_kmaps_fields;
 
             // Event handler 0: On first load, go through each instance of the field and update its picklist
-            $('.kmap_result_box').once('kmaps-fields').each(function () {
+            $('.kmap-result-box').once('kmaps-fields').each(function () {
                 var resultBox = $(this);
-                var my_field = $(this).attr('id').replace('_result_box', '');
+                var my_field = $(this).attr('id').replace('-result-box', '');
                 var picked_already = $.parseJSON(S[my_field].picked_already);
                 picked[my_field] = {}; // Init picklist for this field
                 dictionary[my_field] = {}; // Init dictionary for this field
@@ -27,17 +27,17 @@
                     updateDictionary(kmap_id, item.id, item.header, item.path, my_field);
                     addPickedItem(resultBox, kmap_id, item);
                 }
-                $input = $('#' + my_field + '_search_term');
+                $input = $('#' + my_field + '-search-term');
                 if ($input.parent().hasClass('twitter-typeahead')) {
                     KMapsUtil.trackTypeaheadSelected($input, picked[my_field]);
                 }
             });
 
             // Event handler 1: Fetch search results and build a "pick tree"
-            $('.kmap_search_button').once('kmaps-fields').on('click', function (e) {
-                var my_field = $(this).attr('id').replace('_search_button', '');
-                var pickTree = $('#' + my_field + '_pick_tree');
-                var search_term = $('#' + my_field + '_search_term').val();
+            $('.kmap-search-button').once('kmaps-fields').on('click', function (e) {
+                var my_field = $(this).attr('id').replace('-search-button', '');
+                var pickTree = $('#' + my_field + '-pick-tree');
+                var search_term = $('#' + my_field + '-search-term').val();
                 pickTree.html("<p>Searching ...</p>");
                 ancestor_tree[my_field] = {}; // reinit
                 dictionary[my_field] = {}; // reinit
@@ -71,9 +71,9 @@
 
             // Event handler 2: When kmap items are selected from the pick tree, cross them out
             // and populate the result box
-            $('.kmap_pick_tree .kmap-item').once('kmaps-field').on('click', function (e) {
-                var my_field = $(this).closest('.kmap_pick_tree').attr('id').replace('_pick_tree', '');
-                var resultBox = $('#' + my_field + '_result_box');
+            $('.kmap-pick-tree .kmap-item').once('kmaps-field').on('click', function (e) {
+                var my_field = $(this).closest('.kmap-pick-tree').attr('id').replace('-pick-tree', '');
+                var resultBox = $('#' + my_field + '-result-box');
                 var kmap_header = $(this).html();
                 var kmap_id = extractKMapID(kmap_header);
                 if ($(this).hasClass('picked') && $(this).hasClass(kmap_id)) {
@@ -86,16 +86,15 @@
             });
 
             // Event handler 3: When selected items are deleted, remove them and reset the item in the pick tree
-            $('.kmap_result_box .delete-me').once('kmaps-fields').on('click', function (e) {
-                var my_field = $(this).closest('.kmap_result_box').attr('id').replace('_result_box', '');
-                var resultBox = $('#' + my_field + '_result_box');
+            $('.kmap-result-box .delete-me').once('kmaps-fields').on('click', function (e) {
+                var my_field = $(this).closest('.kmap-result-box').attr('id').replace('-result-box', '');
                 var pickedElement = $(this).parent();
-                var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
+                var kmap_id = extractKMapID($(this).next('span.kmap-label').html());
                 delete picked[my_field][kmap_id];
-                var $typeahead = $('#' + my_field + '_search_term');
+                var $typeahead = $('#' + my_field + '-search-term');
                 if ($typeahead.parent().hasClass('twitter-typeahead')) {
                     var search_key = $typeahead.typeahead('val');
-                    $('#' + my_field + '_pick_tree, #' + my_field + '_lazy_tree').find('.kmap-item.' + kmap_id + ', #ajax-id-' + kmap_id.substring(1)).removeClass('picked');
+                    $('#' + my_field + '-pick-tree, #' + my_field + '-lazy-tree').find('.kmap-item.' + kmap_id + ', #ajax-id-' + kmap_id.substring(1)).removeClass('picked');
                     KMapsUtil.trackTypeaheadSelected($typeahead, picked[my_field]);
                     $typeahead.kmapsTypeahead('setValue', search_key, false); // 'false' prevents dropdown from automatically opening
                 }
@@ -116,15 +115,15 @@
                             // This happens for existing kmap ids
                         }
                     }
-                    $('#' + my_field + '_hidden_box').append(JSON.stringify(picked[my_field]));
+                    $('#' + my_field + '-hidden-box').append(JSON.stringify(picked[my_field]));
                 }
                 return;
             });
 
             // Turn inputs into typeahead pickers if required
             $('.field-widget-kmap-typeahead-picker').once('kmaps-fields').each(function () {
-                var $typeahead = $('.kmap_search_term', this);
-                var my_field = $typeahead.attr('id').replace('_search_term', '');
+                var $typeahead = $('.kmap-search-term', this);
+                var my_field = $typeahead.attr('id').replace('-search-term', '');
                 var search_key = '';
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
@@ -158,12 +157,12 @@
 
             // Turn inputs into typeahead_tree pickers if required
             $('.field-widget-kmap-lazy-tree-picker, .field-widget-kmap-typeahead-tree-picker').once('kmaps-fields').each(function () {
-                var $typeahead = $('.kmap_search_term', this);
-                var search = $typeahead.hasClass('kmap_no_search') ? false : true;
+                var $typeahead = $('.kmap-search-term', this);
+                var search = $typeahead.hasClass('kmap-no-search') ? false : true;
                 var search_key = '';
 
-                var my_field = $typeahead.attr('id').replace('_search_term', '');
-                var $tree = $('#' + my_field + '_lazy_tree');
+                var my_field = $typeahead.attr('id').replace('-search-term', '');
+                var $tree = $('#' + my_field + '-lazy-tree');
                 var admin = settings.shanti_kmaps_admin;
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var root_kmapid = widget.root_kmapid ? widget.root_kmapid : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_id : admin.shanti_kmaps_admin_root_places_id;
@@ -202,7 +201,7 @@
                 if (search) {
                     var max_terms = widget.term_limit == 0 ? 999 : widget.term_limit;
                     $typeahead.kmapsTypeahead({
-                        menu: $('#' + my_field + '_menu_wrapper'),
+                        menu: $('#' + my_field + '-menu-wrapper'),
                         term_index: admin.shanti_kmaps_admin_server_solr_terms,
                         domain: widget.domain,
                         root_kmapid: root_kmapid,
@@ -239,7 +238,7 @@
                             KMapsUtil.trackTypeaheadSelected($typeahead, picked[my_field]);
                             $tree.fancytree('getTree').activateKey(false);
                             var id = suggestion.doc.id.substring(suggestion.doc.id.indexOf('-') + 1);
-                            $('#ajax-id-' + id, $('#' + my_field + '_lazy_tree')).addClass('picked');
+                            $('#ajax-id-' + id, $('#' + my_field + '-lazy-tree')).addClass('picked');
                             $typeahead.kmapsTypeahead('setValue', search_key, true, max_terms * Math.floor(suggestion.index/max_terms)); //reset search term
                         }
                     ).bind('typeahead:cursorchange',
@@ -263,28 +262,28 @@
                 }
             });
 
-            $('.kmap_filter_box').once('kmaps-fields').each(function () {
+            $('.kmap-filter-box').once('kmaps-fields').each(function () {
                 var filter_type = $(this).attr('data-search-filter');
-                var my_field = $(this).attr('id').replace('_filter_box_' + filter_type, '');
+                var my_field = $(this).attr('id').replace('-filter-box-' + filter_type, '');
                 if (!filtered[my_field]) {
                     filtered[my_field] = {};
                 }
                 filtered[my_field][filter_type] = {}; // Init filters for this field
             });
 
-            $('.kmap_filter_box .delete-me').once('kmaps-fields').on('click', function (e) {
+            $('.kmap-filter-box .delete-me').once('kmaps-fields').on('click', function (e) {
                 var $filter_el = $(this).parent();
-                var $filter_box = $(this).closest('.kmap_filter_box');
+                var $filter_box = $(this).closest('.kmap-filter-box');
                 var filter_type = $filter_box.attr('data-search-filter'); //feature_type or associated_subject
-                var my_field = $filter_box.attr('id').replace('_filter_box_' + filter_type, '');
+                var my_field = $filter_box.attr('id').replace('-filter-box-' + filter_type, '');
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var other_types = widget.filters.slice(0);
                 other_types.splice(widget.filters.indexOf(filter_type), 1);
-                var kmap_id = extractKMapID($(this).next('span.kmap_label').html());
-                var $filter = $('#' + my_field + '_search_filter_' + filter_type);
+                var kmap_id = extractKMapID($(this).next('span.kmap-label').html());
+                var $filter = $('#' + my_field + '-search-filter-' + filter_type);
                 var filter_field = filter_type + "_ids";
                 var search_key = $filter.typeahead('val'); //get search term
-                var $typeahead = $('#' + my_field + '_search_term');
+                var $typeahead = $('#' + my_field + '-search-term');
                 KMapsUtil.removeFilters($typeahead, filter_field, filtered[my_field][filter_type]);
                 delete filtered[my_field][filter_type][kmap_id];
                 KMapsUtil.trackTypeaheadSelected($filter, filtered[my_field][filter_type]);
@@ -292,23 +291,23 @@
                 var fq = KMapsUtil.getFilters(filter_field, filtered[my_field][filter_type], $filter_box.hasClass('kmaps-conjunctive-filters') ? 'AND' : 'OR');
                 $typeahead.kmapsTypeahead('addFilters', fq).kmapsTypeahead('setValue', $typeahead.typeahead('val'), false);
                 for (var i=0; i<other_types.length; i++) {
-                    $('#' + my_field + '_search_filter_' + other_types[i]).kmapsTypeahead('refetchPrefetch', fq);
+                    $('#' + my_field + '-search-filter-' + other_types[i]).kmapsTypeahead('refetchPrefetch', fq);
                 }
                 $filter.kmapsTypeahead('refacetPrefetch', fq);
                 $filter.kmapsTypeahead('setValue', search_key, false); // 'false' prevents dropdown from re-opening
             });
 
-            $('.kmap_search_filter').once('kmaps-fields').each(function () {
+            $('.kmap-search-filter').once('kmaps-fields').each(function () {
                 var $filter = $(this);
                 var filter_type = $filter.attr('data-search-filter'); //feature_type or associated_subject
                 var filter_field = filter_type + "_ids";
-                var my_field = $filter.attr('id').replace('_search_filter_' + filter_type, '');
+                var my_field = $filter.attr('id').replace('-search-filter-' + filter_type, '');
                 var widget = settings.shanti_kmaps_fields[my_field];
                 var other_types = widget.filters.slice(0);
                 other_types.splice(widget.filters.indexOf(filter_type), 1);
-                var $filter_box = $('#' + my_field + '_filter_box_' + filter_type);
+                var $filter_box = $('#' + my_field + '-filter-box-' + filter_type);
                 var search_key = '';
-                var $typeahead = $('#' + my_field + '_search_term');
+                var $typeahead = $('#' + my_field + '-search-term');
                 var admin = settings.shanti_kmaps_admin;
                 var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
                 $filter.kmapsTypeahead({
@@ -337,7 +336,7 @@
                             var fq = KMapsUtil.getFilters(filter_field, filtered[my_field][filter_type], mode);
                             $typeahead.kmapsTypeahead('addFilters', fq).kmapsTypeahead('setValue', $typeahead.typeahead('val'), false);
                             for (var i=0; i<other_types.length; i++) {
-                                $('#' + my_field + '_search_filter_' + other_types[i]).kmapsTypeahead('refetchPrefetch', fq);
+                                $('#' + my_field + '-search-filter-' + other_types[i]).kmapsTypeahead('refetchPrefetch', fq);
                             }
                             $filter.kmapsTypeahead('refacetPrefetch', fq);
                             $filter.kmapsTypeahead('setValue', search_key, false); // 'false' prevents dropdown from automatically opening
@@ -437,7 +436,7 @@
     }
 
     function pickLazyTreeTerm(my_field, data) {
-        var resultBox = $('#' + my_field + '_result_box');
+        var resultBox = $('#' + my_field + '-result-box');
         var id = data.key, kmap_id = 'F' + id;
         var item = {
             id: data.key,
@@ -448,12 +447,12 @@
         if (!picked[my_field][kmap_id]) {
             picked[my_field][kmap_id] = item;
             addPickedItem(resultBox, kmap_id, item);
-            $('#ajax-id-' + item.id, $('#' + my_field + '_lazy_tree')).addClass('picked');
+            $('#ajax-id-' + item.id, $('#' + my_field + '-lazy-tree')).addClass('picked');
         }
     }
 
     function pickTypeaheadSuggestion(my_field, suggestion) {
-        var resultBox = $('#' + my_field + '_result_box');
+        var resultBox = $('#' + my_field + '-result-box');
         var split = suggestion.doc.id.split('-'), domain = split[0], id = split[1], kmap_id = 'F' + id; //split subjects-123
         var item = {
             id: id,
@@ -468,7 +467,7 @@
     }
 
     function pickTypeaheadFilter(my_field, filter_type, suggestion) {
-        var filterBox = $('#' + my_field + '_filter_box_' + filter_type);
+        var filterBox = $('#' + my_field + '-filter-box-' + filter_type);
         var kmap_id = 'F' + suggestion.id;
         var item = {
             domain: 'subjects', // default
@@ -486,7 +485,7 @@
     function addPickedItem(containerElement, kmap_id, item) {
         var pickedElement = $("<div/>").addClass('selected-kmap ' + kmap_id).appendTo(containerElement);
         $("<span class='icon shanticon-close2'></span>").addClass('delete-me').addClass(kmap_id).appendTo(pickedElement); // delete button
-        $("<span>" + item.header + " " + kmap_id + "</span>").addClass('kmap_label').appendTo(pickedElement); // element label
+        $("<span>" + item.header + " " + kmap_id + "</span>").addClass('kmap-label').appendTo(pickedElement); // element label
         pickedElement.attr({
             'data-kmap-id-int': item.id,
             'data-kmap-path': item.path,

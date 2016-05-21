@@ -1,9 +1,9 @@
 /* SHANTI KMaps Fields Lazy Tree CSS */
-.field-widget-kmap-typeahead-tree-picker .menu_wrapper {
+.field-widget-kmap-typeahead-tree-picker .menu-wrapper {
     clear: both;
 }
 /* hide suggestions but preserve messages */
-.field-widget-kmap-typeahead-tree-picker .menu_wrapper .kmaps-tt-suggestion {
+.field-widget-kmap-typeahead-tree-picker .menu-wrapper .kmaps-tt-suggestion {
     display: none;
 }
 .field-widget-kmap-typeahead-tree-picker .kmaps-tt-header,
@@ -13,22 +13,22 @@
     border-top: 2px solid #ddd;
     border-bottom: 1px solid #ddd;
  }
-.kmap_lazy_tree {
+.kmap-lazy-tree {
     clear: both;
     background: #eee;
     padding: 5px;
     margin-bottom: 5px;
 }
-.kmap_lazy_tree .picked {
+.kmap-lazy-tree .picked {
     color:gray;
     text-decoration:line-through;
 }
-.kmap_lazy_tree span.fancytree-active .fancytree-title {
+.kmap-lazy-tree span.fancytree-active .fancytree-title {
     color: inherit;
     background-color: white;
 }
-.kmap_lazy_tree a.fancytree-title:focus,
-.kmap_lazy_tree span.fancytree-focused a:link,
-.kmap_lazy_tree span.fancytree-focused .fancytree-title {
+.kmap_lazy-tree a.fancytree-title:focus,
+.kmap-lazy-tree span.fancytree-focused a:link,
+.kmap-lazy-tree span.fancytree-focused .fancytree-title {
     outline: none;
 }

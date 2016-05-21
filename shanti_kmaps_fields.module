@@ -525,9 +525,6 @@ function shanti_kmaps_fields_field_widget_info()
         'settings' => array(),
         'behaviors' => array(
             'multiple values' => FALSE,
-            // THIS IS SO THAT USERS DON'T ADD MORE THAN ONE WIDGET
-            // However, the "Number of Values" field in the form must be set to "Unlimited" in the field settings form
-            // for the field to actually accept multiple values in the database
             'default value' => FIELD_BEHAVIOR_DEFAULT,
         ),
     );
@@ -538,9 +535,6 @@ function shanti_kmaps_fields_field_widget_info()
         'settings' => array(),
         'behaviors' => array(
             'multiple values' => FALSE,
-            // THIS IS SO THAT USERS DON'T ADD MORE THAN ONE WIDGET
-            // However, the "Number of Values" field in the form must be set to "Unlimited" in the field settings form
-            // for the field to actually accept multiple values in the database
             'default value' => FIELD_BEHAVIOR_DEFAULT,
         ),
     );
@@ -551,38 +545,11 @@ function shanti_kmaps_fields_field_widget_info()
         'settings' => array(),
         'behaviors' => array(
             'multiple values' => FALSE,
-            // THIS IS SO THAT USERS DON'T ADD MORE THAN ONE WIDGET
-            // However, the "Number of Values" field in the form must be set to "Unlimited" in the field settings form
-            // for the field to actually accept multiple values in the database
             'default value' => FIELD_BEHAVIOR_DEFAULT,
         ),
     );
     return $info;
 }
-
-/*
-    // Add CSS and JS to the form
-    $element['#attached']['js'][]   = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.tree.js";
-    $element['#attached']['css'][]  = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
-    
-    // Pass settings to the JS
-    $js_settings = array(
-      $field_id => array(
-        'field_name'      => $field['field_name'],
-        'domain'          => $domain,
-        'kmap_url'        => url("shanti_kmaps_fields/kmaps_list/$domain/"),
-        'picked_already'  => _shanti_kmaps_fields_get_json($items),
-        'root_kmapid'     => $instance['settings']['root_kmapid'] ? $instance['settings']['root_kmapid'] : 0,
-      ),
-    );  
-    $element['#attached']['js'][] = array(
-      'data' => array('shanti_kmaps_fields' => $js_settings),
-      'type' => 'setting',
-    );
-        
-  }
-  return $element;
-*/
 
 function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element)
 {
@@ -596,38 +563,43 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         '#collapsed' => FALSE,
         '#tree' => FALSE,
         '#element_validate' => array('_shanti_kmaps_fields_extract_data_from_hidden_box'),
-        '#attributes' => array('id' => $field_id . '_fieldset'),
+        '#attributes' => array('id' => $field_id . '-fieldset'),
     );
     $element["{$field_id}_result_box"] = array(
         '#weight' => -5,
         '#type' => 'container',
-        '#attributes' => array('id' => $field_id . '_result_box', 'class' => array('kmap_result_box')),
+        '#attributes' => array('id' => $field_id . '-result-box', 'class' => array('kmap-result-box')),
     );
     $element["{$field_id}_hidden_box"] = array(
         '#weight' => 30,
         '#title' => '',
         '#type' => 'textarea',
         '#prefix' => '<div class="datastore">',
-        '#attributes' => array('id' => $field_id . '_hidden_box'),
+        '#attributes' => array('id' => $field_id . '-hidden-box'),
         '#suffix' => '</div>',
     );
 
     //widget-specific field properties
     switch ($instance['widget']['type']) {
         case 'kmap_tree_picker':
-            $element["{$field_id}_search_term"] = array(
+            $element["tree_wrapper"] = array(
+                '#weight' => 0,
+                '#type' => 'container',
+                '#attributes' => array('class' => array('kmap-tree-picker')),
+            );
+            $element["tree_wrapper"]["{$field_id}_search_term"] = array(
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . $domain),
+                '#attributes' => array('id' => $field_id . '-search-term', 'class' => array('kmap-search-term'), 'placeholder' => 'Search ' . $domain),
                 '#size' => 30,
                 '#description' => "<p>Enter a search term for the KMap $domain server and press tab to see the results.</p>",
-                '#field_suffix' => "<button type='button' id='{$field_id}_search_button' name='{$field_id}_search_button' class='kmap_search_button' value=''>SEARCH</button>",
+                '#field_suffix' => "<button type='button' id='{$field_id}-search-button' name='{$field_id}-search-button' class='kmap-search-button' value=''>SEARCH</button>",
             );
-            $element["{$field_id}_pick_tree"] = array(
+            $element["tree_wrapper"]["{$field_id}_pick_tree"] = array(
                 '#weight' => 10,
                 '#type' => 'container',
-                '#attributes' => array('id' => $field_id . '_pick_tree', 'class' => array('kmap_pick_tree')),
+                '#attributes' => array('id' => $field_id . '-pick-tree', 'class' => array('kmap-pick-tree')),
             );
 
             // Add CSS and JS to the form
@@ -637,18 +609,18 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         case 'kmap_lazy_tree_picker':
             $element["{$field_id}_search_header"] = array(
                 '#weight' => -20,
-                '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
+                '#prefix' => "<div id='{$field_id}-search-header' class='kmap-search-header'>",
                 '#markup' => "<p>Browse the tree to find a term. Click on it or press ENTER to add it to the list.</p>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_search_term"] = array(
                 '#weight' => 0,
-                '#prefix' => "<div id='{$field_id}_search_term' class='kmap_search_term kmap_no_search'>",
+                '#prefix' => "<div id='{$field_id}-search-term' class='kmap-search-term kmap-no-search'>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_lazy_tree"] = array(
                 '#weight' => 25,
-                '#prefix' => "<div id='{$field_id}_lazy_tree' class='kmap_lazy_tree'>",
+                '#prefix' => "<div id='{$field_id}-lazy-tree' class='kmap-lazy-tree'>",
                 '#suffix' => "</div>",
             );
             //tree libraries
@@ -662,14 +634,14 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         case 'kmap_typeahead_picker':
             $element["{$field_id}_search_header"] = array(
                 '#weight' => -20,
-                '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
+                '#prefix' => "<div id='{$field_id}-search-header' class='kmap-search-header'>",
                 '#markup' => "<p><span>Keyword Selection:</span> Click within a text input below and/or begin typing to search for a term.</p>",
                 '#suffix' => "</div>",
             );
             $element["typeahead_wrapper"] = array(
                 '#weight' => -10,
                 '#type' => 'container',
-                '#attributes' => array('class' => array('kmap_search')),
+                '#attributes' => array('class' => array('kmap-typeahead-picker')),
             );
             $element["typeahead_wrapper"]["{$field_id}_description"] = array(
                 '#weight' => -5,
@@ -680,9 +652,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . ucfirst($domain)),
+                '#attributes' => array('id' => $field_id . '-search-term', 'class' => array('kmap-search-term'), 'placeholder' => 'Search ' . ucfirst($domain)),
                 '#size' => 60,
-                // '#description' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
             );
 
             // Add CSS and JS to the form
@@ -696,7 +667,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         case 'kmap_typeahead_tree_picker':
             $element["{$field_id}_search_header"] = array(
                 '#weight' => -20,
-                '#prefix' => "<div id='{$field_id}_search_header' class='kmap_search_header'>",
+                '#prefix' => "<div id='{$field_id}-search-header' class='kmap-search-header'>",
                 '#markup' => "<p>Browse the tree, or click within text input and/or begin typing to search for a term. "
                     . "Use the arrow keys to navigate through the results.</p>",
                 '#suffix' => "</div>",
@@ -705,23 +676,23 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_term', 'class' => array('kmap_search_term'), 'placeholder' => 'Search ' . ucfirst($domain)),
+                '#attributes' => array('id' => $field_id . '-search-term', 'class' => array('kmap-search-term'), 'placeholder' => 'Search ' . ucfirst($domain)),
                 '#size' => 60,
                 '#description' => "<p>Select " .ucfirst($domain). " to classify your content.</p>",
             );
             $element["{$field_id}_search_message"] = array(
                 '#weight' => 5,
-                '#prefix' => "<div id='{$field_id}_search_message' class='kmap_search_message'>",
+                '#prefix' => "<div id='{$field_id}-search-message' class='kmap-search-message'>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_menu_wrapper"] = array(
                 '#weight' => 22,
-                '#prefix' => "<div id='{$field_id}_menu_wrapper' class='menu_wrapper'>",
+                '#prefix' => "<div id='{$field_id}-menu-wrapper' class='menu-wrapper'>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_lazy_tree"] = array(
                 '#weight' => 25,
-                '#prefix' => "<div id='{$field_id}_lazy_tree' class='kmap_lazy_tree'>",
+                '#prefix' => "<div id='{$field_id}-lazy-tree' class='kmap-lazy-tree'>",
                 '#suffix' => "</div>",
             );
 
@@ -756,29 +727,27 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         if ($val) {
             $filters[] = $val;
             $display = $filter_options[$val];
-            $filter = "{$field_id}_filter_{$val}";
+            $filter = "{$field_id}-filter-{$val}";
             $element[$filter] = array(
                 '#weight' => -10,
                 '#type' => 'container',
-                '#attributes' => array('id' => $filter, 'class' => array('kmap_filter'), 'data-search-filter' => $val),
+                '#attributes' => array('id' => $filter, 'class' => array('kmap-filter'), 'data-search-filter' => $val),
             );
             $element[$filter]["description"] = array(
                 '#weight' => -5,
                 '#markup' => '<label><span>Filter:</span> Select ' .ucfirst($display). 's</label>',
-                // '#markup' => "<p>Select " .ucfirst($display). "s to filter ".ucfirst($domain). " below.</p>",
             );
             $element[$filter]["{$field_id}_search_filter_{$val}"] = array(
                 '#weight' => 0,
                 '#type' => 'textfield',
                 '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '_search_filter_' . $val, 'class' => array('kmap_search_filter'), 'data-search-filter' => $val, 'placeholder' => 'Filter by ' . $display),
+                '#attributes' => array('id' => $field_id . '-search-filter-' . $val, 'class' => array('kmap-search-filter'), 'data-search-filter' => $val, 'placeholder' => 'Filter by ' . $display),
                 '#size' => 60,
-                // '#description' => "<p>Select " .ucfirst($display). "s to filter ".ucfirst($domain). " below.</p>",
             );
             $element[$filter]["{$field_id}_filter_box_{$val}"] = array(
                 '#weight' => 5,
                 '#type' => 'container',
-                '#attributes' => array('id' => $field_id . '_filter_box_' . $val, 'class' => array('kmap_filter_box'), 'data-search-filter' => $val),
+                '#attributes' => array('id' => $field_id . '-filter-box-' . $val, 'class' => array('kmap-filter-box'), 'data-search-filter' => $val),
             );
         }
     }
