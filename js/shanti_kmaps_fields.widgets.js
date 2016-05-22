@@ -3,7 +3,6 @@
 // Local "globals"
     var dictionary = {};
     var picked = {};
-    var filtered = {};
     var ancestor_tree = {};
     var S = {}; // Settings passed
     var submit_count = 0;
@@ -262,88 +261,6 @@
                 }
             });
 
-            $('.kmap-filter-box').once('kmaps-fields').each(function () {
-                var filter_type = $(this).attr('data-search-filter');
-                var my_field = $(this).attr('id').replace('-filter-box-' + filter_type, '');
-                if (!filtered[my_field]) {
-                    filtered[my_field] = {};
-                }
-                filtered[my_field][filter_type] = {}; // Init filters for this field
-            });
-
-            $('.kmap-filter-box .delete-me').once('kmaps-fields').on('click', function (e) {
-                var $filter_el = $(this).parent();
-                var $filter_box = $(this).closest('.kmap-filter-box');
-                var filter_type = $filter_box.attr('data-search-filter'); //feature_type or associated_subject
-                var my_field = $filter_box.attr('id').replace('-filter-box-' + filter_type, '');
-                var widget = settings.shanti_kmaps_fields[my_field];
-                var other_types = widget.filters.slice(0);
-                other_types.splice(widget.filters.indexOf(filter_type), 1);
-                var kmap_id = extractKMapID($(this).next('span.kmap-label').html());
-                var $filter = $('#' + my_field + '-search-filter-' + filter_type);
-                var filter_field = filter_type + "_ids";
-                var search_key = $filter.typeahead('val'); //get search term
-                var $typeahead = $('#' + my_field + '-search-term');
-                KMapsUtil.removeFilters($typeahead, filter_field, filtered[my_field][filter_type]);
-                delete filtered[my_field][filter_type][kmap_id];
-                KMapsUtil.trackTypeaheadSelected($filter, filtered[my_field][filter_type]);
-                $filter_el.remove();
-                var fq = KMapsUtil.getFilters(filter_field, filtered[my_field][filter_type], $filter_box.hasClass('kmaps-conjunctive-filters') ? 'AND' : 'OR');
-                $typeahead.kmapsTypeahead('addFilters', fq).kmapsTypeahead('setValue', $typeahead.typeahead('val'), false);
-                for (var i=0; i<other_types.length; i++) {
-                    $('#' + my_field + '-search-filter-' + other_types[i]).kmapsTypeahead('refetchPrefetch', fq);
-                }
-                $filter.kmapsTypeahead('refacetPrefetch', fq);
-                $filter.kmapsTypeahead('setValue', search_key, false); // 'false' prevents dropdown from re-opening
-            });
-
-            $('.kmap-search-filter').once('kmaps-fields').each(function () {
-                var $filter = $(this);
-                var filter_type = $filter.attr('data-search-filter'); //feature_type or associated_subject
-                var filter_field = filter_type + "_ids";
-                var my_field = $filter.attr('id').replace('-search-filter-' + filter_type, '');
-                var widget = settings.shanti_kmaps_fields[my_field];
-                var other_types = widget.filters.slice(0);
-                other_types.splice(widget.filters.indexOf(filter_type), 1);
-                var $filter_box = $('#' + my_field + '-filter-box-' + filter_type);
-                var search_key = '';
-                var $typeahead = $('#' + my_field + '-search-term');
-                var admin = settings.shanti_kmaps_admin;
-                var root_kmap_path = widget.root_kmap_path ? widget.root_kmap_path : widget.domain == 'subjects' ? admin.shanti_kmaps_admin_root_subjects_path : admin.shanti_kmaps_admin_root_places_path;
-                $filter.kmapsTypeahead({
-                    term_index: admin.shanti_kmaps_admin_server_solr_terms,
-                    domain: 'subjects', // always Filter by Subject
-                    filters: KMapsUtil.getFilterQueryForFilter(filter_type),
-                    ancestors: 'off',
-                    min_chars: 0,
-                    selected: 'omit',
-                    prefetch_facets: 'on',
-                    prefetch_field: filter_type + 's', //feature_types or associated_subjects
-                    prefetch_filters: ['tree:' + widget.domain, 'ancestor_id_path:' + root_kmap_path],
-                    max_terms: widget.term_limit == 0 ? 999 : widget.term_limit
-                }).bind('typeahead:asyncrequest',
-                    function () {
-                        search_key = $filter.typeahead('val'); //get search term
-                    }
-                ).bind('typeahead:select',
-                    function (ev, suggestion) {
-                        if (suggestion.count > 0) { // should not be able to select zero-result filters
-                            KMapsUtil.removeFilters($typeahead, filter_field, filtered[my_field][filter_type]);
-                            var mode = suggestion.refacet ? 'AND' : 'OR';
-                            pickTypeaheadFilter(my_field, filter_type, suggestion);
-                            $filter_box.toggleClass('kmaps-conjunctive-filters', mode == 'AND');
-                            KMapsUtil.trackTypeaheadSelected($filter, filtered[my_field][filter_type]);
-                            var fq = KMapsUtil.getFilters(filter_field, filtered[my_field][filter_type], mode);
-                            $typeahead.kmapsTypeahead('addFilters', fq).kmapsTypeahead('setValue', $typeahead.typeahead('val'), false);
-                            for (var i=0; i<other_types.length; i++) {
-                                $('#' + my_field + '-search-filter-' + other_types[i]).kmapsTypeahead('refetchPrefetch', fq);
-                            }
-                            $filter.kmapsTypeahead('refacetPrefetch', fq);
-                            $filter.kmapsTypeahead('setValue', search_key, false); // 'false' prevents dropdown from automatically opening
-                        }
-                    }
-                );
-            });
         },
 
         detach: function (context, settings) {
@@ -463,21 +380,6 @@
         if (!picked[my_field][kmap_id]) {
             picked[my_field][kmap_id] = item;
             addPickedItem(resultBox, kmap_id, item);
-        }
-    }
-
-    function pickTypeaheadFilter(my_field, filter_type, suggestion) {
-        var filterBox = $('#' + my_field + '-filter-box-' + filter_type);
-        var kmap_id = 'F' + suggestion.id;
-        var item = {
-            domain: 'subjects', // default
-            id: suggestion.id,
-            header: suggestion.value,
-            path: '{{' + suggestion.id + '}}'
-        };
-        if (!filtered[my_field][filter_type][kmap_id]) {
-            filtered[my_field][filter_type][kmap_id] = item;
-            addPickedItem(filterBox, kmap_id, item);
         }
     }
 

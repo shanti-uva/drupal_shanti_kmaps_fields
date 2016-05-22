@@ -1,5 +1,6 @@
 <?php
 
+define('SHANTI_KMAPS_ADMIN_PATH', drupal_get_path('module', 'shanti_kmaps_admin'));
 define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module', 'shanti_kmaps_fields'));
 
 function shanti_kmaps_fields_filter_options()
@@ -752,9 +753,10 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         }
     }
     if (count($filters) > 0) { // typeahead libraries
-        $element['#attached']['js'][] = 'https://cdn.jsdelivr.net/handlebarsjs/4.0.5/handlebars.min.js';
+        // $element['#attached']['js'][] = 'https://cdn.jsdelivr.net/handlebarsjs/4.0.5/handlebars.min.js';
+        $element['#attached']['js'][] = SHANTI_KMAPS_ADMIN_PATH . "/js/shanti_kmaps_admin.filter.js";
         $element['#attached']['libraries_load'][] = array('typeahead');
-        $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
+        $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');;
     }
 
     // Pass settings to the JS
