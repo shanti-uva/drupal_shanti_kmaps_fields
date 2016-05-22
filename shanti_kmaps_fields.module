@@ -755,7 +755,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     if (count($filters) > 0) { // typeahead libraries
         // $element['#attached']['js'][] = 'https://cdn.jsdelivr.net/handlebarsjs/4.0.5/handlebars.min.js';
         $element['#attached']['js'][] = SHANTI_KMAPS_ADMIN_PATH . "/js/shanti_kmaps_admin.filter.js";
-        $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/js/shanti_kmaps_admin.filter.css";
+        $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_admin.filter.css";
         $element['#attached']['libraries_load'][] = array('typeahead');
         $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');;
     }
