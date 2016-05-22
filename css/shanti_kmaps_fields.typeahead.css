@@ -1,14 +1,3 @@
-.kmap-typeahead-picker, .kmap-filter {
+.kmap-typeahead-picker {
     clear: both;
-}
-
-.kmap-filter-box .selected-kmap:not(:first-child):before {
-    content: 'OR';
-    display: inline-block;
-    width: 2.3em;
-}
-.kmap-filter-box.kmaps-conjunctive-filters .selected-kmap:not(:first-child):before {
-    content: 'AND';
-    display: inline-block;
-    width: 2.8em;
 }
