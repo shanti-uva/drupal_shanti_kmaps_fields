@@ -646,7 +646,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             );
             $element["typeahead_wrapper"]["{$field_id}_description"] = array(
                 '#weight' => -5,
-                '#markup' => '<label><span>Search:</span> Select KMaps ' .ucfirst($domain). '</label>',
+                '#markup' => '<label><span>Search:</span> Select KMaps ' . ucfirst($domain) . '</label>',
                 // '#markup' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
             );
             $element["typeahead_wrapper"]["{$field_id}_search_term"] = array(
@@ -679,7 +679,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#default_value' => '',
                 '#attributes' => array('id' => $field_id . '-search-term', 'class' => array('kmap-search-term'), 'placeholder' => 'Search ' . ucfirst($domain)),
                 '#size' => 60,
-                '#description' => "<p>Select " .ucfirst($domain). " to classify your content.</p>",
+                '#description' => "<p>Select " . ucfirst($domain) . " to classify your content.</p>",
             );
             $element["{$field_id}_search_message"] = array(
                 '#weight' => 5,
@@ -736,7 +736,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             );
             $element[$filter]["description"] = array(
                 '#weight' => -5,
-                '#markup' => '<label><span>Filter:</span> Select ' .ucfirst($display). 's</label>',
+                '#markup' => '<label><span>Filter:</span> Select ' . ucfirst($display) . 's</label>',
             );
             $element[$filter]["{$field_id}_search_filter_{$val}"] = array(
                 '#weight' => 0,
@@ -757,7 +757,21 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
         $element['#attached']['js'][] = SHANTI_KMAPS_ADMIN_PATH . "/js/shanti_kmaps_admin.filter.js";
         $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_admin.filter.css";
         $element['#attached']['libraries_load'][] = array('typeahead');
-        $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');;
+        $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
+
+        // Pass filter settings to the JS
+        $filter_settings = array(
+            'kmaps_filter' => array(
+                $field_id => array(
+                    'domain' => $domain,
+                    'root_kmap_path' => $instance['settings']['search_root_kmap_path'],
+                ),
+            ),
+        );
+        $element['#attached']['js'][] = array(
+            'data' => array('shanti_kmaps_admin' => $filter_settings),
+            'type' => 'setting',
+        );
     }
 
     // Pass settings to the JS
