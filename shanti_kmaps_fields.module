@@ -731,8 +731,16 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $filter = "{$field_id}-filter-{$val}";
             $element[$filter] = array(
                 '#weight' => -10,
+                '#theme' => 'shanti_kmaps_filter',
+                '#namespace' => $field_id,
+                '#filter_type' => $val,
+                '#filter_display' => $display,
+            );
+            /* $element[$filter] = array(
+                '#weight' => -10,
                 '#type' => 'container',
                 '#attributes' => array('id' => $filter, 'class' => array('kmap-filter'), 'data-search-filter' => $val),
+                '#theme' => 'test_output',
             );
             $element[$filter]["description"] = array(
                 '#weight' => -5,
@@ -749,7 +757,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#weight' => 5,
                 '#type' => 'container',
                 '#attributes' => array('id' => $field_id . '-filter-box-' . $val, 'class' => array('kmap-filter-box'), 'data-search-filter' => $val),
-            );
+            ); */
         }
     }
     if (count($filters) > 0) { // typeahead libraries
