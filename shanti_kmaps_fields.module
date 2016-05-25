@@ -1,6 +1,5 @@
 <?php
 
-define('SHANTI_KMAPS_ADMIN_PATH', drupal_get_path('module', 'shanti_kmaps_admin'));
 define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module', 'shanti_kmaps_fields'));
 
 function shanti_kmaps_fields_filter_options()
@@ -645,25 +644,6 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#namespace' => $field_id,
                 '#domain' => $domain,
             );
-            /* 
-            $element["typeahead_wrapper"] = array(
-                '#weight' => -10,
-                '#type' => 'container',
-                '#attributes' => array('class' => array('kmap-typeahead-picker')),
-            );
-            $element["typeahead_wrapper"]["{$field_id}_description"] = array(
-                '#weight' => -5,
-                '#markup' => '<label><span>Search:</span> Select KMaps ' . ucfirst($domain) . '</label>',
-                // '#markup' => "<p>Select KMaps " .ucfirst($domain). " to classify your content.</p>",
-            );
-            $element["typeahead_wrapper"]["{$field_id}_search_term"] = array(
-                '#weight' => 0,
-                '#type' => 'textfield',
-                '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '-search-term', 'class' => array('kmap-search-term'), 'placeholder' => 'Search ' . ucfirst($domain)),
-                '#size' => 60,
-            ); */
-
             // Add CSS and JS to the form
             $element['#attached']['js'][] = 'https://cdn.jsdelivr.net/handlebarsjs/4.0.5/handlebars.min.js';
             $element['#attached']['libraries_load'][] = array('typeahead');
@@ -747,8 +727,8 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     }
     if (count($filters) > 0) { // typeahead libraries
         // $element['#attached']['js'][] = 'https://cdn.jsdelivr.net/handlebarsjs/4.0.5/handlebars.min.js';
-        $element['#attached']['js'][] = SHANTI_KMAPS_ADMIN_PATH . "/js/shanti_kmaps_admin.filter.js";
-        $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_admin.filter.css";
+        $element['#attached']['js'][] = SHANTI_KMAPS_ADMIN_PATH . "/js/shanti_kmaps_filter.js";
+        $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_filter.css";
         $element['#attached']['libraries_load'][] = array('typeahead');
         $element['#attached']['libraries_load'][] = array('shanti_kmaps_typeahead');
 
