@@ -641,6 +641,13 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             );
             $element["typeahead_wrapper"] = array(
                 '#weight' => -10,
+                '#theme' => 'shanti_kmaps_typeahead',
+                '#namespace' => $field_id,
+                '#domain' => $domain,
+            );
+            /* 
+            $element["typeahead_wrapper"] = array(
+                '#weight' => -10,
                 '#type' => 'container',
                 '#attributes' => array('class' => array('kmap-typeahead-picker')),
             );
@@ -655,7 +662,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#default_value' => '',
                 '#attributes' => array('id' => $field_id . '-search-term', 'class' => array('kmap-search-term'), 'placeholder' => 'Search ' . ucfirst($domain)),
                 '#size' => 60,
-            );
+            ); */
 
             // Add CSS and JS to the form
             $element['#attached']['js'][] = 'https://cdn.jsdelivr.net/handlebarsjs/4.0.5/handlebars.min.js';
@@ -736,28 +743,6 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#filter_type' => $val,
                 '#filter_display' => $display,
             );
-            /* $element[$filter] = array(
-                '#weight' => -10,
-                '#type' => 'container',
-                '#attributes' => array('id' => $filter, 'class' => array('kmap-filter'), 'data-search-filter' => $val),
-                '#theme' => 'test_output',
-            );
-            $element[$filter]["description"] = array(
-                '#weight' => -5,
-                '#markup' => '<label><span>Filter:</span> Select ' . ucfirst($display) . 's</label>',
-            );
-            $element[$filter]["{$field_id}_search_filter_{$val}"] = array(
-                '#weight' => 0,
-                '#type' => 'textfield',
-                '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '-search-filter-' . $val, 'class' => array('kmap-search-filter'), 'data-search-filter' => $val, 'placeholder' => 'Filter by ' . $display),
-                '#size' => 60,
-            );
-            $element[$filter]["{$field_id}_filter_box_{$val}"] = array(
-                '#weight' => 5,
-                '#type' => 'container',
-                '#attributes' => array('id' => $field_id . '-filter-box-' . $val, 'class' => array('kmap-filter-box'), 'data-search-filter' => $val),
-            ); */
         }
     }
     if (count($filters) > 0) { // typeahead libraries
