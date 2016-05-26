@@ -2,18 +2,6 @@
 
 define('SHANTI_KMAPS_FIELDS_PATH', drupal_get_path('module', 'shanti_kmaps_fields'));
 
-function shanti_kmaps_fields_filter_options()
-{
-    static $filter_options;
-    if (!$filter_options) {
-        $filter_options = array(
-            'feature_type' => t('Feature Type'),
-            'associated_subject' => t('Associated Subject'),
-        );
-    }
-    return $filter_options;
-}
-
 function shanti_kmaps_fields_menu()
 {
     return array(
@@ -459,7 +447,7 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance)
             '#type' => 'checkboxes',
             '#title' => t('Search Filters'),
             '#description' => t('Select any widgets that you would like to use to filter your search. This may make it easier to find KMap terms.'),
-            '#options' => shanti_kmaps_fields_filter_options(),
+            '#options' => shanti_kmaps_admin_filter_options(),
             '#required' => FALSE,
             '#default_value' => $settings['search_filters'],
         );
@@ -605,6 +593,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             // Add CSS and JS to the form
             $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
             $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
+            $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_picklist.css";
             break;
         case 'kmap_lazy_tree_picker':
             $element["{$field_id}_search_header"] = array(
@@ -630,6 +619,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
 
             $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
             $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.lazy-tree.css";
+            $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_picklist.css";
             break;
         case 'kmap_typeahead_picker':
             $element["{$field_id}_search_header"] = array(
@@ -651,6 +641,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
             $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_typeahead.css";
             $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
+            $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_picklist.css";
             break;
         case 'kmap_typeahead_tree_picker':
             $element["{$field_id}_search_header"] = array(
@@ -706,11 +697,12 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
             $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
             $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_typeahead.css";
             $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.lazy-tree.css";
+            $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_picklist.css";
             break;
     };
 
     $filters = array();
-    $filter_options = shanti_kmaps_fields_filter_options();
+    $filter_options = shanti_kmaps_admin_filter_options();
     foreach ($instance['settings']['search_filters'] as $filter => $val) {
         if ($val) {
             $filters[] = $val;

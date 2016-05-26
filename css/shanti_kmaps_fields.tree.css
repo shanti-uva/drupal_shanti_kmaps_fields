@@ -1,26 +1,6 @@
 /* SHANTI KMaps Fields Tree CSS */
-
 .kmap-tree-picker {
 	clear: both;
-}
-
-.delete-me, .kmap-item {
-	cursor:pointer;
-}
-
-.delete-me {
-	padding: 0 5px 0 0;
-}
-
-.selected-kmap {
-	float:left;
-	color:green;
-	border-radius:3px;
-	border:1px solid gray;
-	width:auto;
-	padding:.25em .5em;
-	margin:0 .25em .25em 0;
-	background-color:white;
 }
 
 .matching {
@@ -41,38 +21,3 @@
 .datastore {
 	display:none;
 }
-
-
-/* TAKEN FROM SARVAKA */
-
-.selected-kmap {
-  color: #555;
-  font-size: 0.93em;
-  font-family: 'museo-sans-500', helvetica, arial, sans-serif;
-  border: none;
-  padding: 0.3rem 0 0.3rem 0.8rem;
-  background-color: transparent;
-}
-
-.selected-kmap:hover {
-  color: #555;
-  background-color: transparent;
-}
-
-.selected-kmap .shanticon-close2:before {
-  color: #888;
-  position: relative;
-  /* top: 0.15rem; */
-  /* font-size: 1.12em; */
-  top: 0.05rem;
-  font-size: 1.5em;
-  cursor:pointer;
-  /* content: '\E60F'; */
-  content: '\2297';
-  font-family:'shanticon';
-}
-
-.selected-kmap:hover .shanticon-close2:before {
-  color: red;
-}
-
