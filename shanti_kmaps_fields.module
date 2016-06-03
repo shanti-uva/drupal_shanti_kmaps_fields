@@ -443,14 +443,17 @@ function shanti_kmaps_fields_field_instance_settings_form($field, $instance)
             '#default_value' => $settings['kmap_term_limit'],
             '#element_validate' => array('element_validate_integer'),
         );
-        $form['search_filters'] = array(
-            '#type' => 'checkboxes',
-            '#title' => t('Search Filters'),
-            '#description' => t('Select any widgets that you would like to use to filter your search. This may make it easier to find KMap terms.'),
-            '#options' => shanti_kmaps_admin_filter_options(),
-            '#required' => FALSE,
-            '#default_value' => $settings['search_filters'],
-        );
+        $options = shanti_kmaps_admin_filter_options($field['settings']['kmap_domain']);
+        if (count($options) > 0) {
+            $form['search_filters'] = array(
+                '#type' => 'checkboxes',
+                '#title' => t('Search Filters'),
+                '#description' => t('Select any widgets that you would like to use to filter your search. This may make it easier to find KMap terms.'),
+                '#options' => $options,
+                '#required' => FALSE,
+                '#default_value' => $settings['search_filters'],
+            );
+        }
     }
     return $form;
 }
@@ -702,7 +705,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     };
 
     $filters = array();
-    $filter_options = shanti_kmaps_admin_filter_options();
+    $filter_options = shanti_kmaps_admin_filter_options($domain);
     foreach ($instance['settings']['search_filters'] as $filter => $val) {
         if ($val) {
             $filters[] = $val;
