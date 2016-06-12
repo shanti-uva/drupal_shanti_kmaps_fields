@@ -606,12 +606,12 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_search_term"] = array(
-                '#weight' => 0,
+                '#weight' => -15,
                 '#prefix' => "<div id='{$field_id}-search-term' class='kmap-search-term kmap-no-search'>",
                 '#suffix' => "</div>",
             );
             $element["{$field_id}_lazy_tree"] = array(
-                '#weight' => 25,
+                '#weight' => -10,
                 '#prefix' => "<div id='{$field_id}-lazy-tree' class='kmap-lazy-tree'>",
                 '#suffix' => "</div>",
             );
