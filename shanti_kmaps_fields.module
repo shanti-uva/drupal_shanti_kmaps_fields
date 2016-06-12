@@ -573,26 +573,23 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
     //widget-specific field properties
     switch ($instance['widget']['type']) {
         case 'kmap_tree_picker':
+            $element["{$field_id}_search_header"] = array(
+                '#weight' => -20,
+                '#prefix' => "<div id='{$field_id}-search-header' class='kmap-search-header'>",
+                '#markup' => "<p>Enter a search term for the KMap $domain server and press tab to see the results.</p>",
+                '#suffix' => "</div>",
+            );
             $element["tree_wrapper"] = array(
-                '#weight' => 0,
-                '#type' => 'container',
-                '#attributes' => array('class' => array('kmap-tree-picker')),
+                '#weight' => -15,
+                '#theme' => 'shanti_kmaps_tree_picker',
+                '#namespace' => $field_id,
+                '#domain' => $domain,
             );
-            $element["tree_wrapper"]["{$field_id}_search_term"] = array(
-                '#weight' => 0,
-                '#type' => 'textfield',
-                '#default_value' => '',
-                '#attributes' => array('id' => $field_id . '-search-term', 'class' => array('kmap-search-term'), 'placeholder' => 'Search ' . $domain),
-                '#size' => 30,
-                '#description' => "<p>Enter a search term for the KMap $domain server and press tab to see the results.</p>",
-                '#field_suffix' => "<button type='button' id='{$field_id}-search-button' name='{$field_id}-search-button' class='kmap-search-button' value=''>SEARCH</button>",
-            );
-            $element["tree_wrapper"]["{$field_id}_pick_tree"] = array(
-                '#weight' => 10,
+            $element["{$field_id}_pick_tree"] = array(
+                '#weight' => -10,
                 '#type' => 'container',
                 '#attributes' => array('id' => $field_id . '-pick-tree', 'class' => array('kmap-pick-tree')),
             );
-
             // Add CSS and JS to the form
             $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
             $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.tree.css";
@@ -1119,7 +1116,17 @@ function shanti_kmaps_fields_theme()
         'info_popover' => array(
             'variables' => array('label' => '', 'desc' => '', 'tree' => array(), 'links' => array()),
         ),
+        'shanti_kmaps_tree_picker' => array(
+            'path' => drupal_get_path('module', 'shanti_kmaps_fields') . '/templates',
+            'template' => 'shanti_kmaps_tree_picker',
+            'render element' => 'el',
+        ),
     );
+}
+
+function template_preprocess_shanti_kmaps_tree_picker(&$vars) {
+    $vars['namespace'] = $vars['el']['#namespace'];
+    $vars['domain'] = ucfirst($vars['el']['#domain']);
 }
 
 // Not used; overridden by the theme
