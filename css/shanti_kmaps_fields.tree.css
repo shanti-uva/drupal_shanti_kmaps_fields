@@ -1,23 +1,24 @@
 /* SHANTI KMaps Fields Tree CSS */
 .kmap-pick-tree {
-	clear: both;
+	clear:both;
+	max-height:350px;
+	overflow:scroll;
+	padding:5px;
+	margin-bottom:5px;
+	background: #EEE;
 }
-
 .matching {
 	color:red;
 	font-weight:bold;
 }
-
 .terminal {
 	color:green;
 	font-weight:bold;
 }
-
 .picked {
 	color:gray;
 	text-decoration:line-through;
 }
-
 .datastore {
 	display:none;
 }

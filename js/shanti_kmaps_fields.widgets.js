@@ -54,13 +54,13 @@
                         }
                         // Need also to see if any of the new items are in the pick list ...
                         JSONTreeToHTML(my_field, ancestor_tree[my_field], pickTree, search_term);
-                        pickTree.css({
+                        /* pickTree.css({
                             'max-height': '350px',
                             'overflow': 'scroll',
                             'padding': '5px',
                             'margin-bottom': '5px',
                             'background': '#EEE'
-                        });
+                        }); */
                         Drupal.attachBehaviors(pickTree);
                     } else {
                         pickTree.html("No results for the string /" + search_term + "/. Click <a href='" + search_url + "' target='_blank'>here</a> to see if the KMaps server is working.");
