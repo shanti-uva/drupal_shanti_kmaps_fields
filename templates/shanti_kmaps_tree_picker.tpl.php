@@ -10,6 +10,7 @@
     <input id="<?php print $namespace; ?>-search-term"
            class="kmap-search-term form-control form-text" type="text"
            placeholder="Search <?php print $domain; ?>">
-    <button type="button" class="btn searchreset" style="display: none;"><span class="icon"></span></button>
-    <button type='button' id='<?php print $namespace; ?>-search-button' name='<?php print $namespace; ?>-search-button' class='kmap-search-button' value=''>SEARCH</button>
+    <span class="icon shanticon-magnify"></span>
+    <button type="button" class="btn searchreset" aria-label="Clear search text" style="display: none;"><span class="icon"></span></button>
+    <button type='button' id='<?php print $namespace; ?>-search-button' name='<?php print $namespace; ?>-search-button' aria-label='Submit KMaps Search' class='kmap-search-button' value=''>SEARCH</button>
 </div>
