@@ -10,5 +10,6 @@
     <input id="<?php print $namespace; ?>-search-term"
            class="kmap-search-term form-control form-text" type="text"
            placeholder="Search <?php print $domain; ?>">
+    <span class="icon shanticon-magnify"></span>
     <button type='button' id='<?php print $namespace; ?>-search-button' name='<?php print $namespace; ?>-search-button' class='kmap-search-button' value=''>SEARCH</button>
 </div>
