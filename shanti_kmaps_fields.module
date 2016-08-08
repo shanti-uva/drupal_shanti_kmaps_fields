@@ -695,6 +695,7 @@ function shanti_kmaps_fields_field_widget_form(&$form, &$form_state, $field, $in
       $element['#attached']['libraries_load'][] = array('shanti_kmaps_tree');
 
       $element['#attached']['js'][] = SHANTI_KMAPS_FIELDS_PATH . "/js/shanti_kmaps_fields.widgets.js";
+        $element['#attached']['js'][] = SHANTI_KMAPS_ADMIN_PATH . "/js/shanti_kmaps_typeahead.js";
       $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_typeahead.css";
       $element['#attached']['css'][] = SHANTI_KMAPS_FIELDS_PATH . "/css/shanti_kmaps_fields.lazy-tree.css";
       $element['#attached']['css'][] = SHANTI_KMAPS_ADMIN_PATH . "/css/shanti_kmaps_picklist.css";
