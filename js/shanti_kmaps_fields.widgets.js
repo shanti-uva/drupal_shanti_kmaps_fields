@@ -119,6 +119,13 @@
                 return;
             });
 
+            $('.kmap-tree-picker input.kmap-search-term').keypress(function(e) {
+                if (e.which == 13) {
+                    e.preventDefault();
+                    $(this).closest("form").submit();
+                }
+            });
+
             // Turn inputs into typeahead pickers if required
             $('.field-widget-kmap-typeahead-picker').once('kmaps-fields').each(function () {
                 var $typeahead = $('.kmap-search-term', this);
