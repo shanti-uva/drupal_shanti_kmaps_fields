@@ -119,11 +119,14 @@
                 return;
             });
 
-            $('.kmap-tree-picker input.kmap-search-term').keypress(function(e) {
-                if (e.which == 13) {
-                    e.preventDefault();
-                    $(this).closest("form").submit();
-                }
+            $('.kmap-tree-picker').once('kmaps-fields').each(function() {
+                var $picker = $(this);
+                $picker.find('.kmap-search-term').keypress(function(e) {
+                    if (e.which == 13) {
+                        e.preventDefault();
+                        $picker.find('.kmap-search-button').click();
+                    }
+                });
             });
 
             // Turn inputs into typeahead pickers if required
