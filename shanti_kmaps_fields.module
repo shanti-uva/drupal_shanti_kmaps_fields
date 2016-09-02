@@ -863,10 +863,16 @@ function _shanti_kmaps_fields_update_solr_index($solrdoc, $debug = FALSE, $messa
   if ($opt_in) {
     $solr_url = variable_get('shanti_kmaps_admin_server_solr');
     $url = "$solr_url/update/json?commit=true";
+    $headers = array('Content-type' => 'application/json; charset=utf-8', 'Content-Length' => strlen($solrdoc));
+    $username = variable_get('shanti_kmaps_admin_solr_username');
+    $password = variable_get('shanti_kmaps_admin_solr_password');
+    if (!empty($username) && !empty($password)) {
+      $headers += array('Authorization' => 'Basic ' . base64_encode("$username:$password"));
+    }
     $options = array(
       'method' => 'POST',
       'data' => $solrdoc,
-      'headers' => array('Content-type' => 'application/json; charset=utf-8', 'Content-Length' => strlen($solrdoc)),
+      'headers' => $headers,
     );
     $resp = drupal_http_request($url, $options);
     if ($debug) {
