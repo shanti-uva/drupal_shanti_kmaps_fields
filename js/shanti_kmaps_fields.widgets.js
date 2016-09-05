@@ -147,7 +147,7 @@
                     pager: 'on',
                     empty_query: '*:*',
                     empty_limit: widget.term_limit == 0 ? 50 : widget.term_limit,
-                    empty_sort: 'header_s ASC', // sortable header field
+                    empty_sort: 'header_ssort ASC', // sortable header field
                     selected: 'class',
                     filters: admin.shanti_kmaps_admin_solr_filter_query ? admin.shanti_kmaps_admin_solr_filter_query : ''
                 }).bind('typeahead:asyncrequest',
