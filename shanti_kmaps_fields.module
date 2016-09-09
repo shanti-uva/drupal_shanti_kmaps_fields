@@ -895,8 +895,10 @@ function shanti_kmaps_fields_get_assets_for_kmapid($kmap_domain, $kmap_id)
     $solr_request = drupal_http_request(variable_get('shanti_kmaps_admin_server_solr')
                     . "/query?q=kmapid:{$kmap_key}&rows=3000");
     $solr_response = drupal_json_decode($solr_request->data);
-    foreach ($solr_response['response']['docs'] as $solr_doc) {
-      $assets[$solr_doc['asset_type']][] = array('url' => $solr_doc['url_html'], 'caption' => $solr_doc['caption']);
+    if (!empty($solr_response['response']['docs'])) {
+        foreach ($solr_response['response']['docs'] as $solr_doc) {
+          $assets[$solr_doc['asset_type']][] = array('url' => $solr_doc['url_html'], 'caption' => $solr_doc['caption']);
+        }
     }
     return $assets;
 }
