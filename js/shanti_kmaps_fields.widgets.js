@@ -144,7 +144,7 @@
                     root_kmapid: root_kmapid,
                     max_terms: max_terms,
                     min_chars: 0,
-                    pager: 'on',
+                    pager: 'off',
                     empty_query: '*:*',
                     empty_limit: widget.term_limit == 0 ? 50 : widget.term_limit,
                     empty_sort: 'header_ssort ASC', // sortable header field
